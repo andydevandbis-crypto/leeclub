@@ -1,0 +1,1187 @@
+﻿<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lee Betting</title>
+<!-- Englands flagga Favicon -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 36'%3E%3Crect width='60' height='36' fill='%23fff'/%3E%3Crect width='60' height='12' y='12' fill='%23cf142b'/%3E%3Crect width='12' height='36' x='24' fill='%23cf142b'/%3E%3C/svg%3E">
+
+<style>
+  :root{
+    --bg:#070a0f;--panel:#0f141d;--panel2:#131a26;
+    --border:#1e2836;--border-soft:#18202c;
+    --text:#e9eef7;--muted:#8b97a8;
+    --gold:#e8c15a;--gold-deep:#c9962f;
+    --green:#33e08a;--red:#e05a5a;
+    
+    /* Tabellfärger */
+    --c-green: rgba(51, 224, 138, 0.15);
+    --c-blue: rgba(143, 199, 255, 0.15);
+    --c-yellow: rgba(232, 193, 90, 0.15);
+    --c-red: rgba(224, 90, 90, 0.15);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
+  body{
+    font-family:"Inter","Segoe UI",system-ui,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(1100px 600px at 85% -10%, rgba(232,193,90,0.09), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(51,224,138,0.06), transparent 60%),
+      var(--bg);
+    min-height:100vh;padding-bottom: 60px;
+  }
+
+  /* Mörk Scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--panel2); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb { background: #2a3749; border-radius: 999px; border: 2px solid var(--panel2); }
+  ::-webkit-scrollbar-thumb:hover { background: #3a4b63; }
+  * { scrollbar-width: thin; scrollbar-color: #2a3749 var(--panel2); }
+
+  /* Topbar */
+  .topbar{
+    display:flex;align-items:center;gap:20px;
+    padding:14px 28px;border-bottom:1px solid var(--border);
+    background:rgba(8,12,18,0.78);backdrop-filter:blur(14px);
+    position:sticky;top:0;z-index:20;
+  }
+  .logo-mark{
+    width: 54px; height: 32px;
+    display:flex;align-items:center;justify-content:center;
+    overflow: hidden;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+  .logo-mark svg { width: 100%; height: 100%; object-fit: cover; }
+  
+  .brand-name{display:block;font-weight:800;font-size:15px;letter-spacing:2.4px}
+  .brand-sub{display:block;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-top:2px}
+  .spacer{flex:1}
+  .balance{display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:999px;background:var(--panel2);border:1px solid var(--border)}
+  .balance-label{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+  .balance-value{font-size:14px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;transition:color 0.2s;}
+
+  /* Flikar (Tabs) */
+  .tabs-nav {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding: 16px 24px 0; max-width: 1400px; margin: 0 auto;
+    border-bottom: 1px solid var(--border);
+  }
+  .tabs-left { display: flex; gap: 4px; }
+  .tab-btn {
+    background: transparent; border: none; color: var(--muted);
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 12px 20px; cursor: pointer; border-radius: 10px 10px 0 0;
+    border-bottom: 2px solid transparent; transition: 0.2s;
+  }
+  .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .tab-btn.active {
+    color: var(--gold); border-bottom-color: var(--gold);
+    background: linear-gradient(180deg, transparent, rgba(232,193,90,0.05));
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Layout */
+  .main{
+    max-width:1400px;margin:0 auto;padding:24px;
+    display:flex;flex-direction:column;gap:20px;
+  }
+  .panel{
+    background:linear-gradient(180deg,rgba(19,26,38,0.92),rgba(15,20,29,0.96));
+    border:1px solid var(--border);border-radius:14px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.38);
+    overflow: hidden;
+  }
+  .panel-head{padding:20px 22px 14px;border-bottom:1px solid var(--border-soft); display: flex; justify-content: space-between; align-items: center;}
+  .panel-head h1{font-size:16px;font-weight:700}
+  .panel-head p{font-size:12px;color:var(--muted);margin-top:4px}
+
+  /* Accordion */
+  .accordions{display:flex;flex-direction:column;gap:16px;width:100%}
+  .acc-header{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:16px 22px;background:var(--panel2);cursor:pointer;
+    user-select:none;transition:background 0.2s;border-bottom:1px solid transparent;
+  }
+  .acc-header:hover{background:rgba(255,255,255,0.03)}
+  .acc-header h2{font-size:15px;font-weight:700;margin:0}
+  .acc-header .arrow{
+    font-size:12px;color:var(--muted);transition:transform 0.3s;
+    display:flex;align-items:center;justify-content:center;
+    width:24px;height:24px;background:rgba(255,255,255,0.05);border-radius:50%;
+  }
+  .accordion.open .acc-header{border-bottom-color:var(--border)}
+  .accordion.open .acc-header .arrow{transform:rotate(180deg);color:var(--gold);background:rgba(232,193,90,0.1)}
+  .acc-content{display:none;padding:22px;animation:slideDown 0.25s ease-out}
+  .accordion.open .acc-content{display:block}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+  /* Insats & Kombination */
+  .insats-layout{display:grid;grid-template-columns:320px 1fr 1fr;gap:24px;align-items:start}
+  @media (max-width: 1000px){ .insats-layout{grid-template-columns:1fr} }
+  .field-label{font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .field{
+    width:100%;padding:13px 16px;border-radius:10px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--text);font-family:inherit;
+    font-size:22px;font-weight:700;outline:none;font-variant-numeric:tabular-nums;
+    transition:border .18s,box-shadow .18s;
+  }
+  .field:focus{border-color:rgba(232,193,90,0.55);box-shadow:0 0 0 3px rgba(232,193,90,0.15)}
+  
+  .display{
+    border:1px solid var(--border);border-radius:12px;padding:18px;
+    background:radial-gradient(280px 120px at 100% 0%,rgba(232,193,90,0.14),transparent 62%),var(--panel2);
+    min-height: 120px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .display-label{font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted)}
+  .display-value{display:block;margin-top:6px;font-size:26px;font-weight:800;color:var(--gold);line-height:1.2}
+  .display-sub{display:block;margin-top:8px;font-size:13px;font-weight:600;color:var(--green);letter-spacing:.3px}
+  .display-sub.error{color:var(--red); line-height: 1.5; font-weight: 500; font-size: 12px;}
+  .display-sub.error strong { color: var(--text); }
+
+  .slip{display:flex;flex-direction:column;margin-bottom:16px}
+  .slip-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-size:13px;border-bottom:1px dashed var(--border-soft)}
+  .slip-row:last-child{border-bottom:none}
+  .slip-row span{color:var(--muted)}
+  .slip-row strong{font-weight:600;font-variant-numeric:tabular-nums}
+  .btn-primary{
+    width:100%;padding:14px;border:none;border-radius:10px;
+    background:linear-gradient(135deg,#f6da8b,var(--gold-deep));
+    color:#1a1206;font-family:inherit;font-size:14px;font-weight:800;letter-spacing:.3px;
+    cursor:pointer;box-shadow:0 10px 30px rgba(232,193,90,0.24);
+    transition:transform .15s,box-shadow .15s;
+  }
+  .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 14px 36px rgba(232,193,90,0.32)}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+
+  /* Tabell (Kombinationer) */
+  .table-wrap{overflow:auto;max-height:400px;border-radius:8px;border:1px solid var(--border-soft)}
+  table{width:100%;border-collapse:separate;border-spacing:0}
+  thead th{
+    position:sticky;top:0;z-index:2;background:#10161f;text-align:left;
+    padding:11px 14px;font-size:10px;font-weight:600;letter-spacing:1.1px;
+    text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);
+  }
+  tbody td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border-soft);vertical-align:middle}
+  tbody tr{cursor:pointer;transition:background .15s}
+  tbody tr:hover{background:rgba(255,255,255,0.025)}
+  tbody tr.selected{background:rgba(232,193,90,0.06);box-shadow:inset 3px 0 0 var(--gold)}
+  .ta-r{text-align:right}
+  .col-value{font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;text-align:right}
+  .col-komb{color:var(--gold);font-weight:600;white-space:nowrap}
+
+  /* Kupong & Mindre Rutor */
+  .mid-head{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+    padding:18px 22px 14px;border-bottom:1px solid var(--border-soft);flex-wrap:wrap;
+  }
+  .mid-head h1{font-size:16px;font-weight:700}
+  .mid-head p{font-size:12px;color:var(--muted);margin-top:4px}
+  .mid-actions{display:flex;gap:8px}
+  .btn-ghost{
+    padding:10px 16px;border-radius:9px;background:transparent;
+    border:1px solid var(--border);color:var(--muted);
+    font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:.18s;
+  }
+  .btn-ghost:hover{color:var(--text);border-color:rgba(232,193,90,0.35);background:rgba(232,193,90,0.06)}
+  .btn-inline{width:auto;padding:10px 18px;font-size:13px;border-radius:9px}
+  
+  .match-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(170px, 1fr));
+    gap:10px;
+    padding:16px 16px 10px 16px; 
+    user-select: none;
+  }
+  .match{
+    background:var(--panel2);border:1px solid var(--border);border-radius:10px;
+    padding:8px;display:flex;flex-direction:column;gap:6px;
+    transition:border-color .18s,box-shadow .18s, background 0.15s;
+    position: relative;
+  }
+  
+  /* Markeringsstilar */
+  .match.drag-highlight {
+    border-color: var(--gold);
+    background: rgba(232,193,90,0.15);
+    box-shadow: 0 0 0 2px var(--gold);
+  }
+  .match.locked-highlight {
+    border-color: var(--green);
+    background: rgba(51,224,138,0.12);
+    box-shadow: 0 0 10px rgba(51,224,138,0.3), inset 0 0 0 1px var(--green);
+  }
+  .match.locked-highlight::after {
+    content: "🔒";
+    position: absolute;
+    top: 6px; right: 6px;
+    font-size: 12px;
+    opacity: 0.8;
+  }
+
+  .match.hit{border-color:rgba(51,224,138,.55);box-shadow:inset 0 0 0 1px rgba(51,224,138,.18)}
+  .match.miss{border-color:rgba(224,90,90,.5);box-shadow:inset 0 0 0 1px rgba(224,90,90,.14)}
+  
+  .match-header{display:flex;justify-content:space-between;align-items:center; margin-bottom: 2px;}
+  .match-no{font-size:10px;font-weight:700;color:var(--gold)}
+  .match-actions{display:flex;gap:2px}
+  .btn-move{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:10px;padding:1px 3px;border-radius:4px}
+  .btn-move:hover{background:rgba(255,255,255,0.1);color:var(--text)}
+  .match-tag{font-size:8px;font-weight:700;padding:1px 4px;border-radius:999px;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.05)}
+  .match-tag.hel{color:var(--gold);background:rgba(232,193,90,0.13)}
+  .match-tag.halv{color:#8fc7ff;background:rgba(143,199,255,0.13)}
+  
+  .teams{display:flex;flex-direction:column;gap:2px; margin-bottom: 2px;}
+  .team-input{background:transparent;border:1px solid transparent;color:var(--text);font-size:11px;font-family:inherit;padding:2px 4px;border-radius:4px;width:100%;outline:none;transition:.15s}
+  .team-input:hover,.team-input:focus{background:rgba(255,255,255,0.05);border-color:var(--border)}
+  .team-input::placeholder{color:#4a5666}
+  
+  .signs{display:flex;gap:3px}
+  .sign{flex:1;text-align:center;font-size:11px;font-weight:700;padding:3px 0;border-radius:4px;color:var(--muted);background:rgba(255,255,255,0.02);border:1px solid var(--border-soft);cursor:pointer;transition:.15s}
+  .sign.on{color:var(--gold);background:rgba(232,193,90,0.1);border-color:rgba(232,193,90,0.3)}
+  .match-res{text-align:center;font-size:11px;font-weight:800;padding:3px;border-radius:4px;background:rgba(255,255,255,0.03);font-variant-numeric:tabular-nums}
+  .match-res.hit{color:var(--green);background:rgba(51,224,138,0.12)}
+  .match-res.miss{color:var(--red);background:rgba(224,90,90,0.12)}
+  
+  /* Noterings-ruta */
+  .notes-container {
+    padding: 0 16px 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  .notes-container textarea {
+    width: 100%;
+    min-height: 80px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 10px;
+    resize: vertical;
+    outline: none;
+    transition: border 0.18s, box-shadow 0.18s;
+  }
+  .notes-container textarea:focus {
+    border-color: rgba(232,193,90,0.55);
+    box-shadow: 0 0 0 2px rgba(232,193,90,0.15);
+  }
+  .notes-container textarea::placeholder {
+    color: var(--muted);
+  }
+
+  .sim-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 22px 16px}
+  .sum-card{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;flex-direction:column;gap:4px}
+  .sum-label{font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted)}
+  .sum-value{font-size:20px;font-weight:800;color:var(--green);font-variant-numeric:tabular-nums;line-height:1.15}
+  .sum-card.gold .sum-value{color:var(--gold)}
+  
+  .dist{padding:0 22px 22px;display:flex;flex-direction:column}
+  .dist-empty{font-size:13px;color:var(--muted);padding:20px;text-align:center;border:1px dashed var(--border);border-radius:10px}
+  .vinst-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+  .vinst-table th{text-align:left;padding:10px 0;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:0.5px}
+  .vinst-table th.ta-r{text-align:right}
+  .vinst-table td{padding:10px 0;border-bottom:1px solid var(--border-soft)}
+  .vinst-table td.ta-r{text-align:right}
+  .vinst-table .v-count{font-weight:700;color:var(--green);font-size:14px}
+  .vinst-table .v-pct{color:var(--muted);font-size:12px}
+  .vinst-table .v-label{color:var(--text);font-weight:600}
+  .dist-note{font-size:11px;color:var(--muted);margin-top:12px;text-align:center}
+
+  /* Systemtabell */
+  .sys-table-wrap {
+    overflow: auto;
+    max-height: 75vh;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .sys-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .sys-table th, .sys-table td {
+    border: 1px solid var(--border);
+    padding: 6px 8px;
+  }
+  .sys-table thead th {
+    position: sticky; top: 0; background: #1a2230; color: var(--text);
+    font-weight: 700; z-index: 5;
+  }
+  
+  /* Klickbara rubriker */
+  .sys-table thead th.sortable {
+    cursor: pointer;
+    transition: background 0.2s;
+    user-select: none;
+  }
+  .sys-table thead th.sortable:hover {
+    background: #253044;
+  }
+
+  /* Sticky kolumner */
+  .sys-table th:nth-child(1), .sys-table td:nth-child(1) { position: sticky; left: 0; background: #1a2230; z-index: 4; }
+  .sys-table th:nth-child(2), .sys-table td:nth-child(2) { position: sticky; left: 40px; background: #1a2230; z-index: 4; }
+  .sys-table th:nth-child(3), .sys-table td:nth-child(3) { position: sticky; left: 90px; background: #1a2230; z-index: 4; }
+  .sys-table th:nth-child(1) { z-index: 6; }
+  .sys-table th:nth-child(2) { z-index: 6; }
+  .sys-table th:nth-child(3) { z-index: 6; }
+
+  .sys-table tbody tr { cursor: pointer; transition: background 0.15s; }
+  .sys-table tbody tr:hover td { background: rgba(255, 255, 255, 0.05); }
+  .sys-table tbody tr.highlight-row td {
+    background: rgba(232, 193, 90, 0.15) !important;
+    color: var(--gold); font-weight: 800;
+    border-top: 1px solid var(--gold); border-bottom: 1px solid var(--gold);
+  }
+  .sys-table tbody tr.highlight-row td:first-child { box-shadow: inset 4px 0 0 var(--gold); }
+  
+  /* Färgade kolumngrupper */
+  .bg-green { background-color: var(--c-green) !important; }
+  .bg-blue { background-color: var(--c-blue) !important; }
+  .bg-yellow { background-color: var(--c-yellow) !important; }
+  .bg-red { background-color: var(--c-red) !important; }
+
+  .toast{
+    position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);
+    padding:12px 22px;border-radius:999px;background:#121a26;
+    border:1px solid rgba(232,193,90,0.35);color:var(--text);font-size:13px;
+    box-shadow:0 16px 44px rgba(0,0,0,0.55);opacity:0;pointer-events:none;
+    transition:.25s;z-index:60;white-space:nowrap;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo-mark">
+    <!-- Englands flagga -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 36">
+      <rect width="60" height="36" fill="#fff"/>
+      <rect width="60" height="12" y="12" fill="#cf142b"/>
+      <rect width="12" height="36" x="24" fill="#cf142b"/>
+    </svg>
+  </div>
+  <div>
+    <span class="brand-name">LEE BETTING</span>
+    <span class="brand-sub">Desktop Edition</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="balance">
+    <span class="balance-label">Saldo</span>
+    <span class="balance-value" id="saldoValue">1 250,00 kr</span>
+  </div>
+</header>
+
+<!-- FLIK-MENY -->
+<div class="tabs-nav">
+  <div class="tabs-left">
+    <button class="tab-btn active" onclick="switchTab('kupong')">Kupong & Simulering</button>
+    <button class="tab-btn" onclick="switchTab('tabell')">Systemtabell (Vinstrader)</button>
+  </div>
+</div>
+
+<main class="main">
+  
+  <!-- FLIK 1: KUPONG -->
+  <div id="tab-kupong" class="tab-content active">
+    <div style="display:flex; flex-direction:column; gap:20px;">
+      
+      <!-- KUPONG -->
+      <section class="panel panel-mid">
+        <div class="mid-head">
+          <div>
+            <h1>Kupong & Vinstrader</h1>
+            <p>Dra musen över matcher för att markera. Dubbelklicka för att låsa.</p>
+          </div>
+          <div class="mid-actions">
+            <button class="btn-ghost" id="shuffleBtn" type="button">Blanda garderingar</button>
+            <button class="btn-primary btn-inline" id="simBtn" type="button">Simulera omgång</button>
+          </div>
+        </div>
+
+        <div class="match-grid" id="matchGrid"></div>
+        
+        <!-- Noteringsruta -->
+        <div class="notes-container">
+          <div class="field-label" style="margin-top: 8px;">Egna noteringar</div>
+          <textarea placeholder="Skriv dina egna noteringar här..."></textarea>
+        </div>
+
+        <div class="sim-summary">
+          <div class="sum-card"><span class="sum-label">Inom gardering</span><span class="sum-value" id="sumHits">–</span></div>
+          <div class="sum-card gold"><span class="sum-label">Bästa rad</span><span class="sum-value" id="sumBest">–</span></div>
+          <div class="sum-card"><span class="sum-label">13 rätt</span><span class="sum-value" id="sum13">–</span></div>
+        </div>
+
+        <div class="dist" id="dist"></div>
+      </section>
+
+      <!-- ACCORDIONS -->
+      <div class="accordions">
+        
+        <!-- 1. Insats & Kombination -->
+        <div class="accordion open" id="acc-insats">
+          <div class="acc-header" onclick="toggleAccordion('acc-insats')">
+            <h2>Insats & Kombination</h2>
+            <div class="arrow">▼</div>
+          </div>
+          <div class="acc-content">
+            <div class="insats-layout">
+              <div>
+                <div class="field-label">Insats (kr)</div>
+                <input id="amount" class="field" type="text" inputmode="numeric" placeholder="t.ex. 27" autocomplete="off">
+                <div class="info" style="margin-top:16px; font-size:12px; color:var(--muted); line-height:1.6">
+                  <strong>Tips:</strong> Skriv ett belopp för att automatiskt skapa rätt antal hel- och halvgarderingar. Klicka sedan på <strong>Systemtabell</strong> för att se antalet vinstrader.
+                </div>
+              </div>
+              
+              <div>
+                <div class="display">
+                  <span class="display-label">Kombination</span>
+                  <span class="display-value" id="comboValue">–</span>
+                  <span class="display-sub" id="comboSub">Ingen giltig kombination</span>
+                </div>
+              </div>
+
+              <div>
+                <div class="slip">
+                  <div class="slip-row"><span>Insats</span><strong id="slipAmount">–</strong></div>
+                  <div class="slip-row"><span>Rader</span><strong id="slipRows">–</strong></div>
+                  <div class="slip-row"><span>Kostnad</span><strong id="slipCost">–</strong></div>
+                </div>
+                <button class="btn-primary" id="placeBtn" type="button" disabled>Placera spel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Alla Kombinationer -->
+        <div class="accordion" id="acc-kombinationer">
+          <div class="acc-header" onclick="toggleAccordion('acc-kombinationer')">
+            <h2>Alla Kombinationer</h2>
+            <div class="arrow">▼</div>
+          </div>
+          <div class="acc-content">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="ta-r">Insats</th>
+                    <th>Kombination</th>
+                    <th class="ta-r">Rader</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- FLIK 2: SYSTEMTABELL -->
+  <div id="tab-tabell" class="tab-content">
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h1>Antalet vinstrader vid olika system</h1>
+          <p>Klicka på en rad för att låsa den. Dubbelklicka för att låsa upp.</p>
+        </div>
+      </div>
+      <div class="sys-table-wrap">
+        <table class="sys-table">
+          <thead>
+            <tr>
+              <th rowspan="3" class="sortable" onclick="sortTable(0)" style="width:50px;">HELG. <span id="sort-icon-0"></span></th>
+              <th rowspan="3" class="sortable" onclick="sortTable(1)" style="width:60px;">HALVG. <span id="sort-icon-1"></span></th>
+              <th rowspan="3" class="sortable" onclick="sortTable(2)" style="width:60px;">RADER <span id="sort-icon-2"></span></th>
+              <th colspan="4" class="bg-green">ALLA MATCHER RÄTT TIPPADE</th>
+              <th colspan="6" class="bg-blue">EN MATCH FELTIPPAD</th>
+              <th colspan="6" class="bg-yellow">TVÅ MATCHER FELTIPPADE</th>
+              <th colspan="4" class="bg-red">TRE MATCHER FELTIPPADE</th>
+            </tr>
+            <tr>
+              <th class="bg-green" rowspan="2" style="width:35px;">13</th>
+              <th class="bg-green" rowspan="2" style="width:35px;">12</th>
+              <th class="bg-green" rowspan="2" style="width:35px;">11</th>
+              <th class="bg-green" rowspan="2" style="width:35px;">10</th>
+              
+              <th class="bg-blue" colspan="3">Ogarderade</th>
+              <th class="bg-blue" colspan="3">Halvgarderade</th>
+              
+              <th class="bg-yellow" colspan="2">2 og*</th>
+              <th class="bg-yellow" colspan="2">1 og+1hg</th>
+              <th class="bg-yellow" colspan="2">2 hg</th>
+              
+              <th class="bg-red" rowspan="2" style="width:35px;">3og</th>
+              <th class="bg-red" rowspan="2" style="width:45px;">2 og+1 hg</th>
+              <th class="bg-red" rowspan="2" style="width:45px;">1 og+2 hg</th>
+              <th class="bg-red" rowspan="2" style="width:35px;">3hg</th>
+            </tr>
+            <tr>
+              <th class="bg-blue" style="width:30px;">12</th><th class="bg-blue" style="width:30px;">11</th><th class="bg-blue" style="width:30px;">10</th>
+              <th class="bg-blue" style="width:30px;">12</th><th class="bg-blue" style="width:30px;">11</th><th class="bg-blue" style="width:30px;">10</th>
+              
+              <th class="bg-yellow" style="width:30px;">11</th><th class="bg-yellow" style="width:30px;">10</th>
+              <th class="bg-yellow" style="width:30px;">11</th><th class="bg-yellow" style="width:30px;">10</th>
+              <th class="bg-yellow" style="width:30px;">11</th><th class="bg-yellow" style="width:30px;">10</th>
+            </tr>
+          </thead>
+          <tbody id="system-table-body">
+            <!-- Fylls av JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const PRICE_PER_ROW = 1;
+  const MAX_MATCHES   = 13;
+  const MATCHES       = 13;
+  const CAP           = 5000;
+
+  const $amount   = document.getElementById('amount');
+  const $comboVal = document.getElementById('comboValue');
+  const $comboSub = document.getElementById('comboSub');
+  const $slipAmt  = document.getElementById('slipAmount');
+  const $slipRows = document.getElementById('slipRows');
+  const $slipCost = document.getElementById('slipCost');
+  const $placeBtn = document.getElementById('placeBtn');
+  const $tbody    = document.getElementById('tbody');
+  const $grid     = document.getElementById('matchGrid');
+  const $sumHits  = document.getElementById('sumHits');
+  const $sumBest  = document.getElementById('sumBest');
+  const $sum13    = document.getElementById('sum13');
+  const $dist     = document.getElementById('dist');
+  const $toast    = document.getElementById('toast');
+  const $sysBody  = document.getElementById('system-table-body');
+  const $saldo    = document.getElementById('saldoValue');
+
+  const state = {
+    matches: Array.from({ length: MATCHES }, () => ({
+      home: '', away: '', signs: ['1']
+    })),
+    combo: null,
+    dist: null,
+    results: null
+  };
+
+  // Skapa en lista med alla giltiga kombinationer sorterade för fallback
+  const allValidCombos = [];
+  for (let h = 0; h <= MAX_MATCHES; h++){
+    for (let v = 0; v <= MAX_MATCHES - h; v++){
+      const rows = Math.pow(3, h) * Math.pow(2, v);
+      allValidCombos.push({ hela: h, halva: v, rows, amount: rows * PRICE_PER_ROW });
+    }
+  }
+  allValidCombos.sort((a, b) => a.amount - b.amount);
+
+  /* ---------- Flikar ---------- */
+  window.switchTab = function(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById('tab-' + tabId).classList.add('active');
+    event.target.classList.add('active');
+  };
+
+  /* ---------- Accordion ---------- */
+  window.toggleAccordion = function(id) {
+    document.getElementById(id).classList.toggle('open');
+  };
+
+  function shuffleArr(a){
+    for (let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function fmtMoney(n){
+    return n.toLocaleString('sv-SE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function comboText(c){
+    return c.hela + ' hela ' + c.halva + ' ' + (c.halva === 1 ? 'halv' : 'halva');
+  }
+
+  function comboFromAmount(amount){
+    const rows = amount / PRICE_PER_ROW;
+    if (!Number.isInteger(rows) || rows < 1) return null;
+    for (const c of allValidCombos) {
+      if (c.amount === amount) return { hela: c.hela, halva: c.halva, rows: c.rows };
+      if (c.amount > amount) break;
+    }
+    return null;
+  }
+
+  function renderPanel() {
+    const c = state.combo;
+    if (!c) {
+      $comboVal.textContent = '–';
+      $comboSub.textContent = 'Ingen giltig kombination';
+      $comboSub.classList.add('error');
+      $slipAmt.textContent  = $amount.value.trim() ? $amount.value.trim() + ' kr' : '–';
+      $slipRows.textContent = '–';
+      $slipCost.textContent = '–';
+      $placeBtn.disabled    = true;
+    } else {
+      $comboVal.textContent = comboText(c);
+      $comboSub.textContent = c.rows + ' rader';
+      $comboSub.classList.remove('error');
+      $slipAmt.textContent  = (c.rows * PRICE_PER_ROW) + ' kr';
+      $slipRows.textContent = c.rows;
+      $slipCost.textContent = fmtMoney(c.rows * PRICE_PER_ROW) + ' kr';
+      $placeBtn.disabled    = false;
+    }
+
+    document.querySelectorAll('#tbody tr.selected').forEach(r => r.classList.remove('selected'));
+    if (c) {
+      const row = document.querySelector('#tbody tr[data-amount="' + (c.rows * PRICE_PER_ROW) + '"]');
+      if (row) row.classList.add('selected');
+    }
+  }
+
+  /* ---------- DRAG & MARKERING ---------- */
+  let isDragging = false;
+  let startIdx = null;
+  let endIdx = null;
+  let lockedIndices = new Set();
+
+  function updateDragHighlight() {
+    if (startIdx === null || endIdx === null) return;
+    
+    const min = Math.min(startIdx, endIdx);
+    const max = Math.max(startIdx, endIdx);
+    
+    document.querySelectorAll('.match').forEach((el, i) => {
+      if (i >= min && i <= max) {
+        el.classList.add('drag-highlight');
+      } else {
+        el.classList.remove('drag-highlight');
+      }
+    });
+  }
+
+  window.startDrag = function(idx) {
+    if (event.target.tagName === 'INPUT' || event.target.classList.contains('sign') || event.target.tagName === 'BUTTON') return;
+    isDragging = true;
+    startIdx = idx;
+    endIdx = idx;
+    document.querySelectorAll('.match').forEach(el => el.classList.remove('drag-highlight'));
+    updateDragHighlight();
+  };
+
+  window.hoverDrag = function(idx) {
+    if (!isDragging) return;
+    endIdx = idx;
+    updateDragHighlight();
+  };
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+  });
+
+  window.lockHighlight = function(idx) {
+    if (event.target.tagName === 'INPUT' || event.target.classList.contains('sign') || event.target.tagName === 'BUTTON') return;
+    
+    const min = Math.min(startIdx, endIdx);
+    const max = Math.max(startIdx, endIdx);
+    
+    let isCurrentlyLocked = false;
+    for(let i = min; i <= max; i++) {
+      if (lockedIndices.has(i)) isCurrentlyLocked = true;
+    }
+
+    document.querySelectorAll('.match').forEach((el, i) => {
+      if (i >= min && i <= max) {
+        if (isCurrentlyLocked) {
+          el.classList.remove('locked-highlight');
+          lockedIndices.delete(i);
+        } else {
+          el.classList.remove('drag-highlight');
+          el.classList.add('locked-highlight');
+          lockedIndices.add(i);
+        }
+      }
+    });
+    
+    startIdx = null;
+    endIdx = null;
+  };
+
+  function renderMatches() {
+    $grid.innerHTML = '';
+    const frag = document.createDocumentFragment();
+    
+    for (let i = 0; i < MATCHES; i++) {
+      const m = state.matches[i];
+      const res = state.results ? state.results[i] : null;
+      const hit = res ? m.signs.includes(res) : null;
+      const kind = m.signs.length === 3 ? 'hel' : m.signs.length === 2 ? 'halv' : '';
+
+      const el = document.createElement('div');
+      el.className = 'match';
+      if (lockedIndices.has(i)) el.classList.add('locked-highlight');
+      if (res) el.classList.add(hit ? 'hit' : 'miss');
+      
+      el.onmousedown = () => startDrag(i);
+      el.onmouseenter = () => hoverDrag(i);
+      el.ondblclick = () => lockHighlight(i);
+      
+      el.innerHTML = `
+        <div class="match-header">
+          <span class="match-no">M${i+1}</span>
+          <span class="match-tag ${kind}">${kind === 'hel' ? 'HEL' : kind === 'halv' ? 'HALV' : ''}</span>
+          <div class="match-actions">
+            <button class="btn-move" onclick="moveMatch(${i}, -1)">↑</button>
+            <button class="btn-move" onclick="moveMatch(${i}, 1)">↓</button>
+          </div>
+        </div>
+        <div class="teams">
+          <input type="text" class="team-input" placeholder="Hemmalag" value="${m.home}" oninput="updateTeam(${i}, 'home', this.value)">
+          <input type="text" class="team-input" placeholder="Bortalag" value="${m.away}" oninput="updateTeam(${i}, 'away', this.value)">
+        </div>
+        <div class="signs">
+          <div class="sign ${m.signs.includes('1') ? 'on' : ''}" onclick="toggleSign(${i}, '1')">1</div>
+          <div class="sign ${m.signs.includes('X') ? 'on' : ''}" onclick="toggleSign(${i}, 'X')">X</div>
+          <div class="sign ${m.signs.includes('2') ? 'on' : ''}" onclick="toggleSign(${i}, '2')">2</div>
+        </div>
+        <div class="match-res ${res ? (hit ? 'hit' : 'miss') : ''}">${res || '–'}</div>
+      `;
+      frag.appendChild(el);
+    }
+    $grid.appendChild(frag);
+  }
+
+  function renderSummary(){
+    if (!state.results){
+      $sumHits.textContent = '–';
+      $sumBest.textContent = '–';
+      $sum13.textContent   = '–';
+      return;
+    }
+    let hits = 0;
+    for (let i = 0; i < MATCHES; i++){
+      if (state.matches[i].signs.includes(state.results[i])) hits++;
+    }
+    let best = 0;
+    if (state.dist){
+      for (let k = 13; k >= 0; k--){
+        if (state.dist.counts[k] > 0){ best = k; break; }
+      }
+    }
+    $sumHits.textContent = hits + '/13';
+    $sumBest.textContent = best + ' rätt';
+    $sum13.textContent   = state.dist ? state.dist.counts[13] : 0;
+  }
+
+  function renderDistribution(){
+    if (!state.results || !state.dist){
+      $dist.innerHTML = '<div class="dist-empty">Simulera en omgång för att se antalet vinstrader.</div>';
+      return;
+    }
+    const { counts, total, sampled } = state.dist;
+    
+    let html = '<h3 style="font-size:14px; font-weight:700; margin-bottom:10px; color:var(--text);">Vinstrader för denna omgång</h3>';
+    html += '<table class="vinst-table">';
+    html += '<thead><tr><th>Rätt</th><th class="ta-r">Antal rader</th><th class="ta-r">Andel</th></tr></thead>';
+    html += '<tbody>';
+    
+    let totalWins = 0;
+    for (let k = 13; k >= 0; k--) {
+      if (counts[k] > 0) {
+        const pct = (counts[k] / total * 100).toFixed(1);
+        html += `<tr><td class="v-label">${k} rätt</td><td class="ta-r v-count">${counts[k]}</td><td class="ta-r v-pct">${pct}%</td></tr>`;
+        totalWins += counts[k];
+      }
+    }
+    if (totalWins === 0) html += `<tr><td colspan="3" style="text-align:center; color:var(--muted); padding:16px;">Inga vinstrader denna omgång</td></tr>`;
+    html += '</tbody></table>';
+    if (sampled) html += `<div class="dist-note">Uppskattning via ${total} slumpade rader (systemet har fler).</div>`;
+    else html += `<div class="dist-note">${total} rader utvärderade.</div>`;
+    
+    $dist.innerHTML = html;
+  }
+
+  let isSyncing = false;
+
+  function syncAmount() {
+    let rows = 1;
+    for (const m of state.matches) {
+      rows *= m.signs.length;
+    }
+    const amount = rows * PRICE_PER_ROW;
+    state.combo = comboFromAmount(amount);
+    
+    isSyncing = true;
+    $amount.value = amount;
+    isSyncing = false;
+    
+    $saldo.textContent = fmtMoney(amount) + ' kr';
+    renderPanel();
+  }
+
+  function computeDistribution(coverages, results){
+    const counts = new Array(14).fill(0);
+    const sizes  = coverages.map(c => c.length);
+    let total = 1;
+    for (const s of sizes) total *= s;
+
+    if (total <= CAP){
+      const idx = new Array(MATCHES).fill(0);
+      for (let n = 0; n < total; n++){
+        let correct = 0;
+        for (let i = 0; i < MATCHES; i++) if (coverages[i][idx[i]] === results[i]) correct++;
+        counts[correct]++;
+        for (let i = 0; i < MATCHES; i++){
+          idx[i]++;
+          if (idx[i] < sizes[i]) break;
+          idx[i] = 0;
+        }
+      }
+      return { counts, total, sampled: false };
+    }
+
+    for (let n = 0; n < CAP; n++){
+      let correct = 0;
+      for (let i = 0; i < MATCHES; i++) if (coverages[i][Math.floor(Math.random() * coverages[i].length)] === results[i]) correct++;
+      counts[correct]++;
+    }
+    return { counts, total: CAP, sampled: true };
+  }
+
+  function updateSimulation() {
+    const coverages = state.matches.map(m => m.signs);
+    state.dist = computeDistribution(coverages, state.results);
+    renderMatches();
+    renderSummary();
+    renderDistribution();
+  }
+
+  window.moveMatch = function(idx, dir) {
+    const newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= MATCHES) return;
+    [state.matches[idx], state.matches[newIdx]] = [state.matches[newIdx], state.matches[idx]];
+    if (state.results) [state.results[idx], state.results[newIdx]] = [state.results[newIdx], state.results[idx]];
+    renderMatches();
+  };
+
+  window.updateTeam = function(idx, field, val) { state.matches[idx][field] = val; };
+
+  window.toggleSign = function(idx, sign) {
+    const m = state.matches[idx];
+    if (m.signs.includes(sign)) {
+      if (m.signs.length > 1) m.signs = m.signs.filter(s => s !== sign);
+    } else {
+      m.signs.push(sign);
+      m.signs.sort((a, b) => ['1', 'X', '2'].indexOf(a) - ['1', 'X', '2'].indexOf(b));
+    }
+    syncAmount();
+    if (state.results) updateSimulation(); else renderMatches();
+  };
+
+  $amount.addEventListener('input', () => {
+    if (isSyncing) return;
+    const raw = $amount.value.trim();
+    const amount = /^\d+$/.test(raw) ? parseInt(raw, 10) : null;
+    
+    if (amount) {
+      $saldo.textContent = fmtMoney(amount) + ' kr';
+    } else {
+      $saldo.textContent = '0,00 kr';
+    }
+
+    const combo = amount ? comboFromAmount(amount) : null;
+    
+    if (combo) {
+      state.matches.forEach(m => m.signs = ['1']);
+      const indices = [...Array(MATCHES).keys()];
+      shuffleArr(indices);
+      for (let i = 0; i < combo.hela; i++) state.matches[indices[i]].signs = ['1', 'X', '2'];
+      for (let i = 0; i < combo.halva; i++) {
+        const m = state.matches[indices[combo.hela + i]];
+        m.signs = shuffleArr(['1', 'X', '2']).slice(0, 2).sort((a,b) => ['1','X','2'].indexOf(a) - ['1','X','2'].indexOf(b));
+      }
+      state.combo = combo;
+      renderPanel();
+      if (state.results) updateSimulation(); else renderMatches();
+    } else {
+      state.combo = null;
+      
+      // Om vi har ett ogiltigt belopp, hitta närmast under/över
+      if (amount) {
+        let lower = null, higher = null;
+        for (const c of allValidCombos) {
+          if (c.amount < amount) lower = c;
+          else if (c.amount > amount) { higher = c; break; }
+        }
+        
+        $comboVal.textContent = 'Hittades ej';
+        $comboVal.style.color = 'var(--red)';
+        let sub = '';
+        if (lower) sub += `Närmast under: <strong>${lower.amount} kr</strong> (${comboText(lower)})<br>`;
+        if (higher) sub += `Närmast över: <strong>${higher.amount} kr</strong> (${comboText(higher)})`;
+        $comboSub.innerHTML = sub;
+        $comboSub.classList.add('error');
+        $placeBtn.disabled = true;
+        
+        $slipAmt.textContent = amount + ' kr';
+        $slipRows.textContent = '–';
+        $slipCost.textContent = '–';
+      } else {
+        $comboVal.textContent = '–';
+        $comboVal.style.color = 'var(--gold)';
+        $comboSub.textContent = 'Ingen giltig kombination';
+        $comboSub.classList.add('error');
+        $slipAmt.textContent  = '–';
+        $slipRows.textContent = '–';
+        $slipCost.textContent = '–';
+        $placeBtn.disabled    = true;
+      }
+    }
+  });
+
+  $amount.addEventListener('keydown', e => { if (e.key === 'Enter' && !$placeBtn.disabled) $placeBtn.click(); });
+
+  document.getElementById('shuffleBtn').addEventListener('click', () => {
+    if (!state.combo) return;
+    const combo = state.combo;
+    state.matches.forEach(m => m.signs = ['1']);
+    const indices = [...Array(MATCHES).keys()];
+    shuffleArr(indices);
+    for (let i = 0; i < combo.hela; i++) state.matches[indices[i]].signs = ['1', 'X', '2'];
+    for (let i = 0; i < combo.halva; i++) {
+      const m = state.matches[indices[combo.hela + i]];
+      m.signs = shuffleArr(['1', 'X', '2']).slice(0, 2).sort((a,b) => ['1','X','2'].indexOf(a) - ['1','X','2'].indexOf(b));
+    }
+    if (state.results) updateSimulation(); else renderMatches();
+  });
+
+  document.getElementById('simBtn').addEventListener('click', () => {
+    state.results = Array.from({ length: MATCHES }, () => {
+      const r = Math.random();
+      if (r < 0.45) return '1';
+      if (r < 0.72) return 'X';
+      return '2';
+    });
+    updateSimulation();
+  });
+
+  $placeBtn.addEventListener('click', () => {
+    if (!state.combo) return;
+    showToast('Mockup – ' + comboText(state.combo) + ' · ' + state.combo.rows + ' rader placerade.');
+  });
+
+  let toastTimer;
+  function showToast(msg){
+    $toast.textContent = msg;
+    $toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => $toast.classList.remove('show'), 2400);
+  }
+
+  function buildTable(){
+    const frag = document.createDocumentFragment();
+    allValidCombos.forEach(c => {
+      const tr = document.createElement('tr');
+      tr.dataset.amount = c.amount;
+      tr.innerHTML = '<td class="ta-r">' + c.amount + ' kr</td><td class="col-komb">' + comboText(c) + '</td><td class="col-value">' + c.rows + '</td>';
+      tr.addEventListener('click', () => {
+        $amount.value = c.amount;
+        $amount.dispatchEvent(new Event('input'));
+        $amount.focus();
+        $amount.select();
+      });
+      frag.appendChild(tr);
+    });
+    $tbody.appendChild(frag);
+  }
+
+  /* ============================================================
+     SYSTEMTABELL DATA & GENERERING
+     ============================================================ */
+  
+  const systemTableData = [
+    [0,1,2, 1,1,null,null, 1,1,null, 2,null,null, 1,1, 2,null, null,null, 1,2,null,null],
+    [0,2,4, 1,2,1,null, 1,2,1, 2,2,null, 1,2, 2,2, 4,null, 1,2,null,null],
+    [0,3,8, 1,3,3,1, 1,3,3, 2,4,2, 1,3, 2,4, 4,4, 1,2,4,8],
+    [0,4,16, 1,4,6,4, 1,4,6, 2,6,6, 1,4, 2,6, 4,8, 1,2,4,8],
+    [0,5,32, 1,5,10,10, 1,5,10, 2,8,12, 1,5, 2,8, 4,12, 1,2,4,8],
+    [0,6,64, 1,6,15,20, 1,6,15, 2,10,20, 1,6, 2,10, 4,16, 1,2,4,8],
+    [0,7,128, 1,7,21,35, 1,7,21, 2,12,30, 1,7, 2,12, 4,20, 1,2,4,8],
+    [0,8,256, 1,8,28,56, 1,8,28, 2,14,42, 1,8, 2,14, 4,24, 1,2,4,8],
+    [0,9,512, 1,9,36,84, 1,9,36, 2,16,56, 1,9, 2,16, 4,28, 1,2,4,8],
+    [0,10,1024, 1,10,45,120, 1,10,45, 2,18,72, 1,10, 2,18, 4,32, 1,2,4,8],
+    [0,11,2048, 1,11,55,165, 1,11,55, 2,20,90, 1,11, 2,20, 4,36, null,2,4,8],
+    [0,12,4096, 1,12,66,220, 1,12,66, 2,22,110, null,null, 2,22, 4,40, null,null,4,8],
+    [0,13,8192, 1,13,78,286, null,null,null, 2,24,132, null,null, null,null, 4,44, null,null,null,8],
+    [1,0,3, 1,2,null,null, 1,2,null, 1,2,null, 1,2, null,null, null,null, 1,null,null,null],
+    [1,1,6, 1,3,2,null, 1,3,2, 1,3,2, 1,3, 2,4, null,null, 1,2,null,null],
+    [1,2,12, 1,4,5,2, 1,4,5, 2,6,4, 1,4, 2,6, 4,8, 1,2,4,null],
+    [1,3,24, 1,5,9,7, 1,5,9, 2,8,10, 1,5, 2,8, 4,12, 1,2,4,8],
+    [1,4,48, 1,6,14,16, 1,6,14, 2,10,18, 1,6, 2,10, 4,16, 1,2,4,8],
+    [1,5,96, 1,7,20,30, 1,7,20, 2,12,28, 1,7, 2,12, 4,20, 1,2,4,8],
+    [1,6,192, 1,8,27,50, 1,8,27, 2,14,40, 1,8, 2,14, 4,24, 1,2,4,8],
+    [1,7,384, 1,9,35,77, 1,9,35, 2,16,54, 1,9, 2,16, 4,28, 1,2,4,8],
+    [1,8,768, 1,10,44,112, 1,10,44, 2,18,70, 1,10, 2,18, 4,32, 1,2,4,8],
+    [1,9,1536, 1,11,54,156, 1,11,54, 2,20,88, 1,11, 2,20, 4,36, 1,2,4,8],
+    [1,10,3072, 1,12,65,210, 1,12,65, 2,22,108, 1,12, 2,22, 4,40, 1,2,4,8],
+    [1,11,6144, 1,13,77,275, 1,13,77, 2,24,130, 1,13, 2,24, 4,44, 1,2,4,8],
+    [2,0,9, 1,4,4,null, 1,4,4, 1,4,4, 1,4, null,null, null,null, 1,null,null,null],
+    [2,1,18, 1,5,8,4, 1,5,8, 1,5,8, 1,5, 2,8, null,null, 1,2,null,null],
+    [2,2,36, 1,6,13,12, 1,6,13, 2,10,16, 1,6, 2,10, 4,16, 1,2,4,null],
+    [2,3,72, 1,7,19,25, 1,7,19, 2,12,26, 1,7, 2,12, 4,20, 1,2,4,8],
+    [2,4,144, 1,8,26,44, 1,8,26, 2,14,38, 1,8, 2,14, 4,24, 1,2,4,8],
+    [2,5,288, 1,9,34,70, 1,9,34, 2,16,52, 1,9, 2,16, 4,28, 1,2,4,8],
+    [2,6,576, 1,10,43,104, 1,10,43, 2,18,68, 1,10, 2,18, 4,32, 1,2,4,8],
+    [2,7,1152, 1,11,53,147, 1,11,53, 2,20,86, 1,11, 2,20, 4,36, 1,2,4,8],
+    [2,8,2304, 1,12,64,200, 1,12,64, 2,22,106, 1,12, 2,22, 4,40, 1,2,4,8],
+    [2,9,4608, 1,13,76,264, 1,13,76, 2,24,128, 1,13, 2,24, 4,44, 1,2,4,8],
+    [2,10,9216, 1,14,89,340, 1,14,89, 2,26,152, 1,14, 2,26, 4,48, 1,2,4,8],
+    [3,0,27, 1,6,12,8, 1,6,12, 1,6,12, 1,6, null,null, null,null, 1,null,null,null],
+    [3,1,54, 1,7,18,20, 1,7,18, 2,12,24, 1,7, 2,12, null,null, 1,2,null,null],
+    [3,2,108, 1,8,25,38, 1,8,25, 2,14,36, 1,8, 2,14, 4,24, 1,2,4,null],
+    [3,3,216, 1,9,33,63, 1,9,33, 2,16,50, 1,9, 2,16, 4,28, 1,2,4,8],
+    [3,4,432, 1,10,42,96, 1,10,42, 2,18,66, 1,10, 2,18, 4,32, 1,2,4,8],
+    [3,5,864, 1,11,52,138, 1,11,52, 2,20,84, 1,11, 2,20, 4,36, 1,2,4,8],
+    [3,6,1728, 1,12,63,190, 1,12,63, 2,22,104, 1,12, 2,22, 4,40, 1,2,4,8],
+    [3,7,3456, 1,13,75,253, 1,13,75, 2,24,126, 1,13, 2,24, 4,44, 1,2,4,8],
+    [3,8,6912, 1,14,88,328, 1,14,88, 2,26,150, 1,14, 2,26, 4,48, 1,2,4,8],
+    [4,0,81, 1,8,24,32, 1,8,24, 1,8,24, 1,8, null,null, null,null, 1,null,null,null],
+    [4,1,162, 1,9,32,56, 1,9,32, 2,16,48, 1,9, 2,16, null,null, 1,2,null,null],
+    [4,2,324, 1,10,41,88, 1,10,41, 2,18,64, 1,10, 2,18, 4,32, 1,2,4,null],
+    [4,3,648, 1,11,51,129, 1,11,51, 2,20,82, 1,11, 2,20, 4,36, 1,2,4,8],
+    [4,4,1296, 1,12,62,180, 1,12,62, 2,22,102, 1,12, 2,22, 4,40, 1,2,4,8],
+    [4,5,2592, 1,13,74,242, 1,13,74, 2,24,124, 1,13, 2,24, 4,44, 1,2,4,8],
+    [4,6,5184, 1,14,87,316, 1,14,87, 2,26,148, 1,14, 2,26, 4,48, 1,2,4,8],
+    [5,0,243, 1,10,40,80, 1,10,40, 1,10,40, 1,10, null,null, null,null, 1,null,null,null],
+    [5,1,486, 1,11,50,120, 1,11,50, 2,20,80, 1,11, 2,20, null,null, 1,2,null,null],
+    [5,2,972, 1,12,61,170, 1,12,61, 2,22,100, 1,12, 2,22, 4,40, 1,2,4,null],
+    [5,3,1944, 1,13,73,231, 1,13,73, 2,24,122, 1,13, 2,24, 4,44, 1,2,4,8],
+    [5,4,3888, 1,14,86,304, 1,14,86, 2,26,146, 1,14, 2,26, 4,48, 1,2,4,8],
+    [5,5,7776, 1,15,100,390, 1,15,100, 2,28,172, 1,15, 2,28, 4,52, 1,2,4,8],
+    [6,0,729, 1,12,60,160, 1,12,60, 1,12,60, 1,12, null,null, null,null, 1,null,null,null],
+    [6,1,1458, 1,13,72,220, 1,13,72, 2,24,120, 1,13, 2,24, null,null, 1,2,null,null],
+    [6,2,2916, 1,14,85,292, 1,14,85, 2,26,144, 1,14, 2,26, 4,48, 1,2,4,null],
+    [6,3,5832, 1,15,99,377, 1,15,99, 2,28,170, 1,15, 2,28, 4,52, 1,2,4,8],
+    [7,0,2187, 1,14,84,280, 1,14,84, 1,14,84, 1,14, null,null, null,null, 1,null,null,null],
+    [7,1,4374, 1,15,98,364, 1,15,98, 2,28,168, 1,15, 2,28, null,null, 1,2,null,null],
+    [7,2,8748, 1,16,113,462, 1,16,113, 2,30,196, 1,16, 2,30, 4,56, 1,2,4,null],
+    [8,0,6561, 1,16,112,448, 1,16,112, 1,16,112, 1,16, null,null, null,null, 1,null,null,null]
+  ];
+
+  let sortState = { col: 2, dir: 1 };
+
+  window.sortTable = function(colIndex) {
+    if (sortState.col === colIndex) {
+      sortState.dir *= -1;
+    } else {
+      sortState.col = colIndex;
+      sortState.dir = 1;
+    }
+    renderSystemTable();
+  };
+
+  function renderSystemTable() {
+    $sysBody.innerHTML = '';
+    
+    for (let i = 0; i <= 2; i++) {
+      const iconSpan = document.getElementById('sort-icon-' + i);
+      if (i === sortState.col) {
+        iconSpan.textContent = sortState.dir === 1 ? '▲' : '▼';
+        iconSpan.style.color = 'var(--gold)';
+      } else {
+        iconSpan.textContent = '';
+      }
+    }
+
+    let dataToRender = [...systemTableData];
+    
+    dataToRender.sort((a, b) => {
+      const valA = a[sortState.col];
+      const valB = b[sortState.col];
+      return (valA - valB) * sortState.dir;
+    });
+    
+    const frag = document.createDocumentFragment();
+    const formatCell = (val) => (val !== null && val > 0 ? val : '-');
+    
+    dataToRender.forEach(row => {
+      const [h, v, r, a13, a12, a11, a10, og12, og11, og10, hg12, hg11, hg10, t2og11, t2og10, t1og1hg11, t1og1hg10, t2hg11, t2hg10, tr3og10, tr2og1hg10, tr1og2hg10, tr3hg10] = row;
+      
+      const tr = document.createElement('tr');
+      tr.dataset.helg = h;
+      tr.dataset.halvg = v;
+      
+      tr.onclick = function() {
+        document.querySelectorAll('#system-table-body tr').forEach(el => el.classList.remove('highlight-row'));
+        this.classList.add('highlight-row');
+      };
+
+      tr.ondblclick = function() {
+        this.classList.remove('highlight-row');
+      };
+      
+      tr.innerHTML = `
+        <td style="background:#1a2230; font-weight:700;">${h}</td>
+        <td style="background:#1a2230; font-weight:700;">${v}</td>
+        <td style="background:#1a2230; font-weight:700; color:var(--green);">${r}</td>
+        
+        <td class="bg-green">${formatCell(a13)}</td>
+        <td class="bg-green">${formatCell(a12)}</td>
+        <td class="bg-green">${formatCell(a11)}</td>
+        <td class="bg-green">${formatCell(a10)}</td>
+        
+        <td class="bg-blue">${formatCell(og12)}</td>
+        <td class="bg-blue">${formatCell(og11)}</td>
+        <td class="bg-blue">${formatCell(og10)}</td>
+        <td class="bg-blue">${formatCell(hg12)}</td>
+        <td class="bg-blue">${formatCell(hg11)}</td>
+        <td class="bg-blue">${formatCell(hg10)}</td>
+        
+        <td class="bg-yellow">${formatCell(t2og11)}</td>
+        <td class="bg-yellow">${formatCell(t2og10)}</td>
+        <td class="bg-yellow">${formatCell(t1og1hg11)}</td>
+        <td class="bg-yellow">${formatCell(t1og1hg10)}</td>
+        <td class="bg-yellow">${formatCell(t2hg11)}</td>
+        <td class="bg-yellow">${formatCell(t2hg10)}</td>
+        
+        <td class="bg-red">${formatCell(tr3og10)}</td>
+        <td class="bg-red">${formatCell(tr2og1hg10)}</td>
+        <td class="bg-red">${formatCell(tr1og2hg10)}</td>
+        <td class="bg-red">${formatCell(tr3hg10)}</td>
+      `;
+      frag.appendChild(tr);
+    });
+    $sysBody.appendChild(frag);
+  }
+
+  /* ---------- Start ---------- */
+  buildTable();
+  renderSystemTable();
+  $amount.value = '27';
+  $amount.dispatchEvent(new Event('input'));
+</script>
+
+</body>
+</html>
