@@ -1,4 +1,18 @@
-﻿<!DOCTYPE html>
+﻿# ============================================================
+#  Lee Betting - Saldofärger, Rensa-knapp & Färgkodade taggar
+#  Kör: powershell -ExecutionPolicy Bypass -File .\Skriv-LeeBetting.ps1
+# ============================================================
+
+$path = 'C:\Users\C_Kos\Desktop\APP\LEEBET\Ny(tt) Textdokument.html'
+$dir  = Split-Path -Parent $path
+
+if (-not (Test-Path -LiteralPath $dir)) {
+    New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    Write-Host "Skapade mapp: $dir" -ForegroundColor Yellow
+}
+
+$html = @'
+<!DOCTYPE html>
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
@@ -13,7 +27,7 @@
     --border:#1e2836;--border-soft:#18202c;
     --text:#e9eef7;--muted:#8b97a8;
     --gold:#e8c15a;--gold-deep:#c9962f;
-    --green:#33e08a;--red:#e05a5a;
+    --green:#33e08a;--red:#e05a5a;--blue:#8fc7ff;
     
     /* Tabellfärger */
     --c-green: rgba(51, 224, 138, 0.15);
@@ -50,8 +64,7 @@
   .logo-mark{
     width: 54px; height: 32px;
     display:flex;align-items:center;justify-content:center;
-    overflow: hidden;
-    border-radius: 4px;
+    overflow: hidden; border-radius: 4px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   }
   .logo-mark svg { width: 100%; height: 100%; object-fit: cover; }
@@ -59,9 +72,30 @@
   .brand-name{display:block;font-weight:800;font-size:15px;letter-spacing:2.4px}
   .brand-sub{display:block;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-top:2px}
   .spacer{flex:1}
+  
+  /* Saldo & Rensa */
+  .balance-container { display: flex; align-items: center; gap: 12px; }
   .balance{display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:999px;background:var(--panel2);border:1px solid var(--border)}
   .balance-label{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
-  .balance-value{font-size:14px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;transition:color 0.2s;}
+  .balance-input {
+    background: transparent; border: 1px solid transparent; border-radius: 4px;
+    color: inherit; font-family: inherit; font-size: 14px; font-weight: 700;
+    width: 80px; padding: 2px 4px; outline: none; text-align: right;
+    font-variant-numeric: tabular-nums; transition: 0.2s;
+  }
+  .balance-input:hover, .balance-input:focus { border-color: var(--border); background: rgba(255,255,255,0.05); }
+  
+  .btn-clear {
+    background: transparent; border: 1px solid var(--border); border-radius: 8px;
+    color: var(--muted); font-size: 16px; width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: 0.2s;
+  }
+  .btn-clear:hover { background: rgba(255,255,255,0.05); color: var(--text); border-color: var(--red); }
+  
+  .text-red { color: var(--red) !important; }
+  .text-yellow { color: var(--gold) !important; }
+  .text-blue { color: var(--blue) !important; }
 
   /* Flikar (Tabs) */
   .tabs-nav {
@@ -193,8 +227,8 @@
   
   .match-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(170px, 1fr));
-    gap:10px;
+    grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+    gap:8px;
     padding:16px 16px 10px 16px; 
     user-select: none;
   }
@@ -232,10 +266,18 @@
   .match-actions{display:flex;gap:2px}
   .btn-move{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:10px;padding:1px 3px;border-radius:4px}
   .btn-move:hover{background:rgba(255,255,255,0.1);color:var(--text)}
-  .match-tag{font-size:8px;font-weight:700;padding:1px 4px;border-radius:999px;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.05)}
-  .match-tag.hel{color:var(--gold);background:rgba(232,193,90,0.13)}
-  .match-tag.halv{color:#8fc7ff;background:rgba(143,199,255,0.13)}
   
+  /* Garderingstaggar & Status */
+  .match-tag{font-size:8px;font-weight:700;padding:1px 4px;border-radius:999px;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.05); border: 1px solid transparent; transition: 0.2s;}
+  
+  .match-tag.state-blue { color: var(--blue); background: rgba(143,199,255,0.15); border-color: rgba(143,199,255,0.3); }
+  .match-tag.state-red { color: var(--red); background: rgba(224,90,90,0.15); border-color: rgba(224,90,90,0.3); }
+  .match-tag.state-yellow { color: var(--gold); background: rgba(232,193,90,0.15); border-color: rgba(232,193,90,0.3); }
+
+  .match.state-blue { border-color: rgba(143,199,255,0.4); box-shadow: inset 0 0 0 1px rgba(143,199,255,0.1); }
+  .match.state-red { border-color: rgba(224,90,90,0.4); box-shadow: inset 0 0 0 1px rgba(224,90,90,0.1); }
+  .match.state-yellow { border-color: rgba(232,193,90,0.4); box-shadow: inset 0 0 0 1px rgba(232,193,90,0.1); }
+
   .teams{display:flex;flex-direction:column;gap:2px; margin-bottom: 2px;}
   .team-input{background:transparent;border:1px solid transparent;color:var(--text);font-size:11px;font-family:inherit;padding:2px 4px;border-radius:4px;width:100%;outline:none;transition:.15s}
   .team-input:hover,.team-input:focus{background:rgba(255,255,255,0.05);border-color:var(--border)}
@@ -377,9 +419,14 @@
     <span class="brand-sub">Desktop Edition</span>
   </div>
   <div class="spacer"></div>
-  <div class="balance">
-    <span class="balance-label">Saldo</span>
-    <span class="balance-value" id="saldoValue">1 250,00 kr</span>
+  
+  <div class="balance-container">
+    <div class="balance">
+      <span class="balance-label">Saldo</span>
+      <input id="balanceInput" class="balance-input text-yellow" type="text" value="1250" autocomplete="off">
+      <span class="balance-label">kr</span>
+    </div>
+    <button class="btn-clear" id="clearBtn" title="Rensa kupong">↺</button>
   </div>
 </header>
 
@@ -415,7 +462,7 @@
         <!-- Noteringsruta -->
         <div class="notes-container">
           <div class="field-label" style="margin-top: 8px;">Egna noteringar</div>
-          <textarea placeholder="Skriv dina egna noteringar här..."></textarea>
+          <textarea id="notesArea" placeholder="Skriv dina egna noteringar här..."></textarea>
         </div>
 
         <div class="sim-summary">
@@ -573,7 +620,10 @@
   const $dist     = document.getElementById('dist');
   const $toast    = document.getElementById('toast');
   const $sysBody  = document.getElementById('system-table-body');
-  const $saldo    = document.getElementById('saldoValue');
+  const $notes    = document.getElementById('notesArea');
+  
+  const $balanceInput = document.getElementById('balanceInput');
+  const $clearBtn     = document.getElementById('clearBtn');
 
   const state = {
     matches: Array.from({ length: MATCHES }, () => ({
@@ -584,6 +634,8 @@
     results: null
   };
 
+  let lockedIndices = new Set();
+
   // Skapa en lista med alla giltiga kombinationer sorterade för fallback
   const allValidCombos = [];
   for (let h = 0; h <= MAX_MATCHES; h++){
@@ -593,6 +645,42 @@
     }
   }
   allValidCombos.sort((a, b) => a.amount - b.amount);
+
+  /* ============================================================
+     SPARA & LADDA (LOCAL STORAGE)
+     ============================================================ */
+  function saveState() {
+    const saveData = {
+      matches: state.matches,
+      results: state.results,
+      locked: [...lockedIndices],
+      notes: $notes.value,
+      amount: $amount.value,
+      balance: $balanceInput.value
+    };
+    localStorage.setItem('leeBettingData', JSON.stringify(saveData));
+  }
+
+  function loadState() {
+    try {
+      const saved = localStorage.getItem('leeBettingData');
+      if (!saved) return false;
+      
+      const data = JSON.parse(saved);
+      
+      if (data.matches) state.matches = data.matches;
+      if (data.results) state.results = data.results;
+      if (data.locked) lockedIndices = new Set(data.locked);
+      if (data.notes) $notes.value = data.notes;
+      if (data.amount) $amount.value = data.amount;
+      if (data.balance) $balanceInput.value = data.balance;
+      
+      return true;
+    } catch (e) {
+      console.error('Kunde inte ladda sparat tillstånd:', e);
+      return false;
+    }
+  }
 
   /* ---------- Flikar ---------- */
   window.switchTab = function(tabId) {
@@ -638,6 +726,7 @@
     const c = state.combo;
     if (!c) {
       $comboVal.textContent = '–';
+      $comboVal.style.color = 'var(--gold)';
       $comboSub.textContent = 'Ingen giltig kombination';
       $comboSub.classList.add('error');
       $slipAmt.textContent  = $amount.value.trim() ? $amount.value.trim() + ' kr' : '–';
@@ -646,6 +735,7 @@
       $placeBtn.disabled    = true;
     } else {
       $comboVal.textContent = comboText(c);
+      $comboVal.style.color = 'var(--gold)';
       $comboSub.textContent = c.rows + ' rader';
       $comboSub.classList.remove('error');
       $slipAmt.textContent  = (c.rows * PRICE_PER_ROW) + ' kr';
@@ -665,7 +755,6 @@
   let isDragging = false;
   let startIdx = null;
   let endIdx = null;
-  let lockedIndices = new Set();
 
   function updateDragHighlight() {
     if (startIdx === null || endIdx === null) return;
@@ -727,6 +816,7 @@
     
     startIdx = null;
     endIdx = null;
+    saveState();
   };
 
   function renderMatches() {
@@ -751,7 +841,7 @@
       el.innerHTML = `
         <div class="match-header">
           <span class="match-no">M${i+1}</span>
-          <span class="match-tag ${kind}">${kind === 'hel' ? 'HEL' : kind === 'halv' ? 'HALV' : ''}</span>
+          <span class="match-tag">${kind === 'hel' ? 'HEL' : kind === 'halv' ? 'HALV' : ''}</span>
           <div class="match-actions">
             <button class="btn-move" onclick="moveMatch(${i}, -1)">↑</button>
             <button class="btn-move" onclick="moveMatch(${i}, 1)">↓</button>
@@ -771,6 +861,8 @@
       frag.appendChild(el);
     }
     $grid.appendChild(frag);
+    
+    updateBalance();
   }
 
   function renderSummary(){
@@ -837,8 +929,8 @@
     $amount.value = amount;
     isSyncing = false;
     
-    $saldo.textContent = fmtMoney(amount) + ' kr';
     renderPanel();
+    updateBalance();
   }
 
   function computeDistribution(coverages, results){
@@ -884,9 +976,13 @@
     [state.matches[idx], state.matches[newIdx]] = [state.matches[newIdx], state.matches[idx]];
     if (state.results) [state.results[idx], state.results[newIdx]] = [state.results[newIdx], state.results[idx]];
     renderMatches();
+    saveState();
   };
 
-  window.updateTeam = function(idx, field, val) { state.matches[idx][field] = val; };
+  window.updateTeam = function(idx, field, val) { 
+    state.matches[idx][field] = val; 
+    saveState();
+  };
 
   window.toggleSign = function(idx, sign) {
     const m = state.matches[idx];
@@ -898,19 +994,50 @@
     }
     syncAmount();
     if (state.results) updateSimulation(); else renderMatches();
+    saveState();
   };
+
+  function updateBalance() {
+    const base = parseInt($balanceInput.value.replace(/\D/g, ''), 10) || 0;
+    
+    let currentCost = 1;
+    for (const m of state.matches) {
+      currentCost *= m.signs.length;
+    }
+    currentCost *= PRICE_PER_ROW;
+
+    const diff = base - currentCost;
+
+    let stateClass = '';
+    if (diff < 0) {
+      $balanceInput.className = 'balance-input text-red';
+      stateClass = 'state-red';
+    } else if (diff > 0) {
+      $balanceInput.className = 'balance-input text-yellow';
+      stateClass = 'state-yellow';
+    } else {
+      $balanceInput.className = 'balance-input text-blue';
+      stateClass = 'state-blue';
+    }
+
+    document.querySelectorAll('.match').forEach(el => {
+      el.classList.remove('state-blue', 'state-red', 'state-yellow');
+      const tag = el.querySelector('.match-tag');
+      if (tag) {
+        tag.classList.remove('state-blue', 'state-red', 'state-yellow');
+        if (tag.textContent.trim() !== '') {
+          tag.classList.add(stateClass);
+          el.classList.add(stateClass);
+        }
+      }
+    });
+  }
 
   $amount.addEventListener('input', () => {
     if (isSyncing) return;
     const raw = $amount.value.trim();
     const amount = /^\d+$/.test(raw) ? parseInt(raw, 10) : null;
     
-    if (amount) {
-      $saldo.textContent = fmtMoney(amount) + ' kr';
-    } else {
-      $saldo.textContent = '0,00 kr';
-    }
-
     const combo = amount ? comboFromAmount(amount) : null;
     
     if (combo) {
@@ -928,7 +1055,6 @@
     } else {
       state.combo = null;
       
-      // Om vi har ett ogiltigt belopp, hitta närmast under/över
       if (amount) {
         let lower = null, higher = null;
         for (const c of allValidCombos) {
@@ -959,9 +1085,44 @@
         $placeBtn.disabled    = true;
       }
     }
+    updateBalance();
+    saveState();
+  });
+
+  $balanceInput.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '');
+    updateBalance();
+    saveState();
+  });
+
+  $clearBtn.addEventListener('click', () => {
+    if (confirm('Vill du rensa hela kupongen?')) {
+      state.matches = Array.from({ length: MATCHES }, () => ({
+        home: '', away: '', signs: ['1']
+      }));
+      state.results = null;
+      lockedIndices.clear();
+      $notes.value = '';
+      $amount.value = '1';
+      $comboVal.textContent = '–';
+      $comboVal.style.color = 'var(--gold)';
+      $comboSub.textContent = 'Ingen giltig kombination';
+      $comboSub.classList.add('error');
+      $dist.innerHTML = '<div class="dist-empty">Simulera en omgång för att se antalet vinstrader.</div>';
+      $sumHits.textContent = '–';
+      $sumBest.textContent = '–';
+      $sum13.textContent = '–';
+      state.combo = comboFromAmount(1);
+      renderMatches();
+      renderPanel();
+      updateBalance();
+      saveState();
+    }
   });
 
   $amount.addEventListener('keydown', e => { if (e.key === 'Enter' && !$placeBtn.disabled) $placeBtn.click(); });
+  
+  $notes.addEventListener('input', saveState);
 
   document.getElementById('shuffleBtn').addEventListener('click', () => {
     if (!state.combo) return;
@@ -975,6 +1136,7 @@
       m.signs = shuffleArr(['1', 'X', '2']).slice(0, 2).sort((a,b) => ['1','X','2'].indexOf(a) - ['1','X','2'].indexOf(b));
     }
     if (state.results) updateSimulation(); else renderMatches();
+    saveState();
   });
 
   document.getElementById('simBtn').addEventListener('click', () => {
@@ -985,6 +1147,7 @@
       return '2';
     });
     updateSimulation();
+    saveState();
   });
 
   $placeBtn.addEventListener('click', () => {
@@ -1179,9 +1342,34 @@
   /* ---------- Start ---------- */
   buildTable();
   renderSystemTable();
-  $amount.value = '27';
-  $amount.dispatchEvent(new Event('input'));
+  
+  // Ladda sparat tillstånd eller kör standard
+  const hasSavedData = loadState();
+  
+  if (hasSavedData) {
+    renderMatches();
+    
+    if ($amount.value) {
+      const amount = parseInt($amount.value, 10);
+      const combo = amount ? comboFromAmount(amount) : null;
+      state.combo = combo;
+      renderPanel();
+      if (state.results) updateSimulation();
+    }
+    updateBalance();
+  } else {
+    $amount.value = '27';
+    $balanceInput.value = '1250';
+    $amount.dispatchEvent(new Event('input'));
+  }
 </script>
 
 </body>
 </html>
+'@
+
+Set-Content -LiteralPath $path -Value $html -Encoding UTF8 -Force -NoNewline
+Write-Host "Klar! Skrev filen:" -ForegroundColor Green
+Write-Host "  $path" -ForegroundColor Cyan
+
+Invoke-Item -LiteralPath $path
