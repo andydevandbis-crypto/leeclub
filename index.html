@@ -1,18 +1,4 @@
-﻿# ============================================================
-#  Lee Betting - Saldofärger, Rensa-knapp & Färgkodade taggar
-#  Kör: powershell -ExecutionPolicy Bypass -File .\Skriv-LeeBetting.ps1
-# ============================================================
-
-$path = 'C:\Users\C_Kos\Desktop\APP\LEEBET\Ny(tt) Textdokument.html'
-$dir  = Split-Path -Parent $path
-
-if (-not (Test-Path -LiteralPath $dir)) {
-    New-Item -ItemType Directory -Path $dir -Force | Out-Null
-    Write-Host "Skapade mapp: $dir" -ForegroundColor Yellow
-}
-
-$html = @'
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
@@ -45,6 +31,7 @@ $html = @'
       radial-gradient(900px 500px at -10% 110%, rgba(51,224,138,0.06), transparent 60%),
       var(--bg);
     min-height:100vh;padding-bottom: 60px;
+    display: flex; flex-direction: column;
   }
 
   /* Mörk Scrollbar */
@@ -73,18 +60,12 @@ $html = @'
   .brand-sub{display:block;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-top:2px}
   .spacer{flex:1}
   
-  /* Saldo & Rensa */
+  /* Endast Kostnad i toppen */
   .balance-container { display: flex; align-items: center; gap: 12px; }
   .balance{display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:999px;background:var(--panel2);border:1px solid var(--border)}
   .balance-label{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
-  .balance-input {
-    background: transparent; border: 1px solid transparent; border-radius: 4px;
-    color: inherit; font-family: inherit; font-size: 14px; font-weight: 700;
-    width: 80px; padding: 2px 4px; outline: none; text-align: right;
-    font-variant-numeric: tabular-nums; transition: 0.2s;
-  }
-  .balance-input:hover, .balance-input:focus { border-color: var(--border); background: rgba(255,255,255,0.05); }
-  
+  .balance-value { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
   .btn-clear {
     background: transparent; border: 1px solid var(--border); border-radius: 8px;
     color: var(--muted); font-size: 16px; width: 32px; height: 32px;
@@ -97,10 +78,68 @@ $html = @'
   .text-yellow { color: var(--gold) !important; }
   .text-blue { color: var(--blue) !important; }
 
+  /* RSS Ticker (Oändlig Marquee) */
+  .rss-bar {
+    background: #0b1118;
+    border-bottom: 1px solid var(--border);
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+  }
+  .rss-badge {
+    background: var(--red);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+  .rss-marquee {
+    overflow: hidden;
+    width: 100%;
+    display: flex;
+  }
+  .rss-ticker {
+    display: flex;
+    white-space: nowrap;
+    animation: marquee 50s linear infinite;
+  }
+  .rss-ticker:hover {
+    animation-play-state: paused;
+  }
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .rss-group {
+    display: flex;
+    padding-right: 20px;
+  }
+  .rss-item {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 30px;
+  }
+  .rss-item::before { content: "•"; color: var(--gold); }
+  .rss-item:hover { color: var(--gold); }
+
   /* Flikar (Tabs) */
   .tabs-nav {
     display: flex; justify-content: space-between; align-items: flex-end;
-    padding: 16px 24px 0; max-width: 1400px; margin: 0 auto;
+    padding: 16px 24px 0; max-width: 1400px; margin: 0 auto; width: 100%;
     border-bottom: 1px solid var(--border);
   }
   .tabs-left { display: flex; gap: 4px; }
@@ -121,7 +160,7 @@ $html = @'
 
   /* Layout */
   .main{
-    max-width:1400px;margin:0 auto;padding:24px;
+    max-width:1400px;margin:0 auto;padding:24px; width: 100%;
     display:flex;flex-direction:column;gap:20px;
   }
   .panel{
@@ -422,13 +461,25 @@ $html = @'
   
   <div class="balance-container">
     <div class="balance">
-      <span class="balance-label">Saldo</span>
-      <input id="balanceInput" class="balance-input text-yellow" type="text" value="1250" autocomplete="off">
-      <span class="balance-label">kr</span>
+      <span class="balance-label">KOSTNAD</span>
+      <span id="costValue" class="balance-value text-yellow">0 kr</span>
     </div>
     <button class="btn-clear" id="clearBtn" title="Rensa kupong">↺</button>
   </div>
 </header>
+
+<!-- RSS TICKER -->
+<div class="rss-bar">
+  <span class="rss-badge">BBC SPORT</span>
+  <div class="rss-marquee">
+    <div class="rss-ticker" id="rssFeed">
+      <div class="rss-group" id="rssGroup1">
+        <span class="rss-item">Hämtar de senaste nyheterna...</span>
+      </div>
+      <div class="rss-group" id="rssGroup2"></div>
+    </div>
+  </div>
+</div>
 
 <!-- FLIK-MENY -->
 <div class="tabs-nav">
@@ -480,13 +531,13 @@ $html = @'
         <!-- 1. Insats & Kombination -->
         <div class="accordion open" id="acc-insats">
           <div class="acc-header" onclick="toggleAccordion('acc-insats')">
-            <h2>Insats & Kombination</h2>
+            <h2>Mål & Kombination</h2>
             <div class="arrow">▼</div>
           </div>
           <div class="acc-content">
             <div class="insats-layout">
               <div>
-                <div class="field-label">Insats (kr)</div>
+                <div class="field-label">Mål (kr)</div>
                 <input id="amount" class="field" type="text" inputmode="numeric" placeholder="t.ex. 27" autocomplete="off">
                 <div class="info" style="margin-top:16px; font-size:12px; color:var(--muted); line-height:1.6">
                   <strong>Tips:</strong> Skriv ett belopp för att automatiskt skapa rätt antal hel- och halvgarderingar. Klicka sedan på <strong>Systemtabell</strong> för att se antalet vinstrader.
@@ -622,9 +673,9 @@ $html = @'
   const $sysBody  = document.getElementById('system-table-body');
   const $notes    = document.getElementById('notesArea');
   
-  const $balanceInput = document.getElementById('balanceInput');
+  const $costValue    = document.getElementById('costValue');
   const $clearBtn     = document.getElementById('clearBtn');
-
+  
   const state = {
     matches: Array.from({ length: MATCHES }, () => ({
       home: '', away: '', signs: ['1']
@@ -647,6 +698,39 @@ $html = @'
   allValidCombos.sort((a, b) => a.amount - b.amount);
 
   /* ============================================================
+     HÄMTA RSS NYHETER (BBC SPORT via rss2json)
+     ============================================================ */
+  async function fetchRSS() {
+    try {
+      const rssUrl = encodeURIComponent('https://feeds.bbci.co.uk/sport/rss.xml');
+      const apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + rssUrl;
+      
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      
+      if (data.status !== 'ok' || !data.items) {
+        throw new Error('API returnerade fel');
+      }
+      
+      const items = data.items;
+      let html = '';
+      for (let i = 0; i < Math.min(items.length, 10); i++) {
+        html += `<a href="${items[i].link}" target="_blank" class="rss-item">${items[i].title}</a>`;
+      }
+      
+      // Duplicera nyheterna för att skapa en sömlös oändlig loop
+      document.getElementById('rssGroup1').innerHTML = html;
+      document.getElementById('rssGroup2').innerHTML = html;
+      
+    } catch (e) {
+      console.warn('RSS fetch misslyckades:', e);
+      const fallback = '<a href="https://www.bbc.com/sport" target="_blank" class="rss-item">Klicka här för senaste nyheterna från BBC Sport (live-flödet blockerades av nätverket)</a>';
+      document.getElementById('rssGroup1').innerHTML = fallback;
+      document.getElementById('rssGroup2').innerHTML = fallback;
+    }
+  }
+
+  /* ============================================================
      SPARA & LADDA (LOCAL STORAGE)
      ============================================================ */
   function saveState() {
@@ -655,8 +739,7 @@ $html = @'
       results: state.results,
       locked: [...lockedIndices],
       notes: $notes.value,
-      amount: $amount.value,
-      balance: $balanceInput.value
+      amount: $amount.value
     };
     localStorage.setItem('leeBettingData', JSON.stringify(saveData));
   }
@@ -673,7 +756,6 @@ $html = @'
       if (data.locked) lockedIndices = new Set(data.locked);
       if (data.notes) $notes.value = data.notes;
       if (data.amount) $amount.value = data.amount;
-      if (data.balance) $balanceInput.value = data.balance;
       
       return true;
     } catch (e) {
@@ -925,9 +1007,8 @@ $html = @'
     const amount = rows * PRICE_PER_ROW;
     state.combo = comboFromAmount(amount);
     
-    isSyncing = true;
-    $amount.value = amount;
-    isSyncing = false;
+    // Vi uppdaterar INTE $amount.value här, så att användarens "Mål" ligger kvar
+    // och KOSTNADEN i toppen kan jämföras mot målet.
     
     renderPanel();
     updateBalance();
@@ -998,7 +1079,8 @@ $html = @'
   };
 
   function updateBalance() {
-    const base = parseInt($balanceInput.value.replace(/\D/g, ''), 10) || 0;
+    // Läser av det inmatade Målet
+    const target = parseInt($amount.value.replace(/\D/g, ''), 10) || 0;
     
     let currentCost = 1;
     for (const m of state.matches) {
@@ -1006,17 +1088,18 @@ $html = @'
     }
     currentCost *= PRICE_PER_ROW;
 
-    const diff = base - currentCost;
+    // Uppdatera Kostnads-siffran i toppen
+    $costValue.textContent = currentCost + ' kr';
 
     let stateClass = '';
-    if (diff < 0) {
-      $balanceInput.className = 'balance-input text-red';
+    if (currentCost > target) {
+      $costValue.className = 'balance-value text-red';
       stateClass = 'state-red';
-    } else if (diff > 0) {
-      $balanceInput.className = 'balance-input text-yellow';
+    } else if (currentCost < target) {
+      $costValue.className = 'balance-value text-yellow';
       stateClass = 'state-yellow';
     } else {
-      $balanceInput.className = 'balance-input text-blue';
+      $costValue.className = 'balance-value text-blue';
       stateClass = 'state-blue';
     }
 
@@ -1089,14 +1172,10 @@ $html = @'
     saveState();
   });
 
-  $balanceInput.addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/\D/g, '');
-    updateBalance();
-    saveState();
-  });
-
   $clearBtn.addEventListener('click', () => {
     if (confirm('Vill du rensa hela kupongen?')) {
+      localStorage.removeItem('leeBettingData');
+      
       state.matches = Array.from({ length: MATCHES }, () => ({
         home: '', away: '', signs: ['1']
       }));
@@ -1104,6 +1183,7 @@ $html = @'
       lockedIndices.clear();
       $notes.value = '';
       $amount.value = '1';
+      
       $comboVal.textContent = '–';
       $comboVal.style.color = 'var(--gold)';
       $comboSub.textContent = 'Ingen giltig kombination';
@@ -1112,6 +1192,7 @@ $html = @'
       $sumHits.textContent = '–';
       $sumBest.textContent = '–';
       $sum13.textContent = '–';
+      
       state.combo = comboFromAmount(1);
       renderMatches();
       renderPanel();
@@ -1340,6 +1421,8 @@ $html = @'
   }
 
   /* ---------- Start ---------- */
+  fetchRSS(); // Starta RSS-hämtning
+  
   buildTable();
   renderSystemTable();
   
@@ -1359,17 +1442,9 @@ $html = @'
     updateBalance();
   } else {
     $amount.value = '27';
-    $balanceInput.value = '1250';
     $amount.dispatchEvent(new Event('input'));
   }
 </script>
 
 </body>
 </html>
-'@
-
-Set-Content -LiteralPath $path -Value $html -Encoding UTF8 -Force -NoNewline
-Write-Host "Klar! Skrev filen:" -ForegroundColor Green
-Write-Host "  $path" -ForegroundColor Cyan
-
-Invoke-Item -LiteralPath $path
