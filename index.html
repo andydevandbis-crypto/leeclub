@@ -459,18 +459,12 @@
   </div>
   <div class="spacer"></div>
   
-  <div class="balance-container">
-    <div class="balance">
-      <span class="balance-label">KOSTNAD</span>
-      <span id="costValue" class="balance-value text-yellow">0 kr</span>
-    </div>
-    <button class="btn-clear" id="clearBtn" title="Rensa kupong">↺</button>
-  </div>
 </header>
 
 <!-- RSS TICKER -->
 <div class="rss-bar">
   <span class="rss-badge">BBC SPORT</span>
+  <button id="rssPauseBtn" class="btn-ghost" style="padding: 4px 10px; font-size: 12px; margin-left: 10px; z-index: 10;">Pausa</button>
   <div class="rss-marquee">
     <div class="rss-ticker" id="rssFeed">
       <div class="rss-group" id="rssGroup1">
@@ -509,6 +503,15 @@
         </div>
 
         <div class="match-grid" id="matchGrid"></div>
+
+  <div class="balance-container" style="margin-top: 15px; justify-content: center;">
+    <div class="balance">
+      <span class="balance-label">SALDO</span>
+      <span id="costValue" class="balance-value text-yellow">0 kr</span>
+    </div>
+    <button class="btn-clear" id="clearBtn" title="Rensa kupong">↺</button>
+  </div>
+
         
         <!-- Noteringsruta -->
         <div class="notes-container">
@@ -1117,6 +1120,10 @@
   }
 
   $amount.addEventListener('input', () => {
+    updateBalance();
+  });
+
+  $amount.addEventListener('change', () => {
     if (isSyncing) return;
     const raw = $amount.value.trim();
     const amount = /^\d+$/.test(raw) ? parseInt(raw, 10) : null;
@@ -1252,7 +1259,7 @@
       tr.innerHTML = '<td class="ta-r">' + c.amount + ' kr</td><td class="col-komb">' + comboText(c) + '</td><td class="col-value">' + c.rows + '</td>';
       tr.addEventListener('click', () => {
         $amount.value = c.amount;
-        $amount.dispatchEvent(new Event('input'));
+        $amount.dispatchEvent(new Event('change'));
         $amount.focus();
         $amount.select();
       });
@@ -1442,8 +1449,20 @@
     updateBalance();
   } else {
     $amount.value = '27';
-    $amount.dispatchEvent(new Event('input'));
+    $amount.dispatchEvent(new Event('change'));
   }
+
+  document.getElementById('rssPauseBtn').addEventListener('click', function() {
+      const ticker = document.querySelector('.rss-ticker');
+      if (ticker.style.animationPlayState === 'paused') {
+          ticker.style.animationPlayState = 'running';
+          this.textContent = 'Pausa';
+      } else {
+          ticker.style.animationPlayState = 'paused';
+          this.textContent = 'Spela';
+      }
+  });
+
 </script>
 
 </body>
