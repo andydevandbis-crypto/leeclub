@@ -151,6 +151,85 @@
       flex: 1;
       align-content: stretch;
   }
+  .match {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      gap: 6px;
+      transition: 0.2s;
+  }
+  .match.locked, .match.live-mode { pointer-events: none; }
+  
+  .match.locked.live-mode .match-header, 
+  .match.locked.live-mode .teams, 
+  .match.locked.live-mode .signs, 
+  .match.locked.live-mode .lee-row { opacity: 1 !important; }
+  .match.locked.live-mode .sign { pointer-events: none; cursor: default; }
+
+  .sign.dim { opacity: 0.2; }
+  .sign.win { color: var(--green) !important; background: rgba(51,224,138,0.15) !important; border-color: rgba(51,224,138,0.4) !important; }
+  .sign.lose { color: #f08a3c !important; background: rgba(240,138,60,0.15) !important; border-color: rgba(240,138,60,0.4) !important; }
+  
+  /* Layout för innehållet */
+  .match-content { display: flex; justify-content: space-between; align-items: flex-start; flex-grow: 1; margin: 4px 0; }
+  .teams { display: flex; flex-direction: column; font-size: 12px; font-weight: 600; line-height: 1.3; }
+  .score-col { display: flex; flex-direction: column; align-items: flex-end; font-size: 18px; font-weight: 800; line-height: 1.1; }
+  .score-col span { display: block; }
+  .score-col.red { color: var(--red); }
+  .score-col.green { color: var(--green); }
+
+  /* Badges (tid och resultat) */
+  .live-badge { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+  .live-badge.tid { background: #fff; color: var(--red); }
+  .live-badge.score { background: rgba(51,224,138,0.15); color: var(--green); border: 1px solid rgba(51,224,138,0.4); }
+
+  /* Solida färger på tecknen (som i din bild) */
+  .sign.win { background: var(--green) !important; color: #000 !important; border-color: var(--green) !important; }
+  .sign.lose { background: #f08a3c !important; color: #000 !important; border-color: #f08a3c !important; }
+
+  /* Transparent bakgrund på hela rutan */
+  .match.ft-win { background: rgba(51,224,138,0.15) !important; border-color: var(--green) !important; box-shadow: 0 0 0 1px var(--green) inset !important; }
+  .match.ft-loss { background: rgba(224,90,90,0.15) !important; border-color: var(--red) !important; box-shadow: 0 0 0 1px var(--red) inset !important; }
+
+  /* Resultat-badge i headern */
+  .live-res {
+    font-size: 11px; font-weight: 800; color: var(--text);
+    background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .live-res.ft { background: rgba(51,224,138,0.15); color: var(--green); }
+  .live-res.live { background: rgba(240,138,60,0.15); color: #f08a3c; }
+  .match.lee-known { border-color: rgba(51,224,138,0.35); }
+  .match.locked.lit { pointer-events: auto; cursor: pointer; }
+  .match.locked.lit .match-header, .match.locked.lit .teams, .match.locked.lit .signs { opacity: 1; }
+  .match.locked.lit .sign { pointer-events: none; }
+  .match.marked { background: #3d3420; border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
+  .lee-row { display: flex; align-items: center; gap: 4px; padding-top: 6px; border-top: 1px dashed var(--border-soft); font-size: 10px; }
+  .lee-label { font-weight: 800; letter-spacing: 1px; color: var(--muted); margin-right: 2px; }
+  .lee-sign { min-width: 22px; text-align: center; font-weight: 800; font-size: 12px; padding: 3px 0; border-radius: 4px; color: var(--green); background: rgba(51,224,138,0.12); border: 1px solid rgba(51,224,138,0.35); }
+  .lee-wait { color: var(--muted); font-style: italic; }
+  .match-header{display:flex;justify-content:space-between;align-items:center;}
+  .live-score {
+    font-size: 13px; font-weight: 800; color: var(--text);
+    background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .live-score.live {
+    color: var(--gold); background: rgba(232,193,90,0.15);
+    border: 1px solid rgba(232,193,90,0.3);
+  }
+  .live-min { font-size: 10px; color: var(--gold); font-weight: 600; }
+  .match-no{font-size:10px;font-weight:800;color:var(--gold);}
+  .teams{font-size:12px;font-weight:600;line-height:1.3;}
+  .teams span{display:block;}
+  .signs{display:flex;gap:4px; margin-top: auto;}
+  .sign{flex:1;text-align:center;font-size:12px;font-weight:700;padding:6px 0;border-radius:4px;color:var(--muted);background:rgba(255,255,255,0.02);border:1px solid var(--border-soft);cursor:pointer;transition:0.15s;}
+  .sign:hover{background:rgba(255,255,255,0.05);}
+  .sign.on{color:var(--gold);background:rgba(232,193,90,0.15);border-color:rgba(232,193,90,0.4);}
   .match-content { display: flex; justify-content: space-between; align-items: flex-start; flex-grow: 1; margin: 4px 0; }
   .score-col { display: flex; flex-direction: column; align-items: flex-end; font-size: 18px; font-weight: 800; line-height: 1.1; }
   .score-col span { display: block; }
@@ -716,12 +795,13 @@
   });
 
   function renderAdminLiveView() {
-    const grid = document.getElementById('adminLiveGrid'); if(!grid) return; grid.innerHTML = '';
+    const grid = document.getElementById('adminLiveGrid');
+    grid.innerHTML = '';
+    const lee = getLee(); const lit = isSubmitted && lee.started;
     
-    for (let i = 0; i < 13; i++) {
-      const m = state.matches[i] || { home: '', away: '', signs: ['1'] };
+    MATCHES.forEach((m, i) => {
       const live = liveScores[i];
-      const p = m.signs || [];
+      const p = picks[i] || [];
       
       let currentWin = null;
       let isFinished = false;
@@ -730,69 +810,110 @@
           if (live.home_goals > live.away_goals) currentWin = '1';
           else if (live.home_goals < live.away_goals) currentWin = '2';
           else currentWin = 'X';
+          
           const st = (live.status || '').toLowerCase();
           isFinished = (st === 'ft' || st === 'settled' || st === 'ended');
       }
 
-      let badgeHtml = '';
-      if (live) {
-          const st = (live.status || '').toLowerCase();
-          if (isFinished) badgeHtml = `<div class="live-badge score" style="color:var(--muted);">SLUT</div>`;
-          else if (st === 'pending' || st === 'ns' || !st) {
-              let timeStr = '00:00';
-              if (live.datetime) timeStr = new Date(live.datetime).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'});
-              badgeHtml = `<div class="live-badge score">${timeStr}</div>`;
-          } else badgeHtml = `<div class="live-badge tid">LIVE</div>`;
+      const leeKnown = lee.started || (lee.locked && lee.locked[i] !== undefined);
+      const leeSigns = lee.started ? (lee.picks[i] || []) : ((lee.locked && lee.locked[i]) || []);
+      
+      const el = document.createElement('div');
+      let cardClass = 'match';
+      
+      if (isSubmitted || live) cardClass += ' locked live-mode';
+      if (lit && marks.has(i)) cardClass += ' marked';
+      if (isSubmitted && leeKnown && !lit) cardClass += ' lee-known';
+      
+      if (isFinished && currentWin && p.length > 0) {
+          cardClass += p.includes(currentWin) ? ' ft-win' : ' ft-loss';
       }
+      
+      el.className = cardClass;
+      if (lit) el.onclick = () => markCard(i);
 
-      let scoreHtml = '';
-      if (live) {
-          let hg = live.home_goals, ag = live.away_goals;
-          const st = (live.status || '').toLowerCase();
-          if ((st === 'ns' || st === 'pending') && (hg === null || hg === undefined)) { hg = 0; ag = 0; }
-          scoreHtml = `<div class="score-col ${isFinished ? 'green' : 'red'}"><span>${hg ?? '-'}</span><span>${ag ?? '-'}</span></div>`;
-      }
+      const leeRow = isSubmitted ? `<div class="lee-row"><span class="lee-label">LEE</span>${leeKnown ? (leeSigns.length ? leeSigns.map(x => `<span class="lee-sign">${x}</span>`).join('') : '<span class="lee-wait">&ndash;</span>') : '<span class="lee-wait">Väntar...</span>'}</div>` : '';
 
       let c1 = 'sign' + (p.includes('1') ? ' on' : '');
       let cx = 'sign' + (p.includes('X') ? ' on' : '');
       let c2 = 'sign' + (p.includes('2') ? ' on' : '');
 
       if (live && currentWin) {
-          if (currentWin === '1') c1 += ' win'; if (currentWin === 'X') cx += ' win'; if (currentWin === '2') c2 += ' win';
-          if (currentWin !== '1' && p.includes('1')) c1 += ' lose'; if (currentWin !== 'X' && p.includes('X')) cx += ' lose'; if (currentWin !== '2' && p.includes('2')) c2 += ' lose';
-          if (!p.includes('1') && currentWin !== '1') c1 += ' dim'; if (!p.includes('X') && currentWin !== 'X') cx += ' dim'; if (!p.includes('2') && currentWin !== '2') c2 += ' dim';
+          if (currentWin === '1') c1 += ' win';
+          if (currentWin === 'X') cx += ' win';
+          if (currentWin === '2') c2 += ' win';
+
+          if (currentWin !== '1' && p.includes('1')) c1 += ' lose';
+          if (currentWin !== 'X' && p.includes('X')) cx += ' lose';
+          if (currentWin !== '2' && p.includes('2')) c2 += ' lose';
+
+          if (!p.includes('1') && currentWin !== '1') c1 += ' dim';
+          if (!p.includes('X') && currentWin !== 'X') cx += ' dim';
+          if (!p.includes('2') && currentWin !== '2') c2 += ' dim';
       }
 
-      const el = document.createElement('div'); 
-      let cardClass = 'match';
-      if (isFinished && currentWin && p.length > 0) cardClass += p.includes(currentWin) ? ' ft-win' : ' ft-loss';
-      el.className = cardClass;
+      // Rätt logik för Badgen uppe till höger:
+      // Om matchen är live -> Vit ruta med röd tid (t.ex. 74')
+      // Om matchen är slut -> Grön ruta med resultat (t.ex. 2 - 2)
+      let badgeHtml = '';
+      if (live) {
+          const st = (live.status || '').toLowerCase();
+          if (st === 'ft' || st === 'settled' || st === 'ended') {
+              badgeHtml = `<div class="live-badge score" style="background:transparent; color:var(--muted); border:1px solid var(--border);">SLUT</div>`;
+          } else if (st === 'pending' || st === 'ns' || !st) {
+              let timeStr = '00:00';
+              if (live.datetime) {
+                  const d = new Date(live.datetime);
+                  timeStr = d.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'});
+              }
+              badgeHtml = `<div class="live-badge score" style="background:transparent; color:var(--text); border:1px solid var(--border);">${timeStr}</div>`;
+          } else {
+              badgeHtml = `<div class="live-badge tid">LIVE</div>`;
+          }
+      }
+
+      // Siffrorna till höger
+      const scoreHtml = live ? (
+        `<div class="score-col ${isFinished ? 'green' : 'red'}">
+           <span>${live.home_goals ?? '-'}</span>
+           <span>${live.away_goals ?? '-'}</span>
+         </div>`
+      ) : '';
 
       el.innerHTML = `
-        <div class="match-header"><span class="match-no">M${i+1}</span>${badgeHtml}</div>
-        <div class="teams"><span>${esc(m.home)}</span><span>${esc(m.away)}</span></div>
-        <div class="match-content">${scoreHtml}</div>
-        <div class="signs"><div class="${c1}">1</div><div class="${cx}">X</div><div class="${c2}">2</div></div>`;
-      grid.appendChild(el);
-    }
+        <div class="match-header">
+          <span class="match-no">M${i+1}</span>
+          ${badgeHtml}
+        </div>
+        
+        <div class="match-content">
+          <div class="teams"><span>${esc(m.home)}</span><span>${esc(m.away)}</span></div>
+          ${scoreHtml}
+        </div>
 
-    // Fyll ut tomma rutor med noteringar
+        <div class="signs">
+          <div class="${c1}" onclick="toggleSign(${i}, '1')">1</div>
+          <div class="${cx}" onclick="toggleSign(${i}, 'X')">X</div>
+          <div class="${c2}" onclick="toggleSign(${i}, '2')">2</div>
+        </div>${leeRow}`;
+        
+      grid.appendChild(el);
+    });
+    
     const noteCard = document.createElement('div');
-    noteCard.className = 'match';
+    noteCard.className = 'notes-card';
     noteCard.innerHTML = `
       <div class="data-label" style="margin-bottom: 6px;">Egna noteringar</div>
-      <textarea placeholder="Skriv dina egna noteringar här..." readonly style="flex:1;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px;resize:none;outline:none;font-family:inherit;font-size:12px;">${esc(localStorage.getItem('lee_admin_notes') || '')}</textarea>
+      <textarea id="notesArea" placeholder="Skriv dina egna noteringar här...">${esc(localStorage.getItem('lee_player_notes') || '')}</textarea>
     `;
     grid.appendChild(noteCard);
 
-    setTimeout(() => {
-        const tpl = getComputedStyle(grid).gridTemplateColumns;
-        if (tpl && tpl !== 'none') {
-            const cols = tpl.split(' ').filter(Boolean).length || 1;
-            const rem = 13 % cols;
-            noteCard.style.gridColumn = 'span ' + (rem === 0 ? cols : cols - rem);
-        }
-    }, 10);
+    document.getElementById('notesArea').addEventListener('input', (e) => {
+      localStorage.setItem('lee_player_notes', e.target.value);
+    });
+
+    fitNotes();
+    updateSubmitInfo();
   }
 
   // Anteckningsrutan fyller alltid ut det lediga utrymmet i sista raden
