@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lee Betting - Admin</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<script src="js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg:#070a0f;--panel:#0f141d;--panel2:#131a26;
+    --border:#1e2836;--border-soft:#18202c;
+    --text:#e9eef7;--muted:#8b97a8;
+    --gold:#e8c15a;--gold-deep:#c9962f;
+    --green:#33e08a;--red:#e05a5a;--blue:#8fc7ff;
+    --c-green: rgba(51, 224, 138, 0.15); --c-blue: rgba(143, 199, 255, 0.15);
+    --c-yellow: rgba(232, 193, 90, 0.15); --c-red: rgba(224, 90, 90, 0.15);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Inter","Segoe UI",system-ui,sans-serif;color:var(--text);background:var(--bg);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+  
+  ::-webkit-scrollbar { display: none; }
+  * { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* LOGIN */
+  #adminLoginScreen { position:fixed; inset:0; background:var(--bg); z-index:99999; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .login-card{width:100%;max-width:320px;padding:24px;background:var(--panel);border:1px solid var(--border);border-radius:12px;}
+  .login-card h1{font-size:16px;letter-spacing:2px;text-align:center;margin-bottom:4px;}
+  .login-card p{font-size:10px;text-align:center;color:var(--muted);text-transform:uppercase;margin-bottom:20px;}
+  .login-card input{width:100%;padding:10px;border-radius:6px;background:var(--panel2);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:13px;outline:none;margin-bottom:10px;}
+  .login-card button{width:100%;margin-top:6px;padding:10px;border:none;border-radius:6px;background:linear-gradient(135deg,#f6da8b,var(--gold-deep));color:#1a1206;font-weight:800;font-size:13px;cursor:pointer;}
+
+  /* APP LAYOUT */
+  #app { display:none; flex-direction:column; min-height:100vh; }
+  .topbar{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--border);background:var(--panel);flex-shrink:0;}
+  .logo-mark{width: 40px; height: 24px; display:flex; align-items:center; justify-content:center;}
+  .logo-mark img { width: 100%; height: 100%; object-fit: contain; }
+  .brand-name{font-weight:800;font-size:13px;letter-spacing:1.5px}
+  .brand-sub{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+  .spacer{flex:1}
+  .top-controls { display: flex; align-items: center; gap: 12px; }
+  .countdown { font-size: 15px; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; }
+  .countdown.warning { color: var(--red); }
+  .btn-logout { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); padding: 4px 10px; font-size: 11px; cursor: pointer; transition: 0.2s; }
+  .btn-logout:hover { color: var(--text); border-color: rgba(232,193,90,0.35); }
+
+  /* RSS TICKER */
+  .rss-bar {background: #0b1118;border-bottom: 1px solid var(--border);padding: 8px 20px;display: flex;align-items: center;gap: 15px;overflow: hidden;}
+  .rss-badge {background: var(--red);color: #fff;font-size: 10px;font-weight: 800;padding: 2px 6px;border-radius: 4px;white-space: nowrap; letter-spacing: 0.5px; flex-shrink: 0;}
+  .rss-marquee {overflow: hidden;width: 100%;display: flex;}
+  .rss-ticker {display: flex;white-space: nowrap;animation: marquee 50s linear infinite;}
+  .rss-ticker:hover {animation-play-state: paused;}
+  @keyframes marquee {0% { transform: translateX(0); }100% { transform: translateX(-50%); }}
+  .rss-group {display: flex;padding-right: 20px;}
+  .rss-item-link {color: var(--text);text-decoration: none;font-size: 13px;font-weight: 500;display: inline-flex;align-items: center;gap: 8px;margin-right: 30px; transition: color 0.2s;}
+  .rss-item-link::before { content: "•"; color: var(--gold); }
+  .rss-item-link:hover { color: var(--gold); }
+
+  .btn-ghost { padding: 4px 10px; font-size: 11px; border-radius: 8px; background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: inherit; font-weight: 600; cursor: pointer; transition: .18s; flex-shrink: 0; }
+  .btn-ghost:hover { color: var(--text); border-color: rgba(232,193,90,0.35); background: rgba(232,193,90,0.06); }
+  .rss-ticker.paused { animation-play-state: paused; }
+
+  /* TABS */
+  .tabs-nav {display: flex; padding: 16px 24px 0; max-width: 1400px; margin: 0 auto; width: 100%; border-bottom: 1px solid var(--border); gap: 4px; flex-shrink: 0; overflow-x: auto; overflow-y: hidden;}
+  .tab-btn {background: transparent; border: none; color: var(--muted);font-family: inherit; font-size: 14px;font-weight: 600;padding: 12px 20px; cursor: pointer; border-radius: 10px 10px 0 0;border-bottom: 2px solid transparent; flex-shrink: 0;}
+  .tab-btn.active {color: var(--gold); border-bottom-color: var(--gold);background: linear-gradient(180deg, transparent, rgba(232,193,90,0.05));}
+  
+  /* MAIN */
+  .main{max-width:1400px;margin:0 auto;padding:24px; width: 100%;flex:1;display:flex;flex-direction:column;overflow:hidden; min-height: 0;}
+  .tab-content { display: none; height: 100%; overflow: hidden; flex-direction: column; }
+  .tab-content.active { display: flex; }
+  
+  /* KUPONG */
+  .panel{background:linear-gradient(180deg,rgba(19,26,38,0.92),rgba(15,20,29,0.96));border:1px solid var(--border);border-radius:14px;overflow: hidden; display: flex; flex-direction: column; height: 100%; min-height: 0;}
+  #tab-kupong .panel { overflow: visible !important; }
+  #tab-kupong .panel > * { flex-shrink: 0; }
+  
+  .top-single-row { display: flex; align-items: center; padding: 16px 22px; gap: 24px; border-bottom: 1px solid var(--border-soft); min-height: 80px; flex-wrap: nowrap; flex-shrink: 0;}
+  .top-single-row h1 { font-size: 16px; font-weight: 700; white-space: nowrap; margin-right: 8px; }
+  .group-left { display: flex; align-items: center; gap: 24px; padding-right: 24px; border-right: 1px solid var(--border); }
+  .group-right { display: flex; align-items: center; gap: 24px; }
+  .data-group { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+  .data-group.amount-group { width: 80px; }
+  .data-group.combo-box { width: 160px; position: relative; }
+  .data-group.slip-group { width: 80px; }
+  .data-label { font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
+  .data-value { font-size: 14px; font-weight: 700; margin-top: 4px; white-space: nowrap; }
+  .slip-amount { font-size: 16px; font-weight: 800; margin-top: 2px; transition: color 0.2s; }
+  .field-mini { width: 100%; box-sizing: border-box; padding: 4px 8px; border-radius: 6px; background: var(--panel2); border: 1px solid rgba(232,193,90,0.5); color: var(--text); font-family: inherit; font-size: 16px; font-weight: 800; outline: none; margin-top: 4px; }
+  .combo-main { color: var(--gold); }
+  .combo-sub { position: absolute; top: 100%; left: 0; margin-top: 4px; font-size: 11px; color: var(--text); background: #1c2533; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.8); z-index: 50; white-space: nowrap; display: none; }
+  .combo-sub.active { display: block; }
+  .combo-sub a { color: var(--gold); text-decoration: underline; cursor: pointer; font-weight: 600; }
+  .btn-clear { background: transparent; border: 1px solid rgba(224, 90, 90, 0.4); color: var(--red); padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; flex-shrink: 0; margin-left: auto; font-family: inherit; }
+  .btn-clear:hover { background: rgba(224, 90, 90, 0.1); border-color: var(--red); }
+  .btn-primary { padding: 10px 16px; border: none; border-radius: 8px; background: linear-gradient(135deg,#f6da8b,var(--gold-deep)); color: #1a1206; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
+  
+  .match-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));gap:8px;padding:16px; user-select: none; overflow: visible !important; flex: 0 0 auto !important; align-content: start;}
+  .match{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;position: relative;}
+  .match-header{display:flex;justify-content:space-between;align-items:center; margin-bottom: 2px;}
+  .match.drag-highlight { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; background: #1b2332; }
+  .match.locked-highlight { background: #3d3420; border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold) inset; }
+  .match.state-yellow { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
+  .match.state-orange { background: linear-gradient(rgba(240,138,60,0.15),rgba(240,138,60,0.15)), var(--panel2); border-color: #f08a3c; box-shadow: 0 0 0 1px #f08a3c inset; }
+  .match.state-red { background: linear-gradient(rgba(224,90,90,0.18),rgba(224,90,90,0.18)), var(--panel2); border-color: var(--red); box-shadow: 0 0 0 1px var(--red) inset; }
+  .match.state-red .lock-badge { position: absolute; top: -9px; right: -9px; background: var(--red); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; box-shadow: 0 2px 8px rgba(224,90,90,0.5); }
+  .match-no{font-size:10px;font-weight:700;color:var(--gold)}
+  .match-actions{display:flex;gap:2px}
+  .btn-move{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:10px;padding:1px 3px;}
+  .match-tag{font-size:8px;font-weight:700;padding:1px 4px;border-radius:999px;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.05);}
+  .teams{display:flex;flex-direction:column;gap:2px;}
+  .team-input{background:transparent;border:1px solid transparent;color:var(--text);font-size:11px;padding:2px 4px;border-radius:4px;width:100%;outline:none;}
+  .signs{display:flex;gap:3px}
+  .sign{flex:1;text-align:center;font-size:11px;font-weight:700;padding:3px 0;border-radius:4px;color:var(--muted);background:rgba(255,255,255,0.02);border:1px solid var(--border-soft);cursor:pointer;}
+  .sign.on{color:var(--gold);background:rgba(232,193,90,0.1);border-color:rgba(232,193,90,0.3)}
+  
+  details.stats-accordion { margin-top: 4px; border-top: 1px dashed var(--border-soft); padding-top: 8px; }
+  details.stats-accordion summary { font-size: 11px; color: var(--muted); cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+  details.stats-accordion summary::after { content: "▼"; font-size: 9px; transition: transform 0.2s; }
+  details.stats-accordion[open] summary::after { transform: rotate(180deg); color: var(--gold); }
+  details.stats-accordion.has-tips summary { color: var(--red) !important; }
+  details.stats-accordion.has-tips summary::after { color: var(--red) !important; }
+  .stats-content { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+  .stat-bar-row { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+  .stat-label { width: 32px; font-weight: 700; color: var(--muted); text-align: left; }
+  .stat-label.active { color: var(--text); }
+  .stat-track { flex: 1; height: 8px; background: rgba(255,255,255,0.03); border-radius: 2px; overflow: hidden; }
+  .stat-fill { height: 100%; background: linear-gradient(90deg, rgba(232,193,90,0.8), rgba(232,193,90,0.4)); }
+  .stat-count { font-size: 10px; font-weight: 800; color: var(--muted); min-width: 15px; text-align: right; }
+  .stat-count.active { color: var(--gold); }
+  
+  .notes-container { padding: 16px 22px 22px; border-top: 1px solid var(--border-soft); }
+  .notes-container textarea { width:100%; min-height:60px; background:var(--panel2); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:10px; outline:none; }
+
+  /* SPELARVY */
+  .live-layout { display: grid; grid-template-columns: 1fr 340px; gap: 16px; width: 100%; height: 100%; overflow: hidden; }
+  .live-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; overflow: hidden; }
+  .live-header { display:flex; justify-content:space-between; margin-bottom:12px; border-bottom: 1px solid var(--border-soft); padding-bottom: 8px;}
+  .live-header h2 { font-size:16px; }
+  .live-header span { font-size:11px; color:var(--gold); font-weight: 600;}
+  .live-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(115px, 1fr)); gap:8px; overflow-y: auto; padding-right: 4px; }
+  .live-card { background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:8px; }
+  .live-card-no { font-size:10px; color:var(--gold); font-weight:800; margin-bottom:4px;}
+  .live-card-teams { font-size:11px; font-weight:600; line-height:1.3; margin-bottom:6px;}
+  .live-card-pick { font-size:14px; font-weight:800; color:var(--gold); text-align:center; background:rgba(232,193,90,0.1); padding:6px; border-radius:4px; border:1px solid rgba(232,193,90,0.3); }
+  
+  .chat-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; }
+  .chat-header { padding: 12px 16px; border-bottom: 1px solid var(--border-soft); font-size: 14px; font-weight: 700; background: var(--panel2); display: flex; justify-content: space-between; align-items: center; }
+  .chat-status { font-size: 10px; color: var(--green); display: flex; align-items: center; gap: 4px; font-weight: 600; }
+  .chat-status::before { content: ""; display: block; width: 6px; height: 6px; background: var(--green); border-radius: 50%; }
+  .chat-messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+  .msg { max-width: 85%; display: flex; flex-direction: column; gap: 4px; }
+  .msg.lee { align-self: flex-start; }
+  .msg.me { align-self: flex-end; align-items: flex-end; }
+  .msg-sender { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+  .msg.lee .msg-sender { color: var(--gold); }
+  .msg-bubble { padding: 10px 14px; border-radius: 10px; font-size: 12px; line-height: 1.4; }
+  .msg.lee .msg-bubble { background: rgba(232,193,90,0.1); border: 1px solid rgba(232,193,90,0.3); border-bottom-left-radius: 2px; }
+  .msg.me .msg-bubble { background: var(--panel2); border: 1px solid var(--border); border-bottom-right-radius: 2px; }
+  .chat-input { padding: 12px; border-top: 1px solid var(--border-soft); background: var(--panel2); display: flex; gap: 8px; }
+  .chat-input input { flex: 1; padding: 10px 12px; border-radius: 6px; background: var(--panel); border: 1px solid var(--border); color: var(--text); font-size: 12px; outline: none; }
+  .chat-input button { padding: 10px 16px; border-radius: 6px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #1a1206; font-weight: 800; font-size: 12px; cursor: pointer; }
+
+  /* SYSTEMTABELL & ADMIN */
+  .accordions{display:flex;flex-direction:column;gap:16px;width:100%; overflow-y: auto; padding-bottom: 20px;}
+  .accordion{background:linear-gradient(180deg,rgba(19,26,38,0.92),rgba(15,20,29,0.96));border:1px solid var(--border);border-radius:14px;overflow: hidden;}
+  .acc-header{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;background:var(--panel2);cursor:pointer;border-bottom:1px solid transparent; user-select: none;}
+  .acc-header h2{font-size:15px;font-weight:700;margin:0;}
+  .acc-content{display:none;padding:22px;}
+  .accordion.open .acc-content{display:block;}
+  .accordion.open .acc-header{border-bottom-color:var(--border);}
+  .arrow{font-size:12px;color:var(--muted);transition:transform 0.3s;display:flex;align-items:center;justify-content:center;width:24px;height:24px;background:rgba(255,255,255,0.05);border-radius:50%;}
+  .accordion.open .arrow{transform:rotate(180deg);color:var(--gold);}
+  
+  .sys-table-wrap { --hh: 34px; overflow: auto; max-height: 70vh; min-height: 200px; border-radius: 8px; border: 1px solid var(--border); background: #0f141d; }
+  .sys-table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; text-align: center; white-space: nowrap; }
+  .sys-table th, .sys-table td { border-right: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 0 10px; min-width: 40px; }
+  .sys-table td { height: 38px; color: #f1f5fb; }
+  .sys-table thead th { position: sticky; height: var(--hh); background: #1a2230; color: #fff; font-weight: 700; z-index: 5; }
+  .sys-table thead tr:nth-child(1) th { top: 0; }
+  .sys-table thead tr:nth-child(2) th { top: var(--hh); }
+  .sys-table thead tr:nth-child(3) th { top: calc(var(--hh) * 2); }
+  .sys-table thead th.sortable { cursor: pointer; user-select: none; }
+  .sys-table thead th.sortable:hover { background: #253044; }
+  .sys-table thead tr:first-child th:nth-child(-n+3), .sys-table td:nth-child(-n+3) { position: sticky; background-color: #1a2230; min-width: 0; }
+  .sys-table thead tr:first-child th:nth-child(1), .sys-table td:nth-child(1) { left: 0; width: 56px; min-width: 56px; }
+  .sys-table thead tr:first-child th:nth-child(2), .sys-table td:nth-child(2) { left: 56px; width: 66px; min-width: 66px; }
+  .sys-table thead tr:first-child th:nth-child(3), .sys-table td:nth-child(3) { left: 122px; width: 66px; min-width: 66px; border-right: 2px solid rgba(255,255,255,0.18); }
+  .sys-table td:nth-child(-n+3) { z-index: 3; }
+  .sys-table thead tr:first-child th:nth-child(-n+3) { z-index: 7; }
+  .sys-table thead th.bg-green  { background-color: #1e7a52; }
+  .sys-table thead th.bg-blue   { background-color: #3d5f82; }
+  .sys-table thead th.bg-yellow { background-color: #7a6528; }
+  .sys-table thead th.bg-red    { background-color: #7a2f3c; }
+  .sys-table td.bg-green  { background-color: #123d2b; }
+  .sys-table td.bg-blue   { background-color: #1d2e42; }
+  .sys-table td.bg-yellow { background-color: #3d3420; }
+  .sys-table td.bg-red    { background-color: #3d1f27; }
+  .sys-table tbody tr { cursor: pointer; }
+  .sys-table tbody tr:hover td { background-image: linear-gradient(rgba(232,193,90,0.35), rgba(232,193,90,0.35)); color: #fff; }
+  .sys-table tbody tr.locked-row td { background-color: #e8c15a !important; background-image: none !important; color: #1a1405 !important; font-weight: 800; border-bottom-color: #c9962f; }
+  .sys-table tbody tr.locked-row td:nth-child(3) { color: #1a1405 !important; }
+  .accordion { flex-shrink: 0; }
+  .accordions { flex: 1; min-height: 0; }
+
+  .admin-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
+  .admin-table th { padding: 12px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; border-bottom: 1px solid var(--border);}
+  .admin-table td { padding: 12px; font-size: 14px; border-bottom: 1px solid var(--border-soft); vertical-align: middle; }
+  .input-field { background: transparent; border: 1px solid transparent; color: var(--text); font-family: inherit; font-size: 14px; padding: 6px 10px; border-radius: 6px; outline: none; width: 100%; transition: 0.2s; }
+  .input-field:hover, .input-field:focus { background: rgba(255,255,255,0.05); border-color: var(--border); }
+  .rss-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .rss-list-item { display: flex; align-items: center; justify-content: space-between; background: var(--panel2); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); }
+  .rss-list-url { font-size: 13px; color: var(--blue); word-break: break-all; }
+  .rss-add-form { display: flex; gap: 10px; margin-top: 10px; align-items: stretch; }
+  .rss-add-form input { flex: 1; padding: 10px 14px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: inherit; font-size: 13px; outline: none; }
+  .rss-add-form input:focus { border-color: rgba(232,193,90,0.5); }
+  .btn-add { padding: 10px 20px; border-radius: 6px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #1a1206; font-family: inherit; font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .btn-add:hover { transform: translateY(-1px); }
+  .btn-icon { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); padding: 4px 8px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+  .btn-icon:hover { border-color: var(--red); color: var(--red); }
+
+  .custom-toast {
+      position: fixed; bottom: 30px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--panel); border: 1px solid var(--gold);
+      color: var(--text); padding: 12px 24px; border-radius: 8px;
+      font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      opacity: 0; transition: all 0.3s; z-index: 99999; pointer-events: none;
+  }
+  .custom-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  /* Hela sidan scrollar, inte korten */
+  .main { overflow-y: auto !important; }
+  #tab-kupong { height: auto !important; overflow: visible !important; flex-shrink: 0 !important; }
+  #tab-kupong .panel { height: auto !important; min-height: auto !important; overflow: visible !important; flex: 0 0 auto !important; }
+  @media (max-width: 768px) {
+    .live-layout { display: flex; flex-direction: column; overflow-y: auto; height: auto; gap: 16px; }
+    .live-panel { min-height: 350px; flex-shrink: 0; }
+    .chat-panel { min-height: 400px; flex-shrink: 0; }
+    .main { padding: 12px; overflow-y: auto; }
+    .top-single-row { flex-wrap: wrap; gap: 12px; padding: 12px; }
+    .top-single-row h1 { width: 100%; margin-bottom: 8px; }
+    .group-left, .group-right { flex-wrap: wrap; width: 100%; gap: 12px; border: none; padding: 0; }
+    .btn-clear { margin-left: auto; }
+    .match-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="adminLoginScreen">
+  <div class="login-card">
+    <h1>LEE BETTING</h1>
+    <p>Admin-inloggning</p>
+    <input type="email" id="adminUser" placeholder="E-postadress (leebarber71@outlook.com)">
+    <input type="password" id="adminPass" placeholder="Lösenord">
+    <button onclick="adminLogin()">Logga in</button>
+    <div id="adminLoginError" style="color:var(--red); font-size:12px; text-align:center; margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header class="topbar">
+    <div class="logo-mark"><img src="logo.png" alt="Logo"></div>
+    <div>
+      <div class="brand-name">LEE BETTING</div>
+      <div class="brand-sub" id="brandSub">Admin</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="top-controls">
+      <span style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-right:8px;">Till inlämning:</span>
+      <span class="countdown" id="countdown">--:--:--</span>
+      <button class="btn-logout" onclick="adminLogout()">Logga ut</button>
+    </div>
+  </header>
+
+  <div class="rss-bar">
+    <span class="rss-badge">NYHETER</span>
+    <button id="rssPauseBtn" class="btn-ghost" style="padding: 4px 10px; font-size: 11px;">Pausa</button>
+    <div class="rss-marquee">
+      <div class="rss-ticker" id="rssFeed">
+        <div class="rss-group" id="rssGroup1"><span class="rss-item-link">Hämtar...</span></div>
+        <div class="rss-group" id="rssGroup2"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab('kupong')">Kupong</button>
+    <button class="tab-btn" onclick="switchTab('playerview')">Spelarvy</button>
+    <button class="tab-btn" onclick="switchTab('tabell')">Systemtabell</button>
+    <button class="tab-btn" onclick="switchTab('admin')">Admin</button>
+  </div>
+
+  <main class="main">
+    
+    <!-- KUPONG -->
+    <div id="tab-kupong" class="tab-content active">
+      <div class="panel">
+        <div class="top-single-row">
+          <h1>Kupong</h1>
+          <div class="group-left">
+            <div class="data-group amount-group">
+              <span class="data-label">Mål (kr)</span>
+              <input id="amount" class="field-mini" type="text" inputmode="numeric" value="27">
+            </div>
+            <div class="data-group combo-box">
+              <span class="data-label">Målets Kombination</span>
+              <span id="targetCombo" class="data-value combo-main">–</span>
+              <div id="comboSub" class="combo-sub"></div>
+            </div>
+          </div>
+          <div class="group-right">
+            <div class="data-group slip-group">
+              <span class="data-label">Insats</span>
+              <span id="liveInsats" class="slip-amount">–</span>
+            </div>
+            <div class="data-group combo-box">
+              <span class="data-label">Din Kombination</span>
+              <span id="liveCombo" class="data-value">–</span>
+            </div>
+            <button class="btn-primary" id="placeBtn" type="button">Placera spel</button>
+          </div>
+          <button class="btn-clear" id="clearBtn" title="Rensa kupong">Rensa</button>
+        </div>
+        <div class="match-grid" id="matchGrid"></div>
+        <div class="notes-container">
+          <div class="data-label">Egna noteringar</div>
+          <textarea id="notesArea" placeholder="Skriv dina egna noteringar här..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- SPELARVY -->
+    <div id="tab-playerview" class="tab-content">
+      <div class="live-layout">
+        <div class="live-panel">
+          <div class="live-header"><h2>Livevy - Lees Spel</h2><span id="adminLiveStatusText">ÖPPEN</span></div>
+          <div class="live-grid" id="adminLiveGrid"></div>
+        </div>
+        <div class="chat-panel">
+          <div class="chat-header"><span>Live Chatt</span><div class="chat-status">Ansluten</div></div>
+          <div class="chat-messages" id="adminChatMessages"></div>
+          <div class="chat-input">
+            <input type="text" id="adminChatInput" placeholder="Skriv ett meddelande..." onkeypress="if(event.key === 'Enter') sendAdminChat()">
+            <button onclick="sendAdminChat()">Skicka</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SYSTEMTABELL -->
+    <div id="tab-tabell" class="tab-content">
+      <div class="accordions">
+        <div class="accordion open" id="acc-system">
+          <div class="acc-header" onclick="toggleAccordion('acc-system')"><h2>Antalet vinstrader vid olika system</h2><div class="arrow">▼</div></div>
+          <div class="acc-content" style="padding: 0;">
+            <div class="sys-table-wrap">
+              <table class="sys-table">
+                <thead>
+                  <tr>
+                    <th rowspan="3" class="sortable" onclick="sortTable(0)">HELG. <span id="sort-icon-0"></span></th>
+                    <th rowspan="3" class="sortable" onclick="sortTable(1)">HALVG. <span id="sort-icon-1"></span></th>
+                    <th rowspan="3" class="sortable" onclick="sortTable(2)">RADER <span id="sort-icon-2"></span></th>
+                    <th colspan="4" class="bg-green">ALLA MATCHER RÄTT TIPPADE</th>
+                    <th colspan="6" class="bg-blue">EN MATCH FELTIPPAD</th>
+                    <th colspan="6" class="bg-yellow">TVÅ MATCHER FELTIPPADE</th>
+                    <th colspan="4" class="bg-red">TRE MATCHER FELTIPPADE</th>
+                  </tr>
+                  <tr>
+                    <th class="bg-green" rowspan="2" style="width:35px;">13</th>
+                    <th class="bg-green" rowspan="2" style="width:35px;">12</th>
+                    <th class="bg-green" rowspan="2" style="width:35px;">11</th>
+                    <th class="bg-green" rowspan="2" style="width:35px;">10</th>
+                    <th class="bg-blue" colspan="3">Ogarderade</th>
+                    <th class="bg-blue" colspan="3">Halvgarderade</th>
+                    <th class="bg-yellow" colspan="2">2 og*</th>
+                    <th class="bg-yellow" colspan="2">1 og+1hg</th>
+                    <th class="bg-yellow" colspan="2">2 hg</th>
+                    <th class="bg-red" rowspan="2" style="width:35px;">3og</th>
+                    <th class="bg-red" rowspan="2" style="width:45px;">2 og+1 hg</th>
+                    <th class="bg-red" rowspan="2" style="width:45px;">1 og+2 hg</th>
+                    <th class="bg-red" rowspan="2" style="width:35px;">3hg</th>
+                  </tr>
+                  <tr>
+                    <th class="bg-blue" style="width:30px;">12</th><th class="bg-blue" style="width:30px;">11</th><th class="bg-blue" style="width:30px;">10</th>
+                    <th class="bg-blue" style="width:30px;">12</th><th class="bg-blue" style="width:30px;">11</th><th class="bg-blue" style="width:30px;">10</th>
+                    <th class="bg-yellow" style="width:30px;">11</th><th class="bg-yellow" style="width:30px;">10</th>
+                    <th class="bg-yellow" style="width:30px;">11</th><th class="bg-yellow" style="width:30px;">10</th>
+                    <th class="bg-yellow" style="width:30px;">11</th><th class="bg-yellow" style="width:30px;">10</th>
+                  </tr>
+                </thead>
+                <tbody id="system-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="tab-admin" class="tab-content">
+      <div class="accordions">
+        <div class="accordion open" id="acc-users">
+          <div class="acc-header" onclick="toggleAccordion('acc-users')"><h2>Hantera Användare</h2><div class="arrow">▼</div></div>
+          <div class="acc-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <p style="font-size:13px; color:var(--muted);">Hantera spelare i databasen.</p>
+              <button class="btn-add" onclick="showCreateUser()">+ Skapa användare</button>
+            </div>
+            <table class="admin-table">
+              <thead><tr><th>Visningsnamn</th><th>E-postadress</th><th>Lösenord</th><th style="text-align:right;">Åtgärder</th></tr></thead>
+              <tbody id="usersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="accordion" id="acc-rss">
+          <div class="acc-header" onclick="toggleAccordion('acc-rss')"><h2>Hantera RSS-flöden</h2><div class="arrow">▼</div></div>
+          <div class="acc-content">
+            <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">Lägg till upp till 10 nyhetsflöden som visas i tickeren.</p>
+            <div class="rss-list" id="adminRssList"></div>
+            <div class="rss-add-form">
+              <input type="text" id="newRssUrl" placeholder="Klistra in RSS-länk här...">
+              <button class="btn-add" type="button" onclick="addRss()">Lägg till flöde</button>
+            </div>
+            <div id="rssLimitMsg" style="font-size:11px; color:var(--muted); margin-top:8px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL SKAPA ANVÄNDARE -->
+<div id="createUserModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+  <div class="login-card" style="position:relative;">
+    <h1>SKAPA SPELARE</h1>
+    <p>Fyll i uppgifterna nedan</p>
+    <input type="text" id="newDisplayName" placeholder="Visningsnamn (t.ex. Hasse)">
+    <input type="email" id="newEmail" placeholder="E-postadress (t.ex. hasse@gmail.com)">
+    <input type="password" id="newPassword" placeholder="Lösenord (minst 6 tecken)">
+    <button type="button" onclick="submitNewUser()">Skapa spelare</button>
+    <div style="text-align:center; margin-top:14px;">
+      <a href="#" onclick="closeCreateUser(event)" style="color:var(--muted); font-size:11px; text-decoration:underline;">Avbryt</a>
+    </div>
+  </div>
+</div>
+
+<div class="custom-toast" id="custom-toast"></div>
+
+<!-- MODAL CUSTOM CONFIRM -->
+<div id="customConfirmModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+  <div class="login-card" style="position:relative; text-align:center; border-color:var(--border);">
+    <h1 style="font-size:14px; margin-bottom:16px; letter-spacing:1px;">BEKRÄFTA</h1>
+    <p id="customConfirmMsg" style="margin-bottom:20px; color:var(--text); font-size:13px;">Är du säker?</p>
+    <div style="display:flex; gap:10px;">
+      <button type="button" onclick="resolveConfirm(false)" style="background:transparent; border:1px solid var(--border); color:var(--muted); flex:1; margin:0;">Avbryt</button>
+      <button type="button" onclick="resolveConfirm(true)" style="flex:1; margin:0;">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.customConfirm = function(msg) {
+      return new Promise((resolve) => {
+          document.getElementById('customConfirmMsg').textContent = msg;
+          const modal = document.getElementById('customConfirmModal');
+          modal.style.display = 'flex';
+          window._confirmResolve = resolve;
+      });
+  };
+  window.resolveConfirm = function(val) {
+      document.getElementById('customConfirmModal').style.display = 'none';
+      if (window._confirmResolve) window._confirmResolve(val);
+  };
+
+  window.alert = function(msg) {
+      const t = document.getElementById('custom-toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+  };
+
+  function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  // Reservlösning om js/config.js inte hittas
+  const SB_CFG = window.SUPABASE_CONFIG || {
+    url: "https://yjkyikxtklaokscnpxdj.supabase.co",
+    key: "sb_publishable_ev3HUbED2MIMHhy6feLXlw_i81spvXM"
+  };
+  const supabaseClient = window.supabase.createClient(SB_CFG.url, SB_CFG.key);
+  
+  // AUTH LOGIK
+  async function adminLogin() {
+    const email = document.getElementById('adminUser').value.trim();
+    const pass = document.getElementById('adminPass').value;
+    const err = document.getElementById('adminLoginError');
+    
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+    
+    if (error) {
+      err.textContent = 'FEL: ' + error.message;
+      return;
+    }
+    
+    document.getElementById('adminLoginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    initApp();
+  }
+
+  async function adminLogout() {
+    await supabaseClient.auth.signOut();
+    localStorage.clear();
+    sessionStorage.clear();
+    location.reload();
+  }
+
+  supabaseClient.auth.getSession().then(({ data: { session } }) => {
+    if (session) {
+      document.getElementById('adminLoginScreen').style.display = 'none';
+      document.getElementById('app').style.display = 'flex';
+      initApp();
+    } else {
+      document.getElementById('adminLoginScreen').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+    }
+  });
+
+  // RESTEN AV LOGIKEN
+  const PRICE_PER_ROW = 1;
+  const MATCHES = 13;
+  const $amount = document.getElementById('amount');
+  const $targetCombo = document.getElementById('targetCombo');
+  const $comboSub = document.getElementById('comboSub');
+  const $liveInsats = document.getElementById('liveInsats');
+  const $liveCombo = document.getElementById('liveCombo');
+  const $placeBtn = document.getElementById('placeBtn');
+  const $grid = document.getElementById('matchGrid');
+  const $sysBody = document.getElementById('system-table-body');
+  const $notes = document.getElementById('notesArea');
+  const $clearBtn = document.getElementById('clearBtn');
+  
+  const state = { matches: Array.from({ length: MATCHES }, () => ({ home: '', away: '', signs: [] })), results: null };
+  let matchStates = Array(MATCHES).fill(0);
+  let lockedIndices = new Set();
+  let currentRoundId = null;
+  let timerInterval = null;
+  let chatInterval = null;
+
+  const allValidCombos = [];
+  for (let h = 0; h <= MATCHES; h++){
+    for (let v = 0; v <= MATCHES - h; v++){
+      const rows = Math.pow(3, h) * Math.pow(2, v);
+      allValidCombos.push({ hela: h, halva: v, rows, amount: rows * PRICE_PER_ROW });
+    }
+  }
+  allValidCombos.sort((a, b) => a.amount - b.amount);
+
+  function initApp() {
+    loadMatches();
+    loadUsers();
+    loadRssFeeds();
+    fetchRSS();
+    startClock();
+    renderSystemTable();
+    updatePlaceBtnState();
+    renderChat();
+    if (chatInterval) clearInterval(chatInterval);
+    chatInterval = setInterval(() => { if (!document.hidden) renderChat(); }, 3000);
+  }
+
+  async function loadMatches() {
+    try {
+      const { data: rounds } = await supabaseClient.from('rounds').select('id, deadline').order('created_at', { ascending: false }).limit(1);
+      if (rounds && rounds.length > 0) {
+        currentRoundId = rounds[0].id;
+        if (rounds[0].deadline) localStorage.setItem('lee_deadline', rounds[0].deadline);
+        
+        const { data: matches } = await supabaseClient.from('matches').select('*').eq('round_id', currentRoundId).order('match_order');
+        if (matches && matches.length === 13) {
+          matches.forEach((m, i) => {
+            state.matches[i].home = m.home;
+            state.matches[i].away = m.away;
+          });
+        }
+      }
+      renderMatches();
+      updateAdminLiveStatusText();
+    } catch(e) { console.error(e); }
+  }
+
+  function startClock() {
+    if (timerInterval) clearInterval(timerInterval);
+    const cd = document.getElementById('countdown');
+    function update() {
+      let globalDeadline = localStorage.getItem('lee_deadline');
+      if (!globalDeadline) return;
+      const ms = new Date(globalDeadline) - Date.now();
+      if (ms <= 0) { cd.textContent = 'LÅST'; cd.classList.add('warning'); updateAdminLiveStatusText(); return; }
+      if (ms < 4 * 60 * 60 * 1000) cd.classList.add('warning'); else cd.classList.remove('warning');
+      const totalSecs = Math.floor(ms / 1000);
+      const days = Math.floor(totalSecs / (3600 * 24));
+      const hours = Math.floor((totalSecs % (3600 * 24)) / 3600);
+      const mins = Math.floor((totalSecs % 3600) / 60);
+      const secs = totalSecs % 60;
+      let timeStr = ''; if (days > 0) timeStr += days + ' dagar ';
+      timeStr += String(hours).padStart(2,'0') + ':' + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+      cd.textContent = timeStr;
+      updateAdminLiveStatusText();
+    }
+    update(); timerInterval = setInterval(update, 1000);
+  }
+
+  function updateAdminLiveStatusText() {
+    const el = document.getElementById('adminLiveStatusText');
+    if (!el) return;
+    const isLiveStarted = localStorage.getItem('lee_live_started') === 'true';
+    const dl = localStorage.getItem('lee_deadline');
+    const isDeadlinePassed = dl && new Date(dl).getTime() < Date.now();
+    if (isLiveStarted) { el.textContent = 'LÅST'; el.style.color = 'var(--red)'; }
+    else if (isDeadlinePassed) { el.textContent = 'LÅST'; el.style.color = 'var(--red)'; }
+    else { el.textContent = 'ÖPPEN'; el.style.color = 'var(--green)'; }
+  }
+
+  function updatePlaceBtnState() {
+    if (localStorage.getItem('lee_live_started') === 'true') {
+      $placeBtn.textContent = 'Ångra spel'; $placeBtn.style.background = 'var(--red)'; $placeBtn.style.color = '#fff';
+    } else {
+      $placeBtn.textContent = 'Placera spel'; $placeBtn.style.background = 'linear-gradient(135deg,#f6da8b,var(--gold-deep))'; $placeBtn.style.color = '#1a1206';
+    }
+  }
+
+  $placeBtn.addEventListener('click', () => {
+    if (localStorage.getItem('lee_live_started') === 'true') { localStorage.removeItem('lee_live_started'); } 
+    else {
+      const leePicks = state.matches.map(m => m.signs); localStorage.setItem('lee_admin_final', JSON.stringify(leePicks)); localStorage.setItem('lee_live_started', 'true');
+    }
+    updatePlaceBtnState(); renderAdminLiveView(); updateAdminLiveStatusText();
+  });
+
+  function renderAdminLiveView() {
+    const grid = document.getElementById('adminLiveGrid'); if(!grid) return; grid.innerHTML = '';
+    state.matches.forEach((m, i) => {
+      const leePick = m.signs.join(' ');
+      const el = document.createElement('div'); el.className = 'live-card';
+      el.innerHTML = `<div class="live-card-no">M${i+1}</div><div class="live-card-teams">${esc(m.home)}<br>${esc(m.away)}</div><div class="live-card-pick">${leePick}</div>`;
+      grid.appendChild(el);
+    });
+  }
+
+  function renderMatches() {
+    $grid.innerHTML = '';
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < MATCHES; i++) {
+      const m = state.matches[i] || { home: '', away: '', signs: ['1'] };
+      const kind = m.signs.length === 3 ? 'hel' : m.signs.length === 2 ? 'halv' : '';
+      const el = document.createElement('div'); el.className = 'match';
+      const st = matchStates[i] || 0;
+      if (st === 1) el.classList.add('state-yellow');
+      else if (st === 2) el.classList.add('state-orange');
+      else if (st === 3) el.classList.add('state-red');
+      el.onmousedown = () => startDrag(i); el.onmouseenter = () => hoverDrag(i);
+      el.onclick = (e) => {
+        if (dragMoved) { dragMoved = false; return; }
+        if (e.target.tagName === 'INPUT' || e.target.classList.contains('sign') || e.target.tagName === 'BUTTON' || e.target.closest('details')) return;
+        cycleMatchState(i);
+      };
+      el.innerHTML = `
+        ${st === 3 ? '<div class="lock-badge">&#128274;</div>' : ''}
+        <div class="match-header"><span class="match-no">M${i+1}</span><span class="match-tag">${kind === 'hel' ? 'HEL' : kind === 'halv' ? 'HALV' : ''}</span>
+          <div class="match-actions"><button class="btn-move" onclick="moveMatch(${i}, -1)">↑</button><button class="btn-move" onclick="moveMatch(${i}, 1)">↓</button></div>
+        </div>
+        <div class="teams"><input type="text" class="team-input" placeholder="Hemmalag" value="${esc(m.home)}" oninput="updateTeam(${i}, 'home', this.value)"><input type="text" class="team-input" placeholder="Bortalag" value="${esc(m.away)}" oninput="updateTeam(${i}, 'away', this.value)"></div>
+        <div class="signs"><div class="sign ${m.signs.includes('1') ? 'on' : ''}" onclick="toggleSign(event, ${i}, '1')">1</div><div class="sign ${m.signs.includes('X') ? 'on' : ''}" onclick="toggleSign(event, ${i}, 'X')">X</div><div class="sign ${m.signs.includes('2') ? 'on' : ''}" onclick="toggleSign(event, ${i}, '2')">2</div></div>
+        <details class="stats-accordion" id="admin-details-${i}"><summary>Visa alla tips (0 inlämnade)</summary><div class="stats-content" id="admin-stats-${i}"></div></details>`;
+      if (lockedIndices.has(i)) el.insertAdjacentHTML('beforeend', '<div class="lock-badge">🔒</div>');
+      frag.appendChild(el);
+    }
+    $grid.appendChild(frag); updateLiveStats(); updateAdminBars();
+  }
+
+  async function updateAdminBars() {
+    try {
+      if(!supabaseClient) return;
+      if(!currentRoundId) {
+        const { data: rounds } = await supabaseClient.from('rounds').select('id').order('created_at', { ascending: false }).limit(1);
+        if(rounds && rounds.length > 0) currentRoundId = rounds[0].id; else return;
+      }
+      const { data: suggestions } = await supabaseClient.from('suggestions').select('*').eq('round_id', currentRoundId).eq('submitted', true);
+      const combos = ['1', 'X', '2', '1X', '12', 'X2', '1X2'];
+      for (let i = 0; i < MATCHES; i++) {
+        const details = document.getElementById(`admin-details-${i}`); const container = document.getElementById(`admin-stats-${i}`);
+        if (!details || !container) continue;
+        let matchVotes = 0; let matchCounts = {}; combos.forEach(c => matchCounts[c] = 0);
+        if (suggestions) {
+          suggestions.forEach(sugg => {
+            const picksArray = sugg.picks;
+            if (picksArray && picksArray[i] && picksArray[i].length > 0) {
+              matchVotes++;
+              const sortedPick = [...picksArray[i]].sort((a,b) => ['1','X','2'].indexOf(a) - ['1','X','2'].indexOf(b));
+              const pickStr = sortedPick.join(''); if (matchCounts[pickStr] !== undefined) matchCounts[pickStr]++;
+            }
+          });
+        }
+        if (matchVotes > 0) details.classList.add('has-tips');
+        else details.classList.remove('has-tips');
+        details.querySelector('summary').textContent = `Visa alla tips (${matchVotes} inlämnade)`;
+        container.innerHTML = combos.map(c => {
+          const count = matchCounts[c]; const pct = matchVotes > 0 ? Math.round((count / matchVotes) * 100) : 0; const isActive = count > 0 ? 'active' : '';
+          return `<div class="stat-bar-row"><span class="stat-label ${isActive}">${c}</span><div class="stat-track"><div class="stat-fill" style="width:${pct}%"></div></div><span class="stat-count ${isActive}">${count}</span></div>`;
+        }).join('');
+      }
+    } catch (error) { console.error("Kunde inte hämta tips:", error); }
+  }
+
+  window.switchTab = function(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    const btns = document.querySelectorAll('.tab-btn');
+    if (tabId === 'kupong') btns[0].classList.add('active');
+    if (tabId === 'playerview') { btns[1].classList.add('active'); renderChat(); renderAdminLiveView(); updateAdminLiveStatusText(); }
+    if (tabId === 'tabell') btns[2].classList.add('active');
+    if (tabId === 'admin') { btns[3].classList.add('active'); loadUsers(); loadRssFeeds(); }
+  };
+
+  window.toggleAccordion = function(id) { document.getElementById(id).classList.toggle('open'); };
+
+  
+  function comboText(c){ return c.hela + ' hela ' + c.halva + ' ' + (c.halva === 1 ? 'halv' : 'halva'); }
+  function comboFromAmount(amount){ const rows = amount / PRICE_PER_ROW; if (!Number.isInteger(rows) || rows < 1) return null; for (const c of allValidCombos) { if (c.amount === amount) return { hela: c.hela, halva: c.halva, rows: c.rows }; if (c.amount > amount) break; } return null; }
+  function getCurrentCombo() { let hela = 0, halva = 0; for (const m of state.matches) { if (m.signs.length === 3) hela++; else if (m.signs.length === 2) halva++; } let rows = 1; for (const m of state.matches) rows *= m.signs.length; return { hela, halva, rows }; }
+
+  let isDragging = false, startIdx = null, endIdx = null, dragMoved = false;
+  function updateDragHighlight() {
+    if (startIdx === null || endIdx === null) return;
+    const min = Math.min(startIdx, endIdx), max = Math.max(startIdx, endIdx);
+    document.querySelectorAll('.match').forEach((el, i) => { if (i >= min && i <= max) el.classList.add('drag-highlight'); else el.classList.remove('drag-highlight'); });
+  }
+  window.startDrag = function(idx) { if (event.target.tagName === 'INPUT' || event.target.classList.contains('sign') || event.target.tagName === 'BUTTON' || event.target.closest('details')) return; isDragging = true; startIdx = idx; endIdx = idx; dragMoved = false; document.querySelectorAll('.match').forEach(el => el.classList.remove('drag-highlight')); updateDragHighlight(); };
+  window.hoverDrag = function(idx) { if (isDragging) { if (idx !== startIdx) dragMoved = true; endIdx = idx; updateDragHighlight(); } };
+  document.addEventListener('mouseup', () => { isDragging = false; });
+  
+  window.lockHighlight = function(idx) {
+    if (event.target.tagName === 'INPUT' || event.target.classList.contains('sign') || event.target.tagName === 'BUTTON' || event.target.closest('details')) return;
+    const min = Math.min(startIdx, endIdx), max = Math.max(startIdx, endIdx);
+    let isCurrentlyLocked = false; for(let i = min; i <= max; i++) if (lockedIndices.has(i)) isCurrentlyLocked = true;
+    document.querySelectorAll('.match').forEach((el, i) => {
+      if (i >= min && i <= max) { if (isCurrentlyLocked) { el.classList.remove('locked-highlight'); lockedIndices.delete(i); } else { el.classList.remove('drag-highlight'); el.classList.add('locked-highlight'); lockedIndices.add(i); } }
+    });
+    startIdx = null; endIdx = null;
+  };
+
+  window.cycleMatchState = function(idx) { matchStates[idx] = ((matchStates[idx] || 0) + 1) % 4; renderMatches(); };
+
+  window.moveMatch = function(idx, dir) { const newIdx = idx + dir; if (newIdx < 0 || newIdx >= MATCHES) return; [state.matches[idx], state.matches[newIdx]] = [state.matches[newIdx], state.matches[idx]]; renderMatches(); };
+  window.updateTeam = function(idx, field, val) { state.matches[idx][field] = val; };
+  window.toggleSign = function(event, idx, sign) { 
+      if (event) event.stopPropagation(); 
+      if (matchStates[idx] === 3) return; 
+      const m = state.matches[idx]; 
+      if (m.signs.includes(sign)) { 
+          m.signs = m.signs.filter(s => s !== sign); 
+      } else { 
+          m.signs.push(sign); 
+          m.signs.sort((a, b) => ['1', 'X', '2'].indexOf(a) - ['1', 'X', '2'].indexOf(b)); 
+      } 
+      renderMatches(); 
+  };
+
+  function updateLiveStats() {
+    const target = parseInt($amount.value.replace(/\D/g, ''), 10) || 0; const current = getCurrentCombo();
+    if (current.rows === 0) {
+        $liveInsats.textContent = '-';
+        $liveInsats.style.color = 'var(--muted)';
+        $liveCombo.textContent = 'Inga val';
+        $liveCombo.className = 'data-value';
+        return;
+    }
+    $liveInsats.textContent = current.rows + ' kr';
+    if (current.rows === target && target > 0) $liveInsats.style.color = 'var(--blue)'; else if (current.rows > target) $liveInsats.style.color = 'var(--red)'; else $liveInsats.style.color = 'var(--gold)'; 
+    if (current.hela > 0 || current.halva > 0) { $liveCombo.textContent = comboText(current); $liveCombo.className = 'data-value combo-main'; } else { $liveCombo.textContent = 'Alla Ogarderade'; $liveCombo.className = 'data-value'; }
+  }
+
+  $amount.addEventListener('input', () => {
+    const raw = $amount.value.trim(); const amount = /^\d+$/.test(raw) ? parseInt(raw, 10) : null; const combo = amount ? comboFromAmount(amount) : null;
+    if (combo) {
+      $targetCombo.textContent = comboText(combo); $targetCombo.style.color = 'var(--gold)'; $comboSub.innerHTML = ''; $comboSub.classList.remove('active');
+      
+      
+      
+    } else {
+      $targetCombo.textContent = 'Hittades ej'; $targetCombo.style.color = 'var(--red)';
+      if (amount) {
+        let lower = null, higher = null; for (const c of allValidCombos) { if (c.amount < amount) lower = c; else if (c.amount > amount) { higher = c; break; } }
+        let sub = ''; if (lower) sub += `Närmast under: <a href="#" class="suggest-link" data-amount="${lower.amount}">${lower.amount} kr</a> (${comboText(lower)})<br>`; if (higher) sub += `Närmast över: <a href="#" class="suggest-link" data-amount="${higher.amount}">${higher.amount} kr</a> (${comboText(higher)})`;
+        $comboSub.innerHTML = sub; $comboSub.classList.add('active');
+      } else { $comboSub.innerHTML = ''; $comboSub.classList.remove('active'); }
+    }
+    renderMatches(); updateLiveStats();
+  });
+  $comboSub.addEventListener('click', (e) => { if (e.target.classList.contains('suggest-link')) { e.preventDefault(); $amount.value = e.target.getAttribute('data-amount'); $amount.dispatchEvent(new Event('input')); } });
+
+  $clearBtn.addEventListener('click', async () => { 
+      if (await customConfirm('Vill du rensa hela kupongen?')) { 
+          state.matches = Array.from({ length: MATCHES }, () => ({ home: '', away: '', signs: [] })); 
+          matchStates = Array(MATCHES).fill(0); 
+          $notes.value = ''; 
+          $amount.value = ''; 
+          $targetCombo.textContent = '–'; 
+          $comboSub.innerHTML = ''; 
+          $comboSub.classList.remove('active'); 
+          renderMatches(); 
+          updateLiveStats(); 
+      } 
+  });
+
+  
+  function renderSystemTable() {
+    $sysBody.innerHTML = '';
+    const data = [
+    [0,1,2, 1,1,null,null, 1,1,null, 2,null,null, 1,1, 2,null, null,null, 1,2,null,null],[0,2,4, 1,2,1,null, 1,2,1, 2,2,null, 1,2, 2,2, 4,null, 1,2,null,null],[0,3,8, 1,3,3,1, 1,3,3, 2,4,2, 1,3, 2,4, 4,4, 1,2,4,8],[0,4,16, 1,4,6,4, 1,4,6, 2,6,6, 1,4, 2,6, 4,8, 1,2,4,8],[0,5,32, 1,5,10,10, 1,5,10, 2,8,12, 1,5, 2,8, 4,12, 1,2,4,8],[0,6,64, 1,6,15,20, 1,6,15, 2,10,20, 1,6, 2,10, 4,16, 1,2,4,8],[0,7,128, 1,7,21,35, 1,7,21, 2,12,30, 1,7, 2,12, 4,20, 1,2,4,8],[0,8,256, 1,8,28,56, 1,8,28, 2,14,42, 1,8, 2,14, 4,24, 1,2,4,8],[0,9,512, 1,9,36,84, 1,9,36, 2,16,56, 1,9, 2,16, 4,28, 1,2,4,8],[0,10,1024, 1,10,45,120, 1,10,45, 2,18,72, 1,10, 2,18, 4,32, 1,2,4,8],[0,11,2048, 1,11,55,165, 1,11,55, 2,20,90, 1,11, 2,20, 4,36, null,2,4,8],[0,12,4096, 1,12,66,220, 1,12,66, 2,22,110, null,null, 2,22, 4,40, null,null,4,8],[0,13,8192, 1,13,78,286, null,null,null, 2,24,132, null,null, null,null, 4,44, null,null,null,8],[1,0,3, 1,2,null,null, 1,2,null, 1,2,null, 1,2, null,null, null,null, 1,null,null,null],[1,1,6, 1,3,2,null, 1,3,2, 1,3,2, 1,3, 2,4, null,null, 1,2,null,null],[1,2,12, 1,4,5,2, 1,4,5, 2,6,4, 1,4, 2,6, 4,8, 1,2,4,null],[1,3,24, 1,5,9,7, 1,5,9, 2,8,10, 1,5, 2,8, 4,12, 1,2,4,8],[1,4,48, 1,6,14,16, 1,6,14, 2,10,18, 1,6, 2,10, 4,16, 1,2,4,8],[1,5,96, 1,7,20,30, 1,7,20, 2,12,28, 1,7, 2,12, 4,20, 1,2,4,8],[1,6,192, 1,8,27,50, 1,8,27, 2,14,40, 1,8, 2,14, 4,24, 1,2,4,8],[1,7,384, 1,9,35,77, 1,9,35, 2,16,54, 1,9, 2,16, 4,28, 1,2,4,8],[1,8,768, 1,10,44,112, 1,10,44, 2,18,70, 1,10, 2,18, 4,32, 1,2,4,8],[1,9,1536, 1,11,54,156, 1,11,54, 2,20,88, 1,11, 2,20, 4,36, 1,2,4,8],[1,10,3072, 1,12,65,210, 1,12,65, 2,22,108, 1,12, 2,22, 4,40, 1,2,4,8],[1,11,6144, 1,13,77,275, 1,13,77, 2,24,130, 1,13, 2,24, 4,44, 1,2,4,8],[2,0,9, 1,4,4,null, 1,4,4, 1,4,4, 1,4, null,null, null,null, 1,null,null,null],[2,1,18, 1,5,8,4, 1,5,8, 1,5,8, 1,5, 2,8, null,null, 1,2,null,null],[2,2,36, 1,6,13,12, 1,6,13, 2,10,16, 1,6, 2,10, 4,16, 1,2,4,null],[2,3,72, 1,7,19,25, 1,7,19, 2,12,26, 1,7, 2,12, 4,20, 1,2,4,8],[2,4,144, 1,8,26,44, 1,8,26, 2,14,38, 1,8, 2,14, 4,24, 1,2,4,8],[2,5,288, 1,9,34,70, 1,9,34, 2,16,52, 1,9, 2,16, 4,28, 1,2,4,8],[2,6,576, 1,10,43,104, 1,10,43, 2,18,68, 1,10, 2,18, 4,32, 1,2,4,8],[2,7,1152, 1,11,53,147, 1,11,53, 2,20,86, 1,11, 2,20, 4,36, 1,2,4,8],[2,8,2304, 1,12,64,200, 1,12,64, 2,22,106, 1,12, 2,22, 4,40, 1,2,4,8],[2,9,4608, 1,13,76,264, 1,13,76, 2,24,128, 1,13, 2,24, 4,44, 1,2,4,8],[2,10,9216, 1,14,89,340, 1,14,89, 2,26,152, 1,14, 2,26, 4,48, 1,2,4,8],[3,0,27, 1,6,12,8, 1,6,12, 1,6,12, 1,6, null,null, null,null, 1,null,null,null],[3,1,54, 1,7,18,20, 1,7,18, 2,12,24, 1,7, 2,12, null,null, 1,2,null,null],[3,2,108, 1,8,25,38, 1,8,25, 2,14,36, 1,8, 2,14, 4,24, 1,2,4,null],[3,3,216, 1,9,33,63, 1,9,33, 2,16,50, 1,9, 2,16, 4,28, 1,2,4,8],[3,4,432, 1,10,42,96, 1,10,42, 2,18,66, 1,10, 2,18, 4,32, 1,2,4,8],[3,5,864, 1,11,52,138, 1,11,52, 2,20,84, 1,11, 2,20, 4,36, 1,2,4,8],[3,6,1728, 1,12,63,190, 1,12,63, 2,22,104, 1,12, 2,22, 4,40, 1,2,4,8],[3,7,3456, 1,13,75,253, 1,13,75, 2,24,126, 1,13, 2,24, 4,44, 1,2,4,8],[3,8,6912, 1,14,88,328, 1,14,88, 2,26,150, 1,14, 2,26, 4,48, 1,2,4,8],[4,0,81, 1,8,24,32, 1,8,24, 1,8,24, 1,8, null,null, null,null, 1,null,null,null],[4,1,162, 1,9,32,56, 1,9,32, 2,16,48, 1,9, 2,16, null,null, 1,2,null,null],[4,2,324, 1,10,41,88, 1,10,41, 2,18,64, 1,10, 2,18, 4,32, 1,2,4,null],[4,3,648, 1,11,51,129, 1,11,51, 2,20,82, 1,11, 2,20, 4,36, 1,2,4,8],[4,4,1296, 1,12,62,180, 1,12,62, 2,22,102, 1,12, 2,22, 4,40, 1,2,4,8],[4,5,2592, 1,13,74,242, 1,13,74, 2,24,124, 1,13, 2,24, 4,44, 1,2,4,8],[4,6,5184, 1,14,87,316, 1,14,87, 2,26,148, 1,14, 2,26, 4,48, 1,2,4,8],[5,0,243, 1,10,40,80, 1,10,40, 1,10,40, 1,10, null,null, null,null, 1,null,null,null],[5,1,486, 1,11,50,120, 1,11,50, 2,20,80, 1,11, 2,20, null,null, 1,2,null,null],[5,2,972, 1,12,61,170, 1,12,61, 2,22,100, 1,12, 2,22, 4,40, 1,2,4,null],[5,3,1944, 1,13,73,231, 1,13,73, 2,24,122, 1,13, 2,24, 4,44, 1,2,4,8],[5,4,3888, 1,14,86,304, 1,14,86, 2,26,146, 1,14, 2,26, 4,48, 1,2,4,8],[5,5,7776, 1,15,100,390, 1,15,100, 2,28,172, 1,15, 2,28, 4,52, 1,2,4,8],[6,0,729, 1,12,60,160, 1,12,60, 1,12,60, 1,12, null,null, null,null, 1,null,null,null],[6,1,1458, 1,13,72,220, 1,13,72, 2,24,120, 1,13, 2,24, null,null, 1,2,null,null],[6,2,2916, 1,14,85,292, 1,14,85, 2,26,144, 1,14, 2,26, 4,48, 1,2,4,null],[6,3,5832, 1,15,99,377, 1,15,99, 2,28,170, 1,15, 2,28, 4,52, 1,2,4,8],[7,0,2187, 1,14,84,280, 1,14,84, 1,14,84, 1,14, null,null, null,null, 1,null,null,null],[7,1,4374, 1,15,98,364, 1,15,98, 2,28,168, 1,15, 2,28, null,null, 1,2,null,null],[7,2,8748, 1,16,113,462, 1,16,113, 2,30,196, 1,16, 2,30, 4,56, 1,2,4,null],[8,0,6561, 1,16,112,448, 1,16,112, 1,16,112, 1,16, null,null, null,null, 1,null,null,null]
+    ];
+    data.sort((a, b) => a[2] - b[2]);
+    data.forEach(row => {
+      const tr = document.createElement('tr');
+      const formatCell = (val) => (val !== null && val > 0 ? val : '-');
+      tr.innerHTML = `<td>${row[0]}</td><td>${row[1]}</td><td style="color:var(--green); font-weight:700;">${row[2]}</td>
+      <td class="bg-green">${formatCell(row[3])}</td><td class="bg-green">${formatCell(row[4])}</td><td class="bg-green">${formatCell(row[5])}</td><td class="bg-green">${formatCell(row[6])}</td>
+      <td class="bg-blue">${formatCell(row[7])}</td><td class="bg-blue">${formatCell(row[8])}</td><td class="bg-blue">${formatCell(row[9])}</td><td class="bg-blue">${formatCell(row[10])}</td><td class="bg-blue">${formatCell(row[11])}</td><td class="bg-blue">${formatCell(row[12])}</td>
+      <td class="bg-yellow">${formatCell(row[13])}</td><td class="bg-yellow">${formatCell(row[14])}</td><td class="bg-yellow">${formatCell(row[15])}</td><td class="bg-yellow">${formatCell(row[16])}</td><td class="bg-yellow">${formatCell(row[17])}</td><td class="bg-yellow">${formatCell(row[18])}</td>
+      <td class="bg-red">${formatCell(row[19])}</td><td class="bg-red">${formatCell(row[20])}</td><td class="bg-red">${formatCell(row[21])}</td><td class="bg-red">${formatCell(row[22])}</td>`;
+      tr.dataset.v = JSON.stringify([row[0], row[1], row[2]]);
+      tr.title = 'Klicka för att låsa/låsa upp raden';
+      tr.addEventListener('click', () => tr.classList.toggle('locked-row'));
+      $sysBody.appendChild(tr);
+    });
+  }
+
+  let sortState = { col: null, dir: 1 };
+  window.sortTable = function(col) {
+    sortState.dir = sortState.col === col ? -sortState.dir : 1;
+    sortState.col = col;
+    const rows = Array.from($sysBody.querySelectorAll('tr'));
+    rows.sort((a, b) => (JSON.parse(a.dataset.v)[col] - JSON.parse(b.dataset.v)[col]) * sortState.dir);
+    rows.forEach(r => $sysBody.appendChild(r));
+    [0,1,2].forEach(i => { const el = document.getElementById('sort-icon-' + i); if (el) el.textContent = i === col ? (sortState.dir === 1 ? '▲' : '▼') : ''; });
+  };
+
+  async function renderChat() {
+    const { data: chat } = await supabaseClient.from('chat_messages').select('*').order('created_at', { ascending: true }).limit(50);
+    if(!chat) return;
+    const container = document.getElementById('adminChatMessages'); if(!container) return;
+    const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 50;
+    const sig = JSON.stringify(chat.map(m => m.id ?? m.created_at));
+    if (container.dataset.sig === sig) return;
+    container.dataset.sig = sig;
+    container.innerHTML = chat.map(m => { const isMe = m.username === 'Lee'; return `<div class="msg ${isMe ? 'lee' : 'me'}"><span class="msg-sender">${isMe ? 'Lee (Admin)' : esc(m.username)}</span><div class="msg-bubble">${esc(m.message)}</div></div>`; }).join('');
+    if (isScrolledToBottom) container.scrollTop = container.scrollHeight;
+  }
+
+  async function sendAdminChat() {
+    const input = document.getElementById('adminChatInput'); const text = input.value.trim(); if (!text) return;
+    await supabaseClient.from('chat_messages').insert({ username: 'Lee', message: text });
+    input.value = ''; renderChat();
+  }
+
+  window.showCreateUser = function() { document.getElementById('createUserModal').style.display = 'flex'; };
+  window.closeCreateUser = function(e) { if (e) e.preventDefault(); document.getElementById('createUserModal').style.display = 'none'; };
+
+  window.submitNewUser = async function() {
+    const name = document.getElementById('newDisplayName').value.trim();
+    const email = document.getElementById('newEmail').value.trim();
+    const password = document.getElementById('newPassword').value;
+    
+    if (!name || !email || password.length < 6) { alert("Fyll i alla fält. Lösenordet måste vara minst 6 tecken."); return; }
+    
+    const tempClient = window.supabase.createClient(SB_CFG.url, SB_CFG.key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
+    const { data, error } = await tempClient.auth.signUp({
+      email: email, password: password,
+      options: { data: { username: name, display_name: name } }
+    });
+    
+    if (error) { alert("Kunde inte skapa användare: " + error.message); }
+    else {
+      alert("Användaren " + name + " har skapats!");
+      closeCreateUser();
+      loadUsers();
+    }
+  };
+
+  async function loadUsers() {
+    const { data: users } = await supabaseClient.from('profiles').select('*');
+    const tbody = document.getElementById('usersTableBody');
+    if(!tbody || !users) return;
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td><input class="input-field" value="${esc(u.display_name || '')}" onchange="updateUser('${u.id}', 'display_name', this.value)"></td>
+        <td style="color: var(--muted); font-size: 13px; padding: 12px;">${esc(u.email || 'Saknas')}</td>
+        <td style="color: var(--muted); font-size: 13px; padding: 12px;">********</td>
+        <td style="text-align:right;"><button class="btn-icon delete" onclick="deleteUser('${u.id}')">Ta bort</button></td>
+      </tr>`).join('');
+  }
+
+  window.updateUser = async function(id, field, value) {
+    await supabaseClient.from('profiles').update({ [field]: value }).eq('id', id);
+  };
+
+  window.deleteUser = async function(id) {
+    if (!(await customConfirm('Är du säker på att du vill ta bort spelaren?'))) return;
+    await supabaseClient.from('profiles').delete().eq('id', id);
+    loadUsers();
+  };
+
+  async function loadRssFeeds() {
+    const { data: feeds } = await supabaseClient.from('rss_feeds').select('*');
+    const container = document.getElementById('adminRssList');
+    if(!container) return;
+    if (!feeds || feeds.length === 0) {
+      container.innerHTML = '<div style="font-size:12px; color:var(--muted);">Inga flöden tillagda.</div>';
+      document.getElementById('rssLimitMsg').textContent = 'Flöden kvar: 10 / 10';
+      return;
+    }
+    container.innerHTML = feeds.map(f => `
+      <div class="rss-list-item">
+        <span class="rss-list-url">${esc(f.url)}</span>
+        <button class="btn-icon" onclick="deleteRss('${f.id}')">Ta bort</button>
+      </div>
+    `).join('');
+    document.getElementById('rssLimitMsg').textContent = `Flöden kvar: ${10 - feeds.length} / 10`;
+  }
+
+  window.addRss = async function() {
+    const url = document.getElementById('newRssUrl').value.trim();
+    if (!url) return;
+    const { data: feeds } = await supabaseClient.from('rss_feeds').select('*');
+    if ((feeds || []).length >= 10) { alert('Max 10 flöden'); return; }
+    await supabaseClient.from('rss_feeds').insert({ url: url });
+    document.getElementById('newRssUrl').value = '';
+    loadRssFeeds();
+    fetchRSS();
+  };
+
+  window.deleteRss = async function(id) {
+    if(!(await customConfirm('Ta bort detta flöde?'))) return;
+    await supabaseClient.from('rss_feeds').delete().eq('id', id);
+    loadRssFeeds();
+    fetchRSS();
+  };
+
+  async function fetchRSS() {
+    try {
+      const { data: feeds } = await supabaseClient.from('rss_feeds').select('*');
+      if (!feeds || feeds.length === 0) return;
+      const safeUrl = u => /^https?:\/\//i.test(u) ? u : '#';
+      const parts = await Promise.all(feeds.map(async f => {
+        try {
+          const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(f.url));
+          const data = await res.json();
+          if (data.status === 'ok' && data.items) {
+            return data.items.slice(0, 3).map(item => `<a href="${esc(safeUrl(item.link))}" target="_blank" rel="noopener" class="rss-item-link">${esc(item.title)}</a>`).join('');
+          }
+        } catch (e) { console.warn('RSS-flöde misslyckades:', f.url, e); }
+        return '';
+      }));
+      const allHtml = parts.join('');
+      if (allHtml) {
+        document.getElementById('rssGroup1').innerHTML = allHtml;
+        document.getElementById('rssGroup2').innerHTML = allHtml;
+      }
+    } catch (e) { console.error('RSS fetch misslyckades:', e); }
+  }
+
+  // Pausa/Fortsätt-knappen för nyhetstickern
+  document.getElementById('rssPauseBtn').addEventListener('click', function () {
+    const t = document.getElementById('rssFeed');
+    const paused = t.classList.toggle('paused');
+    this.textContent = paused ? 'Fortsätt' : 'Pausa';
+  });
+</script>
+</body>
+</html>
+
+
