@@ -701,7 +701,8 @@
   function renderAdminLiveView() {
     const grid = document.getElementById('adminLiveGrid'); if(!grid) return; grid.innerHTML = '';
     
-    state.matches.forEach((m, i) => {
+    for (let i = 0; i < 13; i++) {
+      const m = state.matches[i] || { home: '', away: '', signs: ['1'] };
       const live = liveScores[i];
       const p = m.signs || [];
       
@@ -719,15 +720,12 @@
       let badgeHtml = '';
       if (live) {
           const st = (live.status || '').toLowerCase();
-          if (isFinished) {
-              badgeHtml = `<div class="live-badge score" style="background:transparent; color:var(--muted); border:1px solid var(--border);">SLUT</div>`;
-          } else if (st === 'pending' || st === 'ns' || !st) {
+          if (isFinished) badgeHtml = `<div class="live-badge score" style="background:transparent; color:var(--muted); border:1px solid var(--border);">SLUT</div>`;
+          else if (st === 'pending' || st === 'ns' || !st) {
               let timeStr = '00:00';
               if (live.datetime) timeStr = new Date(live.datetime).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'});
               badgeHtml = `<div class="live-badge score" style="background:transparent; color:var(--text); border:1px solid var(--border);">${timeStr}</div>`;
-          } else {
-              badgeHtml = `<div class="live-badge tid">LIVE</div>`;
-          }
+          } else badgeHtml = `<div class="live-badge tid">LIVE</div>`;
       }
 
       let scoreHtml = '';
@@ -754,21 +752,31 @@
       el.className = cardClass;
 
       el.innerHTML = `
-        <div class="match-header">
-          <span class="match-no">M${i+1}</span>
-          ${badgeHtml}
-        </div>
+        <div class="match-header"><span class="match-no">M${i+1}</span>${badgeHtml}</div>
         <div class="teams"><span>${esc(m.home)}</span><span>${esc(m.away)}</span></div>
-        <div class="match-content">
-          ${scoreHtml}
-        </div>
-        <div class="signs">
-          <div class="${c1}">1</div>
-          <div class="${cx}">X</div>
-          <div class="${c2}">2</div>
-        </div>`;
+        <div class="match-content">${scoreHtml}</div>
+        <div class="signs"><div class="${c1}">1</div><div class="${cx}">X</div><div class="${c2}">2</div></div>`;
       grid.appendChild(el);
-    });
+    }
+
+    // --- LÄGG TILL EGNA NOTERINGAR I DE TOMRUTOR SOM BLIR ---
+    const noteCard = document.createElement('div');
+    noteCard.className = 'match notes-card';
+    noteCard.innerHTML = `
+      <div class="data-label" style="margin-bottom: 6px;">Egna noteringar</div>
+      <textarea placeholder="Skriv dina egna noteringar här..." readonly>${esc(localStorage.getItem('lee_admin_notes') || '')}</textarea>
+    `;
+    grid.appendChild(noteCard);
+
+    // Räkna ut hur många kolumner som är tomma och spänn över dem
+    setTimeout(() => {
+        const tpl = getComputedStyle(grid).gridTemplateColumns;
+        if (tpl && tpl !== 'none') {
+            const cols = tpl.split(' ').filter(Boolean).length || 1;
+            const rem = 13 % cols;
+            noteCard.style.gridColumn = 'span ' + (rem === 0 ? cols : cols - rem);
+        }
+    }, 10);
   }
 
   // Anteckningsrutan fyller alltid ut det lediga utrymmet i sista raden
