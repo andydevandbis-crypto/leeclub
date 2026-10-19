@@ -141,7 +141,19 @@
   .live-header { display:flex; justify-content:space-between; margin-bottom:12px; border-bottom: 1px solid var(--border-soft); padding-bottom: 8px;}
   .live-header h2 { font-size:16px; }
   .live-header span { font-size:11px; color:var(--gold); font-weight: 600;}
-  .live-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(115px, 1fr)); gap:8px; overflow-y: auto; padding-right: 4px; }
+  .live-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:8px; overflow-y: auto; padding-right: 4px; }
+  .match-content { display: flex; justify-content: space-between; align-items: flex-start; flex-grow: 1; margin: 4px 0; }
+  .score-col { display: flex; flex-direction: column; align-items: flex-end; font-size: 18px; font-weight: 800; line-height: 1.1; }
+  .score-col span { display: block; }
+  .score-col.red { color: var(--red); }
+  .score-col.green { color: var(--green); }
+  .live-badge { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+  .live-badge.tid { background: #fff; color: var(--red); }
+  .live-badge.score { background: rgba(51,224,138,0.15); color: var(--green); border: 1px solid rgba(51,224,138,0.4); }
+  .sign.win { background: var(--green) !important; color: #000 !important; border-color: var(--green) !important; }
+  .sign.lose { background: #f08a3c !important; color: #000 !important; border-color: #f08a3c !important; }
+  .match.ft-win { background: rgba(51,224,138,0.15) !important; border-color: var(--green) !important; box-shadow: 0 0 0 1px var(--green) inset !important; }
+  .match.ft-loss { background: rgba(224,90,90,0.15) !important; border-color: var(--red) !important; box-shadow: 0 0 0 1px var(--red) inset !important; }
   .live-card { background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:8px; }
   .live-card-no { font-size:10px; color:var(--gold); font-weight:800; margin-bottom:4px;}
   .live-card-teams { font-size:11px; font-weight:600; line-height:1.3; margin-bottom:6px;}
@@ -576,6 +588,7 @@
   
   let currentRoundId = null;
   let timerInterval = null;
+  let liveScores = {};
   let chatInterval = null;
 
   const allValidCombos = [];
@@ -587,6 +600,16 @@
   }
   allValidCombos.sort((a, b) => a.amount - b.amount);
 
+  async function fetchLiveScores() {
+      try {
+          const { data, error } = await supabaseClient.from('live_scores').select('*');
+          if (!error && data) {
+              liveScores = {};
+              data.forEach(m => { liveScores[m.match_order - 1] = m; });
+              renderAdminLiveView();
+          }
+      } catch (e) {}
+  }
   function initApp() {
     loadMatches();
     loadUsers();
@@ -595,6 +618,8 @@
     startClock();
     renderSystemTable();
     updatePlaceBtnState();
+    fetchLiveScores();
+    setInterval(fetchLiveScores, 300000);
     renderChat();
     if (chatInterval) clearInterval(chatInterval);
     chatInterval = setInterval(() => { if (!document.hidden) renderChat(); }, 3000);
@@ -675,10 +700,73 @@
 
   function renderAdminLiveView() {
     const grid = document.getElementById('adminLiveGrid'); if(!grid) return; grid.innerHTML = '';
+    
     state.matches.forEach((m, i) => {
-      const leePick = m.signs.length > 0 ? m.signs.join(' ') : 'Väntar...';
-      const el = document.createElement('div'); el.className = 'live-card';
-      el.innerHTML = `<div class="live-card-no">M${i+1}</div><div class="live-card-teams">${esc(m.home)}<br>${esc(m.away)}</div><div class="live-card-pick">${leePick}</div>`;
+      const live = liveScores[i];
+      const p = m.signs || [];
+      
+      let currentWin = null;
+      let isFinished = false;
+
+      if (live && live.home_goals != null && live.away_goals != null) {
+          if (live.home_goals > live.away_goals) currentWin = '1';
+          else if (live.home_goals < live.away_goals) currentWin = '2';
+          else currentWin = 'X';
+          const st = (live.status || '').toLowerCase();
+          isFinished = (st === 'ft' || st === 'settled' || st === 'ended');
+      }
+
+      let badgeHtml = '';
+      if (live) {
+          const st = (live.status || '').toLowerCase();
+          if (isFinished) {
+              badgeHtml = `<div class="live-badge score" style="background:transparent; color:var(--muted); border:1px solid var(--border);">SLUT</div>`;
+          } else if (st === 'pending' || st === 'ns' || !st) {
+              let timeStr = '00:00';
+              if (live.datetime) timeStr = new Date(live.datetime).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'});
+              badgeHtml = `<div class="live-badge score" style="background:transparent; color:var(--text); border:1px solid var(--border);">${timeStr}</div>`;
+          } else {
+              badgeHtml = `<div class="live-badge tid">LIVE</div>`;
+          }
+      }
+
+      let scoreHtml = '';
+      if (live) {
+          let hg = live.home_goals, ag = live.away_goals;
+          const st = (live.status || '').toLowerCase();
+          if ((st === 'ns' || st === 'pending') && (hg === null || hg === undefined)) { hg = 0; ag = 0; }
+          scoreHtml = `<div class="score-col ${isFinished ? 'green' : 'red'}"><span>${hg ?? '-'}</span><span>${ag ?? '-'}</span></div>`;
+      }
+
+      let c1 = 'sign' + (p.includes('1') ? ' on' : '');
+      let cx = 'sign' + (p.includes('X') ? ' on' : '');
+      let c2 = 'sign' + (p.includes('2') ? ' on' : '');
+
+      if (live && currentWin) {
+          if (currentWin === '1') c1 += ' win'; if (currentWin === 'X') cx += ' win'; if (currentWin === '2') c2 += ' win';
+          if (currentWin !== '1' && p.includes('1')) c1 += ' lose'; if (currentWin !== 'X' && p.includes('X')) cx += ' lose'; if (currentWin !== '2' && p.includes('2')) c2 += ' lose';
+          if (!p.includes('1') && currentWin !== '1') c1 += ' dim'; if (!p.includes('X') && currentWin !== 'X') cx += ' dim'; if (!p.includes('2') && currentWin !== '2') c2 += ' dim';
+      }
+
+      const el = document.createElement('div'); 
+      let cardClass = 'match';
+      if (isFinished && currentWin && p.length > 0) cardClass += p.includes(currentWin) ? ' ft-win' : ' ft-loss';
+      el.className = cardClass;
+
+      el.innerHTML = `
+        <div class="match-header">
+          <span class="match-no">M${i+1}</span>
+          ${badgeHtml}
+        </div>
+        <div class="teams"><span>${esc(m.home)}</span><span>${esc(m.away)}</span></div>
+        <div class="match-content">
+          ${scoreHtml}
+        </div>
+        <div class="signs">
+          <div class="${c1}">1</div>
+          <div class="${cx}">X</div>
+          <div class="${c2}">2</div>
+        </div>`;
       grid.appendChild(el);
     });
   }
