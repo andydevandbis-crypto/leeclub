@@ -141,7 +141,16 @@
   .live-header { display:flex; justify-content:space-between; margin-bottom:12px; border-bottom: 1px solid var(--border-soft); padding-bottom: 8px;}
   .live-header h2 { font-size:16px; }
   .live-header span { font-size:11px; color:var(--gold); font-weight: 600;}
-  .live-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:8px; overflow-y: auto; padding-right: 4px; }
+  .live-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      grid-auto-rows: 1fr;
+      gap: 8px;
+      padding: 10px;
+      overflow-y: auto;
+      flex: 1;
+      align-content: stretch;
+  }
   .match-content { display: flex; justify-content: space-between; align-items: flex-start; flex-grow: 1; margin: 4px 0; }
   .score-col { display: flex; flex-direction: column; align-items: flex-end; font-size: 18px; font-weight: 800; line-height: 1.1; }
   .score-col span { display: block; }
