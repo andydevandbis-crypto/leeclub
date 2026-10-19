@@ -14,8 +14,6 @@
     --text:#e9eef7;--muted:#8b97a8;
     --gold:#e8c15a;--gold-deep:#c9962f;
     --green:#33e08a;--red:#e05a5a;--blue:#8fc7ff;
-    --c-green: rgba(51, 224, 138, 0.15); --c-blue: rgba(143, 199, 255, 0.15);
-    --c-yellow: rgba(232, 193, 90, 0.15); --c-red: rgba(224, 90, 90, 0.15);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Inter","Segoe UI",system-ui,sans-serif;color:var(--text);background:var(--bg);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
@@ -23,7 +21,6 @@
   ::-webkit-scrollbar { display: none; }
   * { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* LOGIN */
   #adminLoginScreen { position:fixed; inset:0; background:var(--bg); z-index:99999; display:flex; align-items:center; justify-content:center; padding:24px; }
   .login-card{width:100%;max-width:320px;padding:24px;background:var(--panel);border:1px solid var(--border);border-radius:12px;}
   .login-card h1{font-size:16px;letter-spacing:2px;text-align:center;margin-bottom:4px;}
@@ -31,8 +28,7 @@
   .login-card input{width:100%;padding:10px;border-radius:6px;background:var(--panel2);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:13px;outline:none;margin-bottom:10px;}
   .login-card button{width:100%;margin-top:6px;padding:10px;border:none;border-radius:6px;background:linear-gradient(135deg,#f6da8b,var(--gold-deep));color:#1a1206;font-weight:800;font-size:13px;cursor:pointer;}
 
-  /* APP LAYOUT */
-  #app { display:none; flex-direction:column; min-height:100vh; }
+  #app { display:none; flex-direction:column; height:100vh; overflow:hidden; }
   .topbar{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--border);background:var(--panel);flex-shrink:0;}
   .logo-mark{width: 40px; height: 24px; display:flex; align-items:center; justify-content:center;}
   .logo-mark img { width: 100%; height: 100%; object-fit: contain; }
@@ -45,14 +41,13 @@
   .btn-logout { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); padding: 4px 10px; font-size: 11px; cursor: pointer; transition: 0.2s; }
   .btn-logout:hover { color: var(--text); border-color: rgba(232,193,90,0.35); }
 
-  /* RSS TICKER */
   .rss-bar {background: #0b1118;border-bottom: 1px solid var(--border);padding: 8px 20px;display: flex;align-items: center;gap: 15px;overflow: hidden;}
   .rss-badge {background: var(--red);color: #fff;font-size: 10px;font-weight: 800;padding: 2px 6px;border-radius: 4px;white-space: nowrap; letter-spacing: 0.5px; flex-shrink: 0;}
   .rss-marquee {overflow: hidden;width: 100%;display: flex;}
-  .rss-ticker {display: flex;white-space: nowrap;animation: marquee 50s linear infinite;}
+  .rss-ticker {display: flex;white-space: nowrap;animation: marquee 120s linear infinite; will-change: transform;}
   .rss-ticker:hover {animation-play-state: paused;}
   @keyframes marquee {0% { transform: translateX(0); }100% { transform: translateX(-50%); }}
-  .rss-group {display: flex;padding-right: 20px;}
+  .rss-group {display: flex;padding-right: 20px; flex-shrink: 0;}
   .rss-item-link {color: var(--text);text-decoration: none;font-size: 13px;font-weight: 500;display: inline-flex;align-items: center;gap: 8px;margin-right: 30px; transition: color 0.2s;}
   .rss-item-link::before { content: "•"; color: var(--gold); }
   .rss-item-link:hover { color: var(--gold); }
@@ -61,19 +56,17 @@
   .btn-ghost:hover { color: var(--text); border-color: rgba(232,193,90,0.35); background: rgba(232,193,90,0.06); }
   .rss-ticker.paused { animation-play-state: paused; }
 
-  /* TABS */
-  .tabs-nav {display: flex; padding: 16px 24px 0; max-width: 1400px; margin: 0 auto; width: 100%; border-bottom: 1px solid var(--border); gap: 4px; flex-shrink: 0; overflow-x: auto; overflow-y: hidden;}
-  .tab-btn {background: transparent; border: none; color: var(--muted);font-family: inherit; font-size: 14px;font-weight: 600;padding: 12px 20px; cursor: pointer; border-radius: 10px 10px 0 0;border-bottom: 2px solid transparent; flex-shrink: 0;}
+  .tabs-nav {display: flex; padding: 16px 24px 0; max-width: 1400px; margin: 0 auto; width: 100%; border-bottom: 1px solid var(--border); gap: 4px; flex-shrink: 0;}
+  .tab-btn {background: transparent; border: none; color: var(--muted);font-family: inherit; font-size: 14px;font-weight: 600;padding: 12px 20px; cursor: pointer; border-radius: 10px 10px 0 0;border-bottom: 2px solid transparent;}
   .tab-btn.active {color: var(--gold); border-bottom-color: var(--gold);background: linear-gradient(180deg, transparent, rgba(232,193,90,0.05));}
   
-  /* MAIN */
-  .main{max-width:1400px;margin:0 auto;padding:24px; width: 100%;flex:1;display:flex;flex-direction:column;overflow:hidden; min-height: 0;}
+  .main{max-width:none;margin:0;padding:24px max(24px, calc((100% - 1352px) / 2));width:100%;flex:1;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;min-height:0;}
   .tab-content { display: none; height: 100%; overflow: hidden; flex-direction: column; }
   .tab-content.active { display: flex; }
   
-  /* KUPONG */
   .panel{background:linear-gradient(180deg,rgba(19,26,38,0.92),rgba(15,20,29,0.96));border:1px solid var(--border);border-radius:14px;overflow: hidden; display: flex; flex-direction: column; height: 100%; min-height: 0;}
-  #tab-kupong .panel { overflow: visible !important; }
+  #tab-kupong { height: 100%; overflow: visible; flex-shrink: 0; }
+  #tab-kupong .panel { height: auto; min-height: 0; overflow: visible; flex: 1 0 auto; }
   #tab-kupong .panel > * { flex-shrink: 0; }
   
   .top-single-row { display: flex; align-items: center; padding: 16px 22px; gap: 24px; border-bottom: 1px solid var(--border-soft); min-height: 80px; flex-wrap: nowrap; flex-shrink: 0;}
@@ -92,34 +85,44 @@
   .combo-sub { position: absolute; top: 100%; left: 0; margin-top: 4px; font-size: 11px; color: var(--text); background: #1c2533; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.8); z-index: 50; white-space: nowrap; display: none; }
   .combo-sub.active { display: block; }
   .combo-sub a { color: var(--gold); text-decoration: underline; cursor: pointer; font-weight: 600; }
-  .btn-clear { background: transparent; border: 1px solid rgba(224, 90, 90, 0.4); color: var(--red); padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; flex-shrink: 0; margin-left: auto; font-family: inherit; }
-  .btn-clear:hover { background: rgba(224, 90, 90, 0.1); border-color: var(--red); }
-  .btn-primary { padding: 10px 16px; border: none; border-radius: 8px; background: linear-gradient(135deg,#f6da8b,var(--gold-deep)); color: #1a1206; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
   
-  .match-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));gap:8px;padding:16px; user-select: none; overflow: visible !important; flex: 0 0 auto !important; align-content: start;}
+  .btn-primary { padding: 10px 16px; border: none; border-radius: 8px; background: linear-gradient(135deg,#f6da8b,var(--gold-deep)); color: #1a1206; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
+  .btn-clear { background: transparent; border: 1px solid rgba(224, 90, 90, 0.4); color: var(--red); padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; flex-shrink: 0; font-family: inherit; }
+  .btn-clear:hover { background: rgba(224, 90, 90, 0.1); border-color: var(--red); }
+
+  .match-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));grid-auto-rows:1fr;gap:8px;padding:16px; user-select: none; overflow: visible !important; flex: 1 0 auto !important; align-content: stretch;}
   .match{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;position: relative;}
   .match-header{display:flex;justify-content:space-between;align-items:center; margin-bottom: 2px;}
+  .match.halv { border-color: rgba(143,199,255,0.45); box-shadow: 0 0 0 1px rgba(143,199,255,0.12); }
+  .match.hel { border-color: rgba(196,160,255,0.5); box-shadow: 0 0 0 1px rgba(196,160,255,0.14); }
+  .match.marked { background: #3d3420; border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
   .match.drag-highlight { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; background: #1b2332; }
-  .match.locked-highlight { background: #3d3420; border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold) inset; }
-  .match.state-yellow { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
-  .match.state-orange { background: linear-gradient(rgba(240,138,60,0.15),rgba(240,138,60,0.15)), var(--panel2); border-color: #f08a3c; box-shadow: 0 0 0 1px #f08a3c inset; }
-  .match.state-red { background: linear-gradient(rgba(224,90,90,0.18),rgba(224,90,90,0.18)), var(--panel2); border-color: var(--red); box-shadow: 0 0 0 1px var(--red) inset; }
-  .match.state-red .lock-badge { position: absolute; top: -9px; right: -9px; background: var(--red); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; box-shadow: 0 2px 8px rgba(224,90,90,0.5); }
+  .match.locked-highlight { background: linear-gradient(rgba(51,224,138,0.10), rgba(51,224,138,0.10)), var(--panel2); border-color: var(--green); box-shadow: 0 0 0 1px var(--green) inset, 0 0 14px rgba(51,224,138,0.25); }
+  .match-tag.halv { color: var(--blue); background: rgba(143,199,255,0.14); border: 1px solid rgba(143,199,255,0.55); }
+  .match-tag.hel { color: #c9a7ff; background: rgba(196,160,255,0.14); border: 1px solid rgba(196,160,255,0.55); }
+  .match-tag.spik { color: var(--gold); background: rgba(232,193,90,0.14); border: 1px solid rgba(232,193,90,0.55); }
+  .btn-move.btn-lock { color: var(--muted); padding: 3px 5px; display: inline-flex; align-items: center; touch-action: manipulation; cursor: pointer; }
+  .btn-move.btn-lock.on { color: var(--green); }
+  .btn-lock svg { width: 16px; height: 16px; display: block; pointer-events: none; }
+  .match.locked-highlight .signs { pointer-events: none; }
+  .match-grid.placed .signs, .match-grid.placed .btn-lock { pointer-events: none; }
+  .match-grid.placed .signs, .match-grid.placed .teams { opacity: 0.7; }
+  .btn-clear:disabled, .field-mini:disabled { opacity: 0.4; cursor: not-allowed; }
+  .tab-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 8px; border-radius: 999px; background: var(--red); color: #fff; font-size: 10px; font-weight: 800; line-height: 1; vertical-align: middle; }
   .match-no{font-size:10px;font-weight:700;color:var(--gold)}
   .match-actions{display:flex;gap:2px}
   .btn-move{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:10px;padding:1px 3px;}
   .match-tag{font-size:8px;font-weight:700;padding:1px 4px;border-radius:999px;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.05);}
   .teams{display:flex;flex-direction:column;gap:2px;}
   .team-input{background:transparent;border:1px solid transparent;color:var(--text);font-size:11px;padding:2px 4px;border-radius:4px;width:100%;outline:none;}
-  .signs{display:flex;gap:3px}
+  .signs{display:flex;gap:3px;margin-top:auto}
   .sign{flex:1;text-align:center;font-size:11px;font-weight:700;padding:3px 0;border-radius:4px;color:var(--muted);background:rgba(255,255,255,0.02);border:1px solid var(--border-soft);cursor:pointer;}
   .sign.on{color:var(--gold);background:rgba(232,193,90,0.1);border-color:rgba(232,193,90,0.3)}
   
   details.stats-accordion { margin-top: 4px; border-top: 1px dashed var(--border-soft); padding-top: 8px; }
   details.stats-accordion summary { font-size: 11px; color: var(--muted); cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
-  details.stats-accordion summary::after { content: "▼"; font-size: 9px; transition: transform 0.2s; }
+  details.stats-accordion summary::after { content: "▼"; font-size: 9px; transition: transform 0.2s; display: inline-block; color: var(--muted); }
   details.stats-accordion[open] summary::after { transform: rotate(180deg); color: var(--gold); }
-  details.stats-accordion.has-tips summary { color: var(--red) !important; }
   details.stats-accordion.has-tips summary::after { color: var(--red) !important; }
   .stats-content { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
   .stat-bar-row { display: flex; align-items: center; gap: 8px; font-size: 11px; }
@@ -130,10 +133,9 @@
   .stat-count { font-size: 10px; font-weight: 800; color: var(--muted); min-width: 15px; text-align: right; }
   .stat-count.active { color: var(--gold); }
   
-  .notes-container { padding: 16px 22px 22px; border-top: 1px solid var(--border-soft); }
-  .notes-container textarea { width:100%; min-height:60px; background:var(--panel2); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:10px; outline:none; }
+  .notes-card { background: var(--panel2); border: 1px dashed var(--border); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 6px; min-height: 150px; }
+  .notes-card textarea { flex: 1; width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 8px; resize: none; outline: none; font-family: inherit; font-size: 12px; }
 
-  /* SPELARVY */
   .live-layout { display: grid; grid-template-columns: 1fr 340px; gap: 16px; width: 100%; height: 100%; overflow: hidden; }
   .live-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; overflow: hidden; }
   .live-header { display:flex; justify-content:space-between; margin-bottom:12px; border-bottom: 1px solid var(--border-soft); padding-bottom: 8px;}
@@ -144,7 +146,7 @@
   .live-card-no { font-size:10px; color:var(--gold); font-weight:800; margin-bottom:4px;}
   .live-card-teams { font-size:11px; font-weight:600; line-height:1.3; margin-bottom:6px;}
   .live-card-pick { font-size:14px; font-weight:800; color:var(--gold); text-align:center; background:rgba(232,193,90,0.1); padding:6px; border-radius:4px; border:1px solid rgba(232,193,90,0.3); }
-  
+
   .chat-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; }
   .chat-header { padding: 12px 16px; border-bottom: 1px solid var(--border-soft); font-size: 14px; font-weight: 700; background: var(--panel2); display: flex; justify-content: space-between; align-items: center; }
   .chat-status { font-size: 10px; color: var(--green); display: flex; align-items: center; gap: 4px; font-weight: 600; }
@@ -162,7 +164,6 @@
   .chat-input input { flex: 1; padding: 10px 12px; border-radius: 6px; background: var(--panel); border: 1px solid var(--border); color: var(--text); font-size: 12px; outline: none; }
   .chat-input button { padding: 10px 16px; border-radius: 6px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #1a1206; font-weight: 800; font-size: 12px; cursor: pointer; }
 
-  /* SYSTEMTABELL & ADMIN */
   .accordions{display:flex;flex-direction:column;gap:16px;width:100%; overflow-y: auto; padding-bottom: 20px;}
   .accordion{background:linear-gradient(180deg,rgba(19,26,38,0.92),rgba(15,20,29,0.96));border:1px solid var(--border);border-radius:14px;overflow: hidden;}
   .acc-header{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;background:var(--panel2);cursor:pointer;border-bottom:1px solid transparent; user-select: none;}
@@ -229,48 +230,47 @@
       opacity: 0; transition: all 0.3s; z-index: 99999; pointer-events: none;
   }
   .custom-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  /* Hela sidan scrollar, inte korten */
-  .main { overflow-y: auto !important; }
-  #tab-kupong { height: auto !important; overflow: visible !important; flex-shrink: 0 !important; }
-  #tab-kupong .panel { height: auto !important; min-height: auto !important; overflow: visible !important; flex: 0 0 auto !important; }
+
   @media (max-width: 768px) {
-    .live-layout { display: flex; flex-direction: column; overflow-y: auto; height: auto; gap: 16px; }
-    .live-panel { min-height: 350px; flex-shrink: 0; }
-    .chat-panel { min-height: 400px; flex-shrink: 0; }
-    .main { padding: 12px; overflow-y: auto; }
+    body { height: auto; overflow-y: auto; }
+    #app { height: auto; min-height: 100vh; overflow: visible; }
+    .tabs-nav { overflow-x: auto; overflow-y: hidden; white-space: nowrap; }
+    .tab-btn { flex-shrink: 0; }
+    .live-layout { display: flex; flex-direction: column; height: auto; overflow: visible; gap: 16px; }
+    .live-panel { min-height: 400px; flex-shrink: 0; order: 2; }
+    .chat-panel { min-height: 400px; flex-shrink: 0; margin-bottom: 20px; order: 1; }
+    .main { padding: 12px; }
     .top-single-row { flex-wrap: wrap; gap: 12px; padding: 12px; }
     .top-single-row h1 { width: 100%; margin-bottom: 8px; }
     .group-left, .group-right { flex-wrap: wrap; width: 100%; gap: 12px; border: none; padding: 0; }
-    .btn-clear { margin-left: auto; }
     .match-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .rss-bar { display: none !important; }
+    .btn-move.btn-lock { padding: 8px 10px; }
   }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="adminLoginScreen">
   <div class="login-card">
     <h1>LEE BETTING</h1>
     <p>Admin-inloggning</p>
-    <input type="email" id="adminUser" placeholder="E-postadress (leebarber71@outlook.com)">
+    <input type="email" id="adminUser" placeholder="E-postadress">
     <input type="password" id="adminPass" placeholder="Lösenord">
     <button onclick="adminLogin()">Logga in</button>
     <div id="adminLoginError" style="color:var(--red); font-size:12px; text-align:center; margin-top:10px;"></div>
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
   <header class="topbar">
     <div class="logo-mark"><img src="logo.png" alt="Logo"></div>
     <div>
       <div class="brand-name">LEE BETTING</div>
-      <div class="brand-sub" id="brandSub">Admin</div>
     </div>
     <div class="spacer"></div>
     <div class="top-controls">
-      <span style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-right:8px;">Till inlämning:</span>
+      <span style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-right:8px;">Nedräkning till inlämning:</span>
       <span class="countdown" id="countdown">--:--:--</span>
       <button class="btn-logout" onclick="adminLogout()">Logga ut</button>
     </div>
@@ -289,14 +289,13 @@
 
   <div class="tabs-nav">
     <button class="tab-btn active" onclick="switchTab('kupong')">Kupong</button>
-    <button class="tab-btn" onclick="switchTab('playerview')">Spelarvy</button>
+    <button class="tab-btn" onclick="switchTab('playerview')">Spelarvy<span class="tab-badge" id="chatBadge" style="display:none">0</span></button>
     <button class="tab-btn" onclick="switchTab('tabell')">Systemtabell</button>
     <button class="tab-btn" onclick="switchTab('admin')">Admin</button>
   </div>
 
   <main class="main">
     
-    <!-- KUPONG -->
     <div id="tab-kupong" class="tab-content active">
       <div class="panel">
         <div class="top-single-row">
@@ -304,7 +303,7 @@
           <div class="group-left">
             <div class="data-group amount-group">
               <span class="data-label">Mål (kr)</span>
-              <input id="amount" class="field-mini" type="text" inputmode="numeric" value="27">
+              <input id="amount" class="field-mini" type="text" inputmode="numeric" value="">
             </div>
             <div class="data-group combo-box">
               <span class="data-label">Målets Kombination</span>
@@ -322,18 +321,18 @@
               <span id="liveCombo" class="data-value">–</span>
             </div>
             <button class="btn-primary" id="placeBtn" type="button">Placera spel</button>
+            <button class="btn-clear" id="clearBtn" type="button">Rensa</button>
           </div>
-          <button class="btn-clear" id="clearBtn" title="Rensa kupong">Rensa</button>
         </div>
-        <div class="match-grid" id="matchGrid"></div>
-        <div class="notes-container">
-          <div class="data-label">Egna noteringar</div>
-          <textarea id="notesArea" placeholder="Skriv dina egna noteringar här..."></textarea>
+        <div class="match-grid" id="matchGrid">
+          <div class="notes-card" id="notesCard">
+            <div class="data-label">Egna noteringar</div>
+            <textarea id="notesArea" placeholder="Skriv dina egna noteringar här..."></textarea>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- SPELARVY -->
     <div id="tab-playerview" class="tab-content">
       <div class="live-layout">
         <div class="live-panel">
@@ -351,7 +350,6 @@
       </div>
     </div>
 
-    <!-- SYSTEMTABELL -->
     <div id="tab-tabell" class="tab-content">
       <div class="accordions">
         <div class="accordion open" id="acc-system">
@@ -400,7 +398,6 @@
       </div>
     </div>
 
-    <!-- ADMIN -->
     <div id="tab-admin" class="tab-content">
       <div class="accordions">
         <div class="accordion open" id="acc-users">
@@ -434,7 +431,6 @@
   </main>
 </div>
 
-<!-- MODAL SKAPA ANVÄNDARE -->
 <div id="createUserModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
   <div class="login-card" style="position:relative;">
     <h1>SKAPA SPELARE</h1>
@@ -449,9 +445,6 @@
   </div>
 </div>
 
-<div class="custom-toast" id="custom-toast"></div>
-
-<!-- MODAL CUSTOM CONFIRM -->
 <div id="customConfirmModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
   <div class="login-card" style="position:relative; text-align:center; border-color:var(--border);">
     <h1 style="font-size:14px; margin-bottom:16px; letter-spacing:1px;">BEKRÄFTA</h1>
@@ -462,6 +455,8 @@
     </div>
   </div>
 </div>
+
+<div class="custom-toast" id="custom-toast"></div>
 
 <script>
   window.customConfirm = function(msg) {
@@ -487,14 +482,12 @@
 
   function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-  // Reservlösning om js/config.js inte hittas
   const SB_CFG = window.SUPABASE_CONFIG || {
     url: "https://yjkyikxtklaokscnpxdj.supabase.co",
     key: "sb_publishable_ev3HUbED2MIMHhy6feLXlw_i81spvXM"
   };
   const supabaseClient = window.supabase.createClient(SB_CFG.url, SB_CFG.key);
   
-  // AUTH LOGIK
   async function adminLogin() {
     const email = document.getElementById('adminUser').value.trim();
     const pass = document.getElementById('adminPass').value;
@@ -514,7 +507,9 @@
 
   async function adminLogout() {
     await supabaseClient.auth.signOut();
+    const keepNotes = localStorage.getItem('lee_admin_notes');
     localStorage.clear();
+    if (keepNotes !== null) localStorage.setItem('lee_admin_notes', keepNotes);
     sessionStorage.clear();
     location.reload();
   }
@@ -530,7 +525,6 @@
     }
   });
 
-  // RESTEN AV LOGIKEN
   const PRICE_PER_ROW = 1;
   const MATCHES = 13;
   const $amount = document.getElementById('amount');
@@ -542,11 +536,47 @@
   const $grid = document.getElementById('matchGrid');
   const $sysBody = document.getElementById('system-table-body');
   const $notes = document.getElementById('notesArea');
+  const $notesCard = document.getElementById('notesCard');
+  try { $notes.value = localStorage.getItem('lee_admin_notes') || ''; } catch (e) {}
+  $notes.addEventListener('input', () => { try { localStorage.setItem('lee_admin_notes', $notes.value); } catch (e) {} });
   const $clearBtn = document.getElementById('clearBtn');
   
   const state = { matches: Array.from({ length: MATCHES }, () => ({ home: '', away: '', signs: [] })), results: null };
-  let matchStates = Array(MATCHES).fill(0);
   let lockedIndices = new Set();
+  const markedIndices = new Set();
+  const LOCK_CLOSED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor" fill-opacity="0.25"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  const LOCK_OPEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>';
+  function isPlaced() { return localStorage.getItem('lee_live_started') === 'true'; }
+  function restorePlacedPicks() {
+    try {
+      const lk = JSON.parse(localStorage.getItem('lee_locked_picks') || '{}');
+      Object.keys(lk).forEach(k => { const i = +k; if (state.matches[i] && Array.isArray(lk[k])) { state.matches[i].signs = lk[k]; lockedIndices.add(i); } });
+    } catch (e) {}
+    if (!isPlaced()) return;
+    try {
+      const p = JSON.parse(localStorage.getItem('lee_admin_final') || 'null');
+      if (Array.isArray(p)) p.forEach((s, i) => { if (state.matches[i] && Array.isArray(s)) state.matches[i].signs = s; });
+    } catch (e) {}
+  }
+  // Publicerar l\u00e5sta matcher + placering s\u00e5 att spelarna kan se dem
+  function publishLeeState() {
+    const locked = {}; lockedIndices.forEach(i => { locked[i] = state.matches[i].signs; });
+    try { localStorage.setItem('lee_locked_picks', JSON.stringify(locked)); } catch (e) {}
+    if (!currentRoundId) return;
+    let picks = [];
+    if (isPlaced()) { try { picks = JSON.parse(localStorage.getItem('lee_admin_final') || '[]'); } catch (e) {} }
+    try {
+      supabaseClient.from('rounds').update({ live_started: isPlaced(), admin_picks: picks, admin_locked: locked }).eq('id', currentRoundId)
+        .then(({ error }) => { if (error && !window.__leeSyncWarned) { window.__leeSyncWarned = true; console.warn('Spelstatus delas bara i denna webbl\u00e4sare (kolumner saknas i tabellen rounds):', error.message); } });
+    } catch (e) {}
+  }
+  function applyPlacedState() {
+    const placed = isPlaced();
+    $grid.classList.toggle('placed', placed);
+    $grid.querySelectorAll('.team-input').forEach(inp => { inp.readOnly = placed; });
+    $amount.disabled = placed; $clearBtn.disabled = placed;
+  }
+  
   let currentRoundId = null;
   let timerInterval = null;
   let chatInterval = null;
@@ -571,6 +601,8 @@
     renderChat();
     if (chatInterval) clearInterval(chatInterval);
     chatInterval = setInterval(() => { if (!document.hidden) renderChat(); }, 3000);
+    if (window.__barsTimer) clearInterval(window.__barsTimer);
+    window.__barsTimer = setInterval(() => { if (!document.hidden) updateAdminBars(); }, 15000);
   }
 
   async function loadMatches() {
@@ -588,7 +620,9 @@
           });
         }
       }
+      restorePlacedPicks();
       renderMatches();
+      updateAdminBars();
       updateAdminLiveStatusText();
     } catch(e) { console.error(e); }
   }
@@ -639,49 +673,59 @@
     else {
       const leePicks = state.matches.map(m => m.signs); localStorage.setItem('lee_admin_final', JSON.stringify(leePicks)); localStorage.setItem('lee_live_started', 'true');
     }
-    updatePlaceBtnState(); renderAdminLiveView(); updateAdminLiveStatusText();
+    updatePlaceBtnState(); renderAdminLiveView(); updateAdminLiveStatusText(); publishLeeState(); renderMatches();
   });
 
   function renderAdminLiveView() {
     const grid = document.getElementById('adminLiveGrid'); if(!grid) return; grid.innerHTML = '';
     state.matches.forEach((m, i) => {
-      const leePick = m.signs.join(' ');
+      const leePick = m.signs.length > 0 ? m.signs.join(' ') : 'Väntar...';
       const el = document.createElement('div'); el.className = 'live-card';
       el.innerHTML = `<div class="live-card-no">M${i+1}</div><div class="live-card-teams">${esc(m.home)}<br>${esc(m.away)}</div><div class="live-card-pick">${leePick}</div>`;
       grid.appendChild(el);
     });
   }
 
+  // Anteckningsrutan fyller alltid ut det lediga utrymmet i sista raden
+  function fitNotes() {
+    const tpl = getComputedStyle($grid).gridTemplateColumns;
+    if (!tpl || tpl === 'none') return;
+    const cols = tpl.split(' ').filter(Boolean).length || 1;
+    const rem = MATCHES % cols;
+    $notesCard.style.gridColumn = 'span ' + (rem === 0 ? cols : cols - rem);
+  }
+  window.addEventListener('resize', fitNotes);
+
   function renderMatches() {
+    const scroller = document.querySelector('.main'); const keepTop = scroller ? scroller.scrollTop : 0;
     $grid.innerHTML = '';
     const frag = document.createDocumentFragment();
     for (let i = 0; i < MATCHES; i++) {
-      const m = state.matches[i] || { home: '', away: '', signs: ['1'] };
-      const kind = m.signs.length === 3 ? 'hel' : m.signs.length === 2 ? 'halv' : '';
-      const el = document.createElement('div'); el.className = 'match';
-      const st = matchStates[i] || 0;
-      if (st === 1) el.classList.add('state-yellow');
-      else if (st === 2) el.classList.add('state-orange');
-      else if (st === 3) el.classList.add('state-red');
-      el.onmousedown = () => startDrag(i); el.onmouseenter = () => hoverDrag(i);
-      el.onclick = (e) => {
-        if (dragMoved) { dragMoved = false; return; }
-        if (e.target.tagName === 'INPUT' || e.target.classList.contains('sign') || e.target.tagName === 'BUTTON' || e.target.closest('details')) return;
-        cycleMatchState(i);
-      };
+      const m = state.matches[i] || { home: '', away: '', signs: [] };
+      const n = m.signs.length; const kind = n === 3 ? 'hel' : n === 2 ? 'halv' : n === 1 ? 'spik' : '';
+      const el = document.createElement('div'); el.className = 'match' + (n === 2 ? ' halv' : n === 3 ? ' hel' : '') + (markedIndices.has(i) ? ' marked' : '');
+      if (lockedIndices.has(i)) el.classList.add('locked-highlight');
+      
+      el.onmousedown = (ev) => startDrag(ev, i);
+      el.onmouseenter = () => hoverDrag(i);
+      el.onclick = (ev) => cardClick(ev, i);
+      
       el.innerHTML = `
-        ${st === 3 ? '<div class="lock-badge">&#128274;</div>' : ''}
-        <div class="match-header"><span class="match-no">M${i+1}</span><span class="match-tag">${kind === 'hel' ? 'HEL' : kind === 'halv' ? 'HALV' : ''}</span>
-          <div class="match-actions"><button class="btn-move" onclick="moveMatch(${i}, -1)">↑</button><button class="btn-move" onclick="moveMatch(${i}, 1)">↓</button></div>
+        <div class="match-header"><span class="match-no">M${i+1}</span><span class="match-tag ${kind}">${kind ? kind.toUpperCase() : ''}</span>
+          <div class="match-actions"><button type="button" class="btn-move btn-lock ${lockedIndices.has(i) ? 'on' : ''}" title="${lockedIndices.has(i) ? 'L\u00e5s upp match' : 'L\u00e5s match'}" onclick="toggleCardLock(event, ${i})">${lockedIndices.has(i) ? LOCK_CLOSED : LOCK_OPEN}</button></div>
         </div>
         <div class="teams"><input type="text" class="team-input" placeholder="Hemmalag" value="${esc(m.home)}" oninput="updateTeam(${i}, 'home', this.value)"><input type="text" class="team-input" placeholder="Bortalag" value="${esc(m.away)}" oninput="updateTeam(${i}, 'away', this.value)"></div>
         <div class="signs"><div class="sign ${m.signs.includes('1') ? 'on' : ''}" onclick="toggleSign(event, ${i}, '1')">1</div><div class="sign ${m.signs.includes('X') ? 'on' : ''}" onclick="toggleSign(event, ${i}, 'X')">X</div><div class="sign ${m.signs.includes('2') ? 'on' : ''}" onclick="toggleSign(event, ${i}, '2')">2</div></div>
         <details class="stats-accordion" id="admin-details-${i}"><summary>Visa alla tips (0 inlämnade)</summary><div class="stats-content" id="admin-stats-${i}"></div></details>`;
-      if (lockedIndices.has(i)) el.insertAdjacentHTML('beforeend', '<div class="lock-badge">🔒</div>');
+      const det = el.querySelector('details.stats-accordion');
+      if (det) { if (openDetails.has(i)) det.open = true; det.addEventListener('toggle', () => { if (det.open) openDetails.add(i); else openDetails.delete(i); }); }
       frag.appendChild(el);
     }
-    $grid.appendChild(frag); updateLiveStats(); updateAdminBars();
+    frag.appendChild($notesCard); $grid.appendChild(frag); applyPlacedState(); updateLiveStats(); paintAdminBars(); fitNotes(); if (scroller) scroller.scrollTop = keepTop;
   }
+
+  let adminSuggestions = [];
+  const openDetails = new Set();
 
   async function updateAdminBars() {
     try {
@@ -690,31 +734,36 @@
         const { data: rounds } = await supabaseClient.from('rounds').select('id').order('created_at', { ascending: false }).limit(1);
         if(rounds && rounds.length > 0) currentRoundId = rounds[0].id; else return;
       }
-      const { data: suggestions } = await supabaseClient.from('suggestions').select('*').eq('round_id', currentRoundId).eq('submitted', true);
-      const combos = ['1', 'X', '2', '1X', '12', 'X2', '1X2'];
-      for (let i = 0; i < MATCHES; i++) {
-        const details = document.getElementById(`admin-details-${i}`); const container = document.getElementById(`admin-stats-${i}`);
-        if (!details || !container) continue;
-        let matchVotes = 0; let matchCounts = {}; combos.forEach(c => matchCounts[c] = 0);
-        if (suggestions) {
-          suggestions.forEach(sugg => {
-            const picksArray = sugg.picks;
-            if (picksArray && picksArray[i] && picksArray[i].length > 0) {
-              matchVotes++;
-              const sortedPick = [...picksArray[i]].sort((a,b) => ['1','X','2'].indexOf(a) - ['1','X','2'].indexOf(b));
-              const pickStr = sortedPick.join(''); if (matchCounts[pickStr] !== undefined) matchCounts[pickStr]++;
-            }
-          });
+      const { data: allSuggestions } = await supabaseClient.from('suggestions').select('*').eq('round_id', currentRoundId).order('created_at', { ascending: true });
+      const uniquePlayers = new Map();
+      if (allSuggestions) allSuggestions.forEach(s => uniquePlayers.set(s.player_id, s));
+      adminSuggestions = Array.from(uniquePlayers.values()).filter(s => s.submitted === true);
+      paintAdminBars();
+    } catch (error) { console.error("Kunde inte h\u00e4mta tips:", error); }
+  }
+
+  // Ritar "Visa alla tips" fr\u00e5n cachen direkt, utan n\u00e4tverksf\u00f6rdr\u00f6jning
+  function paintAdminBars() {
+    const combos = ['1', 'X', '2', '1X', '12', 'X2', '1X2'];
+    for (let i = 0; i < MATCHES; i++) {
+      const details = document.getElementById(`admin-details-${i}`); const container = document.getElementById(`admin-stats-${i}`);
+      if (!details || !container) continue;
+      let matchVotes = 0; let matchCounts = {}; combos.forEach(c => matchCounts[c] = 0);
+      adminSuggestions.forEach(sugg => {
+        const picksArray = sugg.picks;
+        if (picksArray && picksArray[i] && picksArray[i].length > 0) {
+          matchVotes++;
+          const sortedPick = [...picksArray[i]].sort((a,b) => ['1','X','2'].indexOf(a) - ['1','X','2'].indexOf(b));
+          const pickStr = sortedPick.join(''); if (matchCounts[pickStr] !== undefined) matchCounts[pickStr]++;
         }
-        if (matchVotes > 0) details.classList.add('has-tips');
-        else details.classList.remove('has-tips');
-        details.querySelector('summary').textContent = `Visa alla tips (${matchVotes} inlämnade)`;
-        container.innerHTML = combos.map(c => {
-          const count = matchCounts[c]; const pct = matchVotes > 0 ? Math.round((count / matchVotes) * 100) : 0; const isActive = count > 0 ? 'active' : '';
-          return `<div class="stat-bar-row"><span class="stat-label ${isActive}">${c}</span><div class="stat-track"><div class="stat-fill" style="width:${pct}%"></div></div><span class="stat-count ${isActive}">${count}</span></div>`;
-        }).join('');
-      }
-    } catch (error) { console.error("Kunde inte hämta tips:", error); }
+      });
+      if (matchVotes > 0) details.classList.add('has-tips'); else details.classList.remove('has-tips');
+      details.querySelector('summary').textContent = `Visa alla tips (${matchVotes} inl\u00e4mnade)`;
+      container.innerHTML = combos.map(c => {
+        const count = matchCounts[c]; const pct = matchVotes > 0 ? Math.round((count / matchVotes) * 100) : 0; const isActive = count > 0 ? 'active' : '';
+        return `<div class="stat-bar-row"><span class="stat-label ${isActive}">${c}</span><div class="stat-track"><div class="stat-fill" style="width:${pct}%"></div></div><span class="stat-count ${isActive}">${count}</span></div>`;
+      }).join('');
+    }
   }
 
   window.switchTab = function(tabId) {
@@ -722,55 +771,60 @@
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     document.getElementById('tab-' + tabId).classList.add('active');
     const btns = document.querySelectorAll('.tab-btn');
-    if (tabId === 'kupong') btns[0].classList.add('active');
-    if (tabId === 'playerview') { btns[1].classList.add('active'); renderChat(); renderAdminLiveView(); updateAdminLiveStatusText(); }
+    if (tabId === 'kupong') { btns[0].classList.add('active'); updateAdminBars(); }
+    if (tabId === 'playerview') { btns[1].classList.add('active'); const cb = document.getElementById('chatBadge'); if (cb) cb.style.display = 'none'; renderChat(); renderAdminLiveView(); updateAdminLiveStatusText(); }
     if (tabId === 'tabell') btns[2].classList.add('active');
     if (tabId === 'admin') { btns[3].classList.add('active'); loadUsers(); loadRssFeeds(); }
   };
 
   window.toggleAccordion = function(id) { document.getElementById(id).classList.toggle('open'); };
 
-  
   function comboText(c){ return c.hela + ' hela ' + c.halva + ' ' + (c.halva === 1 ? 'halv' : 'halva'); }
   function comboFromAmount(amount){ const rows = amount / PRICE_PER_ROW; if (!Number.isInteger(rows) || rows < 1) return null; for (const c of allValidCombos) { if (c.amount === amount) return { hela: c.hela, halva: c.halva, rows: c.rows }; if (c.amount > amount) break; } return null; }
   function getCurrentCombo() { let hela = 0, halva = 0; for (const m of state.matches) { if (m.signs.length === 3) hela++; else if (m.signs.length === 2) halva++; } let rows = 1; for (const m of state.matches) rows *= m.signs.length; return { hela, halva, rows }; }
 
-  let isDragging = false, startIdx = null, endIdx = null, dragMoved = false;
+  let isDragging = false, startIdx = null, endIdx = null;
   function updateDragHighlight() {
     if (startIdx === null || endIdx === null) return;
     const min = Math.min(startIdx, endIdx), max = Math.max(startIdx, endIdx);
     document.querySelectorAll('.match').forEach((el, i) => { if (i >= min && i <= max) el.classList.add('drag-highlight'); else el.classList.remove('drag-highlight'); });
   }
-  window.startDrag = function(idx) { if (event.target.tagName === 'INPUT' || event.target.classList.contains('sign') || event.target.tagName === 'BUTTON' || event.target.closest('details')) return; isDragging = true; startIdx = idx; endIdx = idx; dragMoved = false; document.querySelectorAll('.match').forEach(el => el.classList.remove('drag-highlight')); updateDragHighlight(); };
-  window.hoverDrag = function(idx) { if (isDragging) { if (idx !== startIdx) dragMoved = true; endIdx = idx; updateDragHighlight(); } };
-  document.addEventListener('mouseup', () => { isDragging = false; });
-  
-  window.lockHighlight = function(idx) {
-    if (event.target.tagName === 'INPUT' || event.target.classList.contains('sign') || event.target.tagName === 'BUTTON' || event.target.closest('details')) return;
-    const min = Math.min(startIdx, endIdx), max = Math.max(startIdx, endIdx);
-    let isCurrentlyLocked = false; for(let i = min; i <= max; i++) if (lockedIndices.has(i)) isCurrentlyLocked = true;
-    document.querySelectorAll('.match').forEach((el, i) => {
-      if (i >= min && i <= max) { if (isCurrentlyLocked) { el.classList.remove('locked-highlight'); lockedIndices.delete(i); } else { el.classList.remove('drag-highlight'); el.classList.add('locked-highlight'); lockedIndices.add(i); } }
-    });
-    startIdx = null; endIdx = null;
+  function isInteractive(t) { return !!(t && t.closest && t.closest('input, button, textarea, details, .sign')); }
+  window.startDrag = function(ev, idx) {
+    if (isPlaced() || isInteractive(ev.target)) return;
+    isDragging = true; startIdx = idx; endIdx = idx;
+  };
+  window.hoverDrag = function(idx) {
+    if (isDragging) { endIdx = idx; updateDragHighlight(); }
+  };
+  document.addEventListener('mouseup', () => {
+    if (isDragging && startIdx !== null && endIdx !== null && startIdx !== endIdx) {
+      const min = Math.min(startIdx, endIdx), max = Math.max(startIdx, endIdx);
+      let allMarked = true; for (let i = min; i <= max; i++) if (!markedIndices.has(i)) allMarked = false;
+      for (let i = min; i <= max; i++) { if (allMarked) markedIndices.delete(i); else markedIndices.add(i); }
+      renderMatches();
+    } else {
+      document.querySelectorAll('.match.drag-highlight').forEach(el => el.classList.remove('drag-highlight'));
+    }
+    isDragging = false; startIdx = null; endIdx = null;
+  });
+  // Enkelklick på kortet byter färg (markerar / avmarkerar)
+  window.cardClick = function(ev, idx) {
+    if (isPlaced() || isInteractive(ev.target)) return;
+    if (markedIndices.has(idx)) markedIndices.delete(idx); else markedIndices.add(idx);
+    renderMatches();
   };
 
-  window.cycleMatchState = function(idx) { matchStates[idx] = ((matchStates[idx] || 0) + 1) % 4; renderMatches(); };
-
-  window.moveMatch = function(idx, dir) { const newIdx = idx + dir; if (newIdx < 0 || newIdx >= MATCHES) return; [state.matches[idx], state.matches[newIdx]] = [state.matches[newIdx], state.matches[idx]]; renderMatches(); };
-  window.updateTeam = function(idx, field, val) { state.matches[idx][field] = val; };
-  window.toggleSign = function(event, idx, sign) { 
-      if (event) event.stopPropagation(); 
-      if (matchStates[idx] === 3) return; 
-      const m = state.matches[idx]; 
-      if (m.signs.includes(sign)) { 
-          m.signs = m.signs.filter(s => s !== sign); 
-      } else { 
-          m.signs.push(sign); 
-          m.signs.sort((a, b) => ['1', 'X', '2'].indexOf(a) - ['1', 'X', '2'].indexOf(b)); 
-      } 
-      renderMatches(); 
+  window.toggleCardLock = function(e, idx) {
+    if (e) e.stopPropagation();
+    if (isPlaced()) return;
+    if (lockedIndices.has(idx)) lockedIndices.delete(idx); else lockedIndices.add(idx);
+    publishLeeState();
+    renderMatches();
   };
+  window.moveMatch = function(idx, dir) { if (isPlaced()) return; const newIdx = idx + dir; if (newIdx < 0 || newIdx >= MATCHES || lockedIndices.has(idx) || lockedIndices.has(newIdx)) return; [state.matches[idx], state.matches[newIdx]] = [state.matches[newIdx], state.matches[idx]]; renderMatches(); };
+  window.updateTeam = function(idx, field, val) { if (isPlaced()) return; state.matches[idx][field] = val; };
+  window.toggleSign = function(event, idx, sign) { if (event) event.stopPropagation(); if (isPlaced() || lockedIndices.has(idx)) return; const m = state.matches[idx]; if (m.signs.includes(sign)) { m.signs = m.signs.filter(s => s !== sign); } else { m.signs.push(sign); m.signs.sort((a, b) => ['1', 'X', '2'].indexOf(a) - ['1', 'X', '2'].indexOf(b)); } renderMatches(); };
 
   function updateLiveStats() {
     const target = parseInt($amount.value.replace(/\D/g, ''), 10) || 0; const current = getCurrentCombo();
@@ -778,7 +832,6 @@
         $liveInsats.textContent = '-';
         $liveInsats.style.color = 'var(--muted)';
         $liveCombo.textContent = 'Inga val';
-        $liveCombo.className = 'data-value';
         return;
     }
     $liveInsats.textContent = current.rows + ' kr';
@@ -790,9 +843,6 @@
     const raw = $amount.value.trim(); const amount = /^\d+$/.test(raw) ? parseInt(raw, 10) : null; const combo = amount ? comboFromAmount(amount) : null;
     if (combo) {
       $targetCombo.textContent = comboText(combo); $targetCombo.style.color = 'var(--gold)'; $comboSub.innerHTML = ''; $comboSub.classList.remove('active');
-      
-      
-      
     } else {
       $targetCombo.textContent = 'Hittades ej'; $targetCombo.style.color = 'var(--red)';
       if (amount) {
@@ -801,15 +851,16 @@
         $comboSub.innerHTML = sub; $comboSub.classList.add('active');
       } else { $comboSub.innerHTML = ''; $comboSub.classList.remove('active'); }
     }
-    renderMatches(); updateLiveStats();
+    updateLiveStats();
   });
   $comboSub.addEventListener('click', (e) => { if (e.target.classList.contains('suggest-link')) { e.preventDefault(); $amount.value = e.target.getAttribute('data-amount'); $amount.dispatchEvent(new Event('input')); } });
 
   $clearBtn.addEventListener('click', async () => { 
       if (await customConfirm('Vill du rensa hela kupongen?')) { 
           state.matches = Array.from({ length: MATCHES }, () => ({ home: '', away: '', signs: [] })); 
-          matchStates = Array(MATCHES).fill(0); 
+          lockedIndices.clear(); markedIndices.clear(); publishLeeState();
           $notes.value = ''; 
+          try { localStorage.removeItem('lee_admin_notes'); } catch (e) {} 
           $amount.value = ''; 
           $targetCombo.textContent = '–'; 
           $comboSub.innerHTML = ''; 
@@ -819,7 +870,6 @@
       } 
   });
 
-  
   function renderSystemTable() {
     $sysBody.innerHTML = '';
     const data = [
@@ -841,7 +891,8 @@
     });
   }
 
-  let sortState = { col: null, dir: 1 };
+  let sortState = { col: 2, dir: 1 };
+  document.getElementById('sort-icon-2').textContent = '▲';
   window.sortTable = function(col) {
     sortState.dir = sortState.col === col ? -sortState.dir : 1;
     sortState.col = col;
@@ -851,14 +902,29 @@
     [0,1,2].forEach(i => { const el = document.getElementById('sort-icon-' + i); if (el) el.textContent = i === col ? (sortState.dir === 1 ? '▲' : '▼') : ''; });
   };
 
+  function updateChatBadge(chat) {
+    const badge = document.getElementById('chatBadge'); if (!badge) return;
+    const ts = m => new Date(m.created_at).getTime() || 0;
+    const latest = chat.length ? Math.max(...chat.map(ts)) : 0;
+    let seen = parseInt(localStorage.getItem('lee_chat_seen') || '', 10);
+    if (isNaN(seen)) { seen = latest; localStorage.setItem('lee_chat_seen', String(seen)); }
+    const tab = document.getElementById('tab-playerview');
+    if (tab && tab.classList.contains('active') && !document.hidden) { seen = latest; localStorage.setItem('lee_chat_seen', String(seen)); }
+    const unread = chat.filter(m => m.username !== 'Lee' && ts(m) > seen).length;
+    badge.textContent = unread > 9 ? '9+' : String(unread);
+    badge.style.display = unread > 0 ? 'inline-flex' : 'none';
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && typeof renderChat === 'function' && document.getElementById('app') && document.getElementById('app').style.display !== 'none') renderChat(); });
+
   async function renderChat() {
     const { data: chat } = await supabaseClient.from('chat_messages').select('*').order('created_at', { ascending: true }).limit(50);
     if(!chat) return;
+    updateChatBadge(chat);
     const container = document.getElementById('adminChatMessages'); if(!container) return;
-    const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 50;
     const sig = JSON.stringify(chat.map(m => m.id ?? m.created_at));
     if (container.dataset.sig === sig) return;
     container.dataset.sig = sig;
+    const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 50;
     container.innerHTML = chat.map(m => { const isMe = m.username === 'Lee'; return `<div class="msg ${isMe ? 'lee' : 'me'}"><span class="msg-sender">${isMe ? 'Lee (Admin)' : esc(m.username)}</span><div class="msg-bubble">${esc(m.message)}</div></div>`; }).join('');
     if (isScrolledToBottom) container.scrollTop = container.scrollHeight;
   }
@@ -953,6 +1019,7 @@
   };
 
   async function fetchRSS() {
+    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return;
     try {
       const { data: feeds } = await supabaseClient.from('rss_feeds').select('*');
       if (!feeds || feeds.length === 0) return;
@@ -975,7 +1042,6 @@
     } catch (e) { console.error('RSS fetch misslyckades:', e); }
   }
 
-  // Pausa/Fortsätt-knappen för nyhetstickern
   document.getElementById('rssPauseBtn').addEventListener('click', function () {
     const t = document.getElementById('rssFeed');
     const paused = t.classList.toggle('paused');
@@ -984,5 +1050,3 @@
 </script>
 </body>
 </html>
-
-

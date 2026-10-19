@@ -32,7 +32,7 @@
 
   .topbar{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--border);background:var(--panel);flex-shrink:0;}
   .logo-mark{width: 40px; height: 24px;display:flex;align-items:center;justify-content:center;overflow: hidden; border-radius: 2px;}
-  .logo-mark svg { width: 100%; height: 100%; object-fit: cover; }
+  .logo-mark img { width: 100%; height: 100%; object-fit: contain; }
   .brand-name{font-weight:800;font-size:13px;letter-spacing:1.5px}
   .brand-sub{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
   .spacer{flex:1}
@@ -73,7 +73,17 @@
       gap: 6px;
       transition: 0.2s;
   }
-  .match.locked{opacity:0.5;pointer-events:none;}
+  .match.locked { pointer-events: none; }
+  .match.locked .match-header, .match.locked .teams, .match.locked .signs { opacity: 0.5; }
+  .match.lee-known { border-color: rgba(51,224,138,0.35); }
+  .match.locked.lit { pointer-events: auto; cursor: pointer; }
+  .match.locked.lit .match-header, .match.locked.lit .teams, .match.locked.lit .signs { opacity: 1; }
+  .match.locked.lit .sign { pointer-events: none; }
+  .match.marked { background: #3d3420; border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
+  .lee-row { display: flex; align-items: center; gap: 4px; padding-top: 6px; border-top: 1px dashed var(--border-soft); font-size: 10px; }
+  .lee-label { font-weight: 800; letter-spacing: 1px; color: var(--muted); margin-right: 2px; }
+  .lee-sign { min-width: 22px; text-align: center; font-weight: 800; font-size: 12px; padding: 3px 0; border-radius: 4px; color: var(--green); background: rgba(51,224,138,0.12); border: 1px solid rgba(51,224,138,0.35); }
+  .lee-wait { color: var(--muted); font-style: italic; }
   .match-header{display:flex;justify-content:space-between;align-items:center;}
   .match-no{font-size:10px;font-weight:800;color:var(--gold);}
   .teams{font-size:12px;font-weight:600;line-height:1.3;}
@@ -83,7 +93,6 @@
   .sign:hover{background:rgba(255,255,255,0.05);}
   .sign.on{color:var(--gold);background:rgba(232,193,90,0.15);border-color:rgba(232,193,90,0.4);}
   
-  .data-label { font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
   .notes-card { 
       grid-column: span 2; 
       background: var(--panel2); 
@@ -93,17 +102,13 @@
       display: flex; 
       flex-direction: column; 
   }
+  .data-label { font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
   .notes-card textarea { flex: 1; width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 8px; resize: none; outline: none; font-family: inherit; font-size: 12px; }
 
   .live-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; overflow: hidden; }
   .live-header { display:flex; justify-content:space-between; margin-bottom:12px; border-bottom: 1px solid var(--border-soft); padding-bottom: 8px;}
   .live-header h2 { font-size:16px; }
   .live-header span { font-size:11px; color:var(--gold); font-weight: 600;}
-  .live-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(115px, 1fr)); gap:8px; overflow-y: auto; padding-right: 4px; }
-  .live-card { background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:8px; }
-  .live-card-no { font-size:10px; color:var(--gold); font-weight:800; margin-bottom:4px;}
-  .live-card-teams { font-size:11px; font-weight:600; line-height:1.3; margin-bottom:6px;}
-  .live-card-pick { font-size:14px; font-weight:800; color:var(--gold); text-align:center; background:rgba(232,193,90,0.1); padding:6px; border-radius:4px; border:1px solid rgba(232,193,90,0.3); }
 
   .chat-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; }
   .chat-header { padding: 12px 16px; border-bottom: 1px solid var(--border-soft); font-size: 14px; font-weight: 700; background: var(--panel2); display: flex; justify-content: space-between; align-items: center; }
@@ -127,6 +132,8 @@
   .submit-info strong{color:var(--text);}
   .btn-submit{padding:8px 16px;border:none;border-radius:6px;background:linear-gradient(135deg,#f6da8b,var(--gold-deep));color:#1a1206;font-weight:800;font-size:12px;cursor:pointer;transition:0.2s;}
   .btn-submit:disabled{opacity:0.5;cursor:not-allowed;}
+  .btn-submit.is-locked{background:rgba(224,90,90,0.12);color:var(--red);border:1px solid rgba(224,90,90,0.4);opacity:1;cursor:default;display:inline-flex;align-items:center;gap:6px;}
+  .btn-submit.is-locked svg{width:14px;height:14px;}
 
   .custom-toast {
       position: fixed; bottom: 30px; left: 50%;
@@ -137,11 +144,14 @@
       opacity: 0; transition: all 0.3s; z-index: 99999; pointer-events: none;
   }
   .custom-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
   @media (max-width: 768px) {
-    .main { display: flex; flex-direction: column; height: auto; min-height: calc(100vh - 60px); overflow-y: auto; padding: 12px; }
-    .left-column { height: auto; overflow: visible; }
-    .panel { height: auto; min-height: 450px; margin-bottom: 16px; }
-    .chat-panel { height: 500px; flex-shrink: 0; }
+    body { height: auto; overflow-y: auto; }
+    #app { height: auto; min-height: 100vh; overflow: visible; }
+    .main { display: flex; flex-direction: column; height: auto; overflow: visible; padding: 12px; gap: 16px; }
+    .left-column { height: auto; overflow: visible; order: 2; }
+    .panel { height: auto; min-height: 450px; flex: none; }
+    .chat-panel { height: 450px; flex: none; margin-bottom: 20px; order: 1; }
     .match-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
     .topbar { flex-wrap: wrap; gap: 8px; padding: 8px; }
     .top-controls { width: 100%; justify-content: space-between; margin-top: 8px; }
@@ -163,7 +173,6 @@
   </div>
 </div>
 
-<!-- Ruta för att skriva nytt lösenord -->
 <div id="resetScreen">
   <div class="login-card">
     <h1>NYTT LÖSENORD</h1>
@@ -173,7 +182,6 @@
   </div>
 </div>
 
-<!-- Ruta för att begära återställningslänk -->
 <div id="forgotModal">
   <div class="login-card">
     <h1>ÅTERSTÄLL</h1>
@@ -195,7 +203,7 @@
     </div>
     <div class="spacer"></div>
     <div class="top-controls">
-      <span style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-right:8px;">Till inlämning:</span>
+      <span style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-right:8px;">Nedräkning till inlämning:</span>
       <span class="countdown" id="countdown">--:--:--</span>
       <button class="btn-logout" onclick="logout()">Logga ut</button>
     </div>
@@ -206,23 +214,15 @@
         <section class="panel" id="tipView">
           <div class="panel-head">
             <h2>Dina tips</h2>
-            <button class="btn-clear" onclick="clearMyCoupon()">Rensa</button>
+            <button class="btn-clear" id="clearBtn" onclick="clearMyCoupon()">Rensa</button>
           </div>
           <div class="match-grid" id="matchGrid"></div>
           <div class="submit-bar">
             <div class="submit-info" id="submitInfo">Ifyllda: <strong>0</strong> / 13</div>
-            <button class="btn-submit" id="undoBtn" onclick="undoTips()" style="display:none; background:var(--red); color:white; margin-right:8px;">Ångra inlämning</button>
             <button class="btn-submit" id="submitBtn" onclick="submitTips()">Lämna in tips</button>
           </div>
         </section>
 
-        <section class="panel" id="liveView" style="display: none;">
-          <div class="live-header" style="padding: 16px; border-bottom: 1px solid var(--border-soft); display: flex; justify-content: space-between;">
-            <h2 style="font-size:16px;">Livevy - Lees Spel</h2>
-            <span id="playerLiveStatusText" style="font-size:11px; color:var(--green); font-weight:600;">ÖPPEN</span>
-          </div>
-          <div class="live-grid" id="liveGrid" style="padding: 16px; overflow-y: auto;"></div>
-        </section>
       </div>
 
       <div class="chat-panel">
@@ -264,7 +264,6 @@
   };
   const supabaseClient = window.supabase.createClient(SB_CFG.url, SB_CFG.key);
 
-  // HÄR HAR VI EN SÄKERHETS-LISTA MED ALLA MATCHER SÅ DET ALDRIG BLIR TOMT
   const FALLBACK_MATCHES = [
     { home: 'Bayern München', away: 'Arsenal' }, { home: 'Aston Villa', away: 'Viking' },
     { home: 'Inter', away: 'Shakhtar Donetsk' }, { home: 'Real Madrid', away: 'RB Leipzig' },
@@ -281,6 +280,7 @@
   let currentRoundId = null;
   let picks = Array(13).fill(null).map(() => []);
   let isSubmitted = false;
+  const LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor" fill-opacity="0.25"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
   let deadline = 0;
   let timerInterval = null;
   let chatInterval = null;
@@ -314,26 +314,21 @@
     document.getElementById('brandSub').textContent = currentPlayer;
     
     await loadState();
-    checkLiveStatus();
+    renderMatches();
     startCountdown();
     
     if (chatInterval) clearInterval(chatInterval);
     chatInterval = setInterval(() => { if (!document.hidden) renderChat(); }, 3000);
+    if (leeInterval) clearInterval(leeInterval);
+    leeInterval = setInterval(() => { if (!document.hidden) refreshLee(); }, 5000);
   }
 
   async function saveNewPassword() {
     const newPass = document.getElementById('newPass').value;
     if (newPass.length < 6) { alert('Lösenordet måste vara minst 6 tecken.'); return; }
-    
     const { error } = await supabaseClient.auth.updateUser({ password: newPass });
-    
-    if (error) {
-      alert('Kunde inte spara: ' + error.message);
-    } else {
-      alert('Lösenordet har uppdaterats! Du kan nu logga in.');
-      await supabaseClient.auth.signOut();
-      location.reload();
-    }
+    if (error) { alert('Kunde inte spara: ' + error.message); } 
+    else { alert('Lösenordet har uppdaterats! Du kan nu logga in.'); await supabaseClient.auth.signOut(); location.reload(); }
   }
 
   async function logout() {
@@ -343,47 +338,47 @@
     location.reload();
   }
 
-  function showForgotPassword(e) {
-    e.preventDefault();
-    document.getElementById('forgotEmail').value = '';
-    document.getElementById('forgotModal').style.display = 'flex';
-  }
-
-  function closeForgotPassword(e) {
-    if (e) e.preventDefault();
-    document.getElementById('forgotModal').style.display = 'none';
-  }
+  function showForgotPassword(e) { e.preventDefault(); document.getElementById('forgotEmail').value = ''; document.getElementById('forgotModal').style.display = 'flex'; }
+  function closeForgotPassword(e) { if (e) e.preventDefault(); document.getElementById('forgotModal').style.display = 'none'; }
 
   async function submitForgotPassword() {
     const email = document.getElementById('forgotEmail').value.trim();
     if (!email) { alert('Ange din e-postadress.'); return; }
-    
-    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + window.location.pathname
-    });
-    
-    if (error) {
-      alert('Fel: ' + error.message);
-    } else {
-      alert('En återställningslänk har skickats till ' + email + '!');
-      closeForgotPassword();
-    }
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
+    if (error) { alert('Fel: ' + error.message); } else { alert('En återställningslänk har skickats till ' + email + '!'); closeForgotPassword(); }
   }
 
-  function checkLiveStatus() {
-    if (localStorage.getItem('lee_live_started') === 'true') {
-      document.getElementById('tipView').style.display = 'none';
-      document.getElementById('liveView').style.display = 'flex';
-      renderLiveView(); updatePlayerLiveStatusText();
-      renderChat();
-    } else {
-      document.getElementById('tipView').style.display = 'flex';
-      document.getElementById('liveView').style.display = 'none';
-      renderMatches();
-    }
+  // Lees spelstatus: från databasen om kolumnerna finns i rounds, annars från webbläsaren
+  let leeRemote = null;
+  let leeInterval = null;
+  function readJson(key, fallback) { try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch (e) { return fallback; } }
+  function getLee() {
+    if (leeRemote) return leeRemote;
+    return { started: localStorage.getItem('lee_live_started') === 'true', picks: readJson('lee_admin_final', []), locked: readJson('lee_locked_picks', {}) };
   }
+  function applyRound(row) {
+    if (row && 'live_started' in row) leeRemote = { started: !!row.live_started, picks: row.admin_picks || [], locked: row.admin_locked || {} };
+  }
+  async function refreshLee() {
+    try {
+      const { data } = await supabaseClient.from('rounds').select('*').order('created_at', { ascending: false }).limit(1);
+      if (data && data[0]) {
+        const before = JSON.stringify(getLee()); applyRound(data[0]);
+        if (JSON.stringify(getLee()) !== before) renderMatches();
+      }
+    } catch (e) {}
+  }
+  window.addEventListener('storage', (e) => { if (e.key && e.key.startsWith('lee_')) renderMatches(); });
 
-  window.addEventListener('storage', (e) => { if (e.key === 'lee_live_started') checkLiveStatus(); });
+  // Egna markeringar (beläser kort) när Lee har placerat spelet
+  const MARKS_KEY = 'lee_player_marks';
+  const marks = new Set(readJson(MARKS_KEY, []));
+  function markCard(i) {
+    if (!isSubmitted || !getLee().started) return;
+    if (marks.has(i)) marks.delete(i); else marks.add(i);
+    try { localStorage.setItem(MARKS_KEY, JSON.stringify([...marks])); } catch (e) {}
+    renderMatches();
+  }
 
   async function saveState() {
     if (!currentUserId || !currentRoundId) return;
@@ -396,13 +391,12 @@
 
   async function loadState() {
     try {
-      const { data: rounds } = await supabaseClient.from('rounds').select('id, deadline').order('created_at', { ascending: false }).limit(1);
+      const { data: rounds } = await supabaseClient.from('rounds').select('*').order('created_at', { ascending: false }).limit(1);
       if (rounds && rounds.length > 0) {
-        currentRoundId = rounds[0].id;
+        currentRoundId = rounds[0].id; applyRound(rounds[0]);
         if (rounds[0].deadline) deadline = new Date(rounds[0].deadline).getTime();
         
         const { data: matches } = await supabaseClient.from('matches').select('*').eq('round_id', currentRoundId).order('match_order');
-        // Om databasen har matcher, använd dem istället för fallback
         if (matches && matches.length === 13) {
           MATCHES = matches.map(m => ({ home: m.home, away: m.away }));
         }
@@ -416,27 +410,15 @@
     } catch (e) { console.error(e); }
   }
 
-  function updatePlayerLiveStatusText() {
-      const el = document.getElementById('playerLiveStatusText');
-      if (!el) return;
-      const isLiveStarted = localStorage.getItem('lee_live_started') === 'true';
-      const isDeadlinePassed = deadline > 0 && deadline < Date.now();
-
-      if (isLiveStarted) { el.textContent = 'LÅST'; el.style.color = 'var(--red)'; }
-      else if (isDeadlinePassed || isSubmitted) { el.textContent = 'LÅST'; el.style.color = 'var(--red)'; }
-      else { el.textContent = 'ÖPPEN'; el.style.color = 'var(--green)'; }
-  }
-
   function startCountdown() {
     if (timerInterval) clearInterval(timerInterval);
     const cd = document.getElementById('countdown');
     function update() {
+      if (!deadline && !isSubmitted) { cd.textContent = '--:--:--'; return; }
       const ms = deadline - Date.now();
-      if (!deadline) { cd.textContent = '--:--:--'; updatePlayerLiveStatusText(); return; }
       if (isSubmitted || ms <= 0) {
         cd.textContent = 'LÅST'; cd.classList.add('warning');
         if (ms <= 0 && !isSubmitted) { isSubmitted = true; renderMatches(); saveState(); }
-        updatePlayerLiveStatusText();
         return;
       }
       if (ms < 4 * 60 * 60 * 1000) cd.classList.add('warning'); else cd.classList.remove('warning');
@@ -448,17 +430,21 @@
       let timeStr = ''; if (days > 0) timeStr += days + ' dagar ';
       timeStr += String(hours).padStart(2,'0') + ':' + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
       cd.textContent = timeStr;
-      updatePlayerLiveStatusText();
-    }
+      }
     update(); timerInterval = setInterval(update, 1000);
   }
 
   function renderMatches() {
     const grid = document.getElementById('matchGrid');
     grid.innerHTML = '';
+    const lee = getLee(); const lit = isSubmitted && lee.started;
     MATCHES.forEach((m, i) => {
+      const leeKnown = lee.started || (lee.locked && lee.locked[i] !== undefined);
+      const leeSigns = lee.started ? (lee.picks[i] || []) : ((lee.locked && lee.locked[i]) || []);
       const el = document.createElement('div');
-      el.className = 'match'; if (isSubmitted) el.classList.add('locked');
+      el.className = 'match' + (isSubmitted ? ' locked' : '') + (lit ? ' lit' : '') + (lit && marks.has(i) ? ' marked' : '') + (isSubmitted && leeKnown && !lit ? ' lee-known' : '');
+      if (lit) el.onclick = () => markCard(i);
+      const leeRow = isSubmitted ? `<div class="lee-row"><span class="lee-label">LEE</span>${leeKnown ? (leeSigns.length ? leeSigns.map(x => `<span class="lee-sign">${x}</span>`).join('') : '<span class="lee-wait">&ndash;</span>') : '<span class="lee-wait">Väntar...</span>'}</div>` : '';
       const p = picks[i] || [];
       el.innerHTML = `
         <div class="match-header"><span class="match-no">M${i+1}</span></div>
@@ -467,7 +453,7 @@
           <div class="sign ${p.includes('1') ? 'on' : ''}" onclick="toggleSign(${i}, '1')">1</div>
           <div class="sign ${p.includes('X') ? 'on' : ''}" onclick="toggleSign(${i}, 'X')">X</div>
           <div class="sign ${p.includes('2') ? 'on' : ''}" onclick="toggleSign(${i}, '2')">2</div>
-        </div>`;
+        </div>${leeRow}`;
       grid.appendChild(el);
     });
     
@@ -483,14 +469,32 @@
       localStorage.setItem('lee_player_notes', e.target.value);
     });
 
+    fitNotes();
     updateSubmitInfo();
   }
+
+  // Noteringsrutan fyller alltid ut det lediga utrymmet i sista raden
+  function fitNotes() {
+    const grid = document.getElementById('matchGrid');
+    const note = grid && grid.querySelector('.notes-card');
+    if (!grid || !note) return;
+    const tpl = getComputedStyle(grid).gridTemplateColumns;
+    if (!tpl || tpl === 'none') return;
+    const cols = tpl.split(' ').filter(Boolean).length || 1;
+    const rem = MATCHES.length % cols;
+    note.style.gridColumn = 'span ' + (rem === 0 ? cols : cols - rem);
+  }
+  window.addEventListener('resize', fitNotes);
 
   function toggleSign(idx, sign) {
     if (isSubmitted) return;
     let currentPicks = picks[idx] || [];
-    if (currentPicks.includes(sign)) { if (currentPicks.length > 1) currentPicks = currentPicks.filter(s => s !== sign); }
-    else { currentPicks.push(sign); currentPicks.sort((a,b) => ['1','X','2'].indexOf(a) - ['1','X','2'].indexOf(b)); }
+    if (currentPicks.includes(sign)) { 
+        currentPicks = currentPicks.filter(s => s !== sign); 
+    } else { 
+        currentPicks.push(sign); 
+        currentPicks.sort((a,b) => ['1','X','2'].indexOf(a) - ['1','X','2'].indexOf(b)); 
+    }
     picks[idx] = currentPicks; renderMatches(); saveState();
   }
 
@@ -498,36 +502,28 @@
     const filled = picks.filter(p => p && p.length > 0).length;
     const info = document.getElementById('submitInfo');
     const submitBtn = document.getElementById('submitBtn');
-    const undoBtn = document.getElementById('undoBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    
     if (isSubmitted) {
       info.innerHTML = '<strong style="color:var(--green)">Inlämnat!</strong>';
-      submitBtn.style.display = 'none'; undoBtn.style.display = 'block';
+      submitBtn.style.display = 'inline-flex'; submitBtn.disabled = true; submitBtn.classList.add('is-locked');
+      submitBtn.innerHTML = LOCK_SVG + ' Låst';
+      clearBtn.style.display = 'none';
     } else {
       info.innerHTML = `Ifyllda: <strong>${filled}</strong> / 13`;
-      submitBtn.style.display = 'block'; undoBtn.style.display = 'none';
+      submitBtn.style.display = 'block'; submitBtn.classList.remove('is-locked'); submitBtn.textContent = 'Lämna in tips';
+      clearBtn.style.display = 'block';
       submitBtn.disabled = filled === 0 || (deadline > 0 && Date.now() > deadline);
     }
   }
 
-  function submitTips() { isSubmitted = true; renderMatches(); saveState(); }
-  function undoTips() { if (deadline > 0 && Date.now() > deadline) return; isSubmitted = false; saveState(); renderMatches(); }
+  function submitTips() { if (isSubmitted) return; isSubmitted = true; renderMatches(); saveState(); }
   
   function clearMyCoupon() {
+    if (isSubmitted) return;
     picks = Array(13).fill(null).map(() => []);
-    isSubmitted = false;
     renderMatches();
     saveState();
-  }
-
-  function renderLiveView() {
-    const leePicks = JSON.parse(localStorage.getItem('lee_admin_final') || '[]');
-    const grid = document.getElementById('liveGrid'); grid.innerHTML = '';
-    MATCHES.forEach((m, i) => {
-      const leePick = leePicks[i] ? leePicks[i].join(' ') : 'Väntar...';
-      const el = document.createElement('div'); el.className = 'live-card';
-      el.innerHTML = `<div class="live-card-no">M${i+1}</div><div class="live-card-teams">${esc(m.home)}<br>${esc(m.away)}</div><div class="live-card-pick">${leePick}</div>`;
-      grid.appendChild(el);
-    });
   }
 
   async function renderChat() {
