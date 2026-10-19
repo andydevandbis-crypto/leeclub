@@ -1,0 +1,8 @@
+backup_*/
+*.bak*
+*.pdf
+mockup.html
+*.txt
+*.ps1
+.DS_Store
+Thumbs.db

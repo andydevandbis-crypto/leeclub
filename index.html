@@ -317,6 +317,23 @@
     renderMatches();
     startCountdown();
     
+    setInterval(async () => {
+        if (!currentRoundId) return;
+        const { data } = await supabaseClient.from('rounds').select('live_started, admin_picks').eq('id', currentRoundId).single();
+        if (data) {
+            const wasLive = localStorage.getItem('lee_live_started') === 'true';
+            if (data.live_started !== wasLive) {
+                if (data.live_started) {
+                    localStorage.setItem('lee_live_started', 'true');
+                    if (data.admin_picks) localStorage.setItem('lee_admin_final', JSON.stringify(data.admin_picks));
+                } else {
+                    localStorage.removeItem('lee_live_started');
+                }
+                checkLiveStatus();
+            }
+        }
+    }, 10000);
+
     if (chatInterval) clearInterval(chatInterval);
     chatInterval = setInterval(() => { if (!document.hidden) renderChat(); }, 3000);
     if (leeInterval) clearInterval(leeInterval);

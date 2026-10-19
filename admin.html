@@ -612,6 +612,18 @@
         currentRoundId = rounds[0].id;
         if (rounds[0].deadline) localStorage.setItem('lee_deadline', rounds[0].deadline);
         
+        // Hämta från databasen
+        const { data: rData } = await supabaseClient.from('rounds').select('live_started, admin_picks, admin_locked').eq('id', currentRoundId).single();
+        if (rData) {
+            if (rData.live_started) localStorage.setItem('lee_live_started', 'true');
+            else localStorage.removeItem('lee_live_started');
+            if (rData.admin_picks) localStorage.setItem('lee_admin_final', JSON.stringify(rData.admin_picks));
+            if (rData.admin_locked) {
+                lockedIndices.clear();
+                rData.admin_locked.forEach(i => lockedIndices.add(i));
+            }
+        }
+        
         const { data: matches } = await supabaseClient.from('matches').select('*').eq('round_id', currentRoundId).order('match_order');
         if (matches && matches.length === 13) {
           matches.forEach((m, i) => {
