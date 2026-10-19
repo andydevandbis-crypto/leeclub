@@ -507,9 +507,6 @@
 
   async function adminLogout() {
     await supabaseClient.auth.signOut();
-    const keepNotes = localStorage.getItem('lee_admin_notes');
-    localStorage.clear();
-    if (keepNotes !== null) localStorage.setItem('lee_admin_notes', keepNotes);
     sessionStorage.clear();
     location.reload();
   }
