@@ -5,19 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lee Betting - Admin</title>
 <link rel="icon" type="image/png" href="favicon.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="js/config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg:#070a0f;--panel:#0f141d;--panel2:#131a26;
     --border:#1e2836;--border-soft:#18202c;
     --text:#e9eef7;--muted:#8b97a8;
     --gold:#e8c15a;--gold-deep:#c9962f;
-    --green:#33e08a;--red:#e05a5a;--blue:#8fc7ff;
+    --green:#33e08a;--green-bg:rgba(51,224,138,0.12);
+    --blue:#8fc7ff;--blue-bg:rgba(143,199,255,0.12);
+    --yellow:#e8c15a;--yellow-bg:rgba(232,193,90,0.12);
+    --red:#e05a5a;--red-bg:rgba(224,90,90,0.12);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Inter","Segoe UI",system-ui,sans-serif;color:var(--text);background:var(--bg);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
-  
   ::-webkit-scrollbar { display: none; }
   * { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -33,7 +35,6 @@
   .logo-mark{width: 40px; height: 24px; display:flex; align-items:center; justify-content:center;}
   .logo-mark img { width: 100%; height: 100%; object-fit: contain; }
   .brand-name{font-weight:800;font-size:13px;letter-spacing:1.5px}
-  .brand-sub{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
   .spacer{flex:1}
   .top-controls { display: flex; align-items: center; gap: 12px; }
   .countdown { font-size: 15px; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; }
@@ -41,7 +42,7 @@
   .btn-logout { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); padding: 4px 10px; font-size: 11px; cursor: pointer; transition: 0.2s; }
   .btn-logout:hover { color: var(--text); border-color: rgba(232,193,90,0.35); }
 
-  .rss-bar {background: #0b1118;border-bottom: 1px solid var(--border);padding: 8px 20px;display: flex;align-items: center;gap: 15px;overflow: hidden;}
+  .rss-bar {background: #0b1118;border-bottom: 1px solid var(--border);padding: 8px 20px;display: flex;align-items: center;gap: 15px;overflow: hidden;flex-shrink:0;}
   .rss-badge {background: var(--red);color: #fff;font-size: 10px;font-weight: 800;padding: 2px 6px;border-radius: 4px;white-space: nowrap; letter-spacing: 0.5px; flex-shrink: 0;}
   .rss-marquee {overflow: hidden;width: 100%;display: flex;}
   .rss-ticker {display: flex;white-space: nowrap;animation: marquee 120s linear infinite; will-change: transform;}
@@ -56,23 +57,24 @@
   .btn-ghost:hover { color: var(--text); border-color: rgba(232,193,90,0.35); background: rgba(232,193,90,0.06); }
   .rss-ticker.paused { animation-play-state: paused; }
 
-  .tabs-nav {display: flex; padding: 16px 24px 0; max-width: 1400px; margin: 0 auto; width: 100%; border-bottom: 1px solid var(--border); gap: 4px; flex-shrink: 0;}
-  .tab-btn {background: transparent; border: none; color: var(--muted);font-family: inherit; font-size: 14px;font-weight: 600;padding: 12px 20px; cursor: pointer; border-radius: 10px 10px 0 0;border-bottom: 2px solid transparent;}
+  .tabs-nav {display: flex; padding: 16px 24px 0; max-width: 1400px; margin: 0 auto; width: 100%; border-bottom: 1px solid var(--border); gap: 4px; flex-shrink: 0; background: var(--bg); z-index: 100; overflow-x: auto;}
+  .tab-btn {background: transparent; border: none; color: var(--muted);font-family: inherit; font-size: 14px;font-weight: 600;padding: 12px 20px; cursor: pointer; border-radius: 10px 10px 0 0;border-bottom: 2px solid transparent; white-space: nowrap;}
   .tab-btn.active {color: var(--gold); border-bottom-color: var(--gold);background: linear-gradient(180deg, transparent, rgba(232,193,90,0.05));}
+  .tab-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 8px; border-radius: 999px; background: var(--red); color: #fff; font-size: 10px; font-weight: 800; line-height: 1; vertical-align: middle; }
   
   .main{max-width:none;margin:0;padding:24px max(24px, calc((100% - 1352px) / 2));width:100%;flex:1;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;min-height:0;}
-  .tab-content { display: none; height: 100%; overflow: hidden; flex-direction: column; }
+  .tab-content { display: none; height: 100%; flex-direction: column; }
   .tab-content.active { display: flex; }
   
-  .panel{background:linear-gradient(180deg,rgba(19,26,38,0.92),rgba(15,20,29,0.96));border:1px solid var(--border);border-radius:14px;overflow: hidden; display: flex; flex-direction: column; height: 100%; min-height: 0;}
-  #tab-kupong { height: 100%; overflow: visible; flex-shrink: 0; }
-  #tab-kupong .panel { height: auto; min-height: 0; overflow: visible; flex: 1 0 auto; }
-  #tab-kupong .panel > * { flex-shrink: 0; }
+  .panel{background:linear-gradient(180deg,rgba(19,26,38,0.92),rgba(15,20,29,0.96));border:1px solid var(--border);border-radius:14px;overflow: hidden; display: flex; flex-direction: column; flex: 1 0 auto; margin-bottom: 16px;}
   
-  .top-single-row { display: flex; align-items: center; padding: 16px 22px; gap: 24px; border-bottom: 1px solid var(--border-soft); min-height: 80px; flex-wrap: nowrap; flex-shrink: 0;}
+  /* KUPONG LAYOUT */
+  #tab-kupong { gap: 0; height: 100%; }
+  
+  .top-single-row { display: flex; align-items: center; padding: 16px 22px; gap: 24px; border-bottom: 1px solid var(--border-soft); min-height: 80px; flex-wrap: wrap; flex-shrink: 0;}
   .top-single-row h1 { font-size: 16px; font-weight: 700; white-space: nowrap; margin-right: 8px; }
   .group-left { display: flex; align-items: center; gap: 24px; padding-right: 24px; border-right: 1px solid var(--border); }
-  .group-right { display: flex; align-items: center; gap: 24px; }
+  .group-right { display: flex; align-items: center; gap: 12px; }
   .data-group { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
   .data-group.amount-group { width: 80px; }
   .data-group.combo-box { width: 160px; position: relative; }
@@ -86,17 +88,21 @@
   .combo-sub.active { display: block; }
   .combo-sub a { color: var(--gold); text-decoration: underline; cursor: pointer; font-weight: 600; }
   
-  .btn-primary { padding: 10px 16px; border: none; border-radius: 8px; background: linear-gradient(135deg,#f6da8b,var(--gold-deep)); color: #1a1206; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
+  .btn-primary { padding: 10px 16px; border: none; border-radius: 8px; background: linear-gradient(135deg,#f6da8b,var(--gold-deep)); color: #1a1206; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: 0.2s;}
+  #placeBtn { flex: 0 0 132px; width: 132px; }
   .btn-clear { background: transparent; border: 1px solid rgba(224, 90, 90, 0.4); color: var(--red); padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; flex-shrink: 0; font-family: inherit; }
   .btn-clear:hover { background: rgba(224, 90, 90, 0.1); border-color: var(--red); }
 
-  .match-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));grid-auto-rows:1fr;gap:8px;padding:16px; user-select: none; overflow: visible !important; flex: 1 0 auto !important; align-content: stretch;}
-  .match{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;position: relative;}
+  .match-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));grid-auto-rows:min-content;gap:8px;padding:16px; user-select: none; overflow: visible !important; flex: 1 0 auto !important; align-content: start; align-items: start;}
+  .match{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;position: relative; transition: 0.2s; min-height: 120px;}
   .match-header{display:flex;justify-content:space-between;align-items:center; margin-bottom: 2px;}
   .match.halv { border-color: rgba(143,199,255,0.45); box-shadow: 0 0 0 1px rgba(143,199,255,0.12); }
   .match.hel { border-color: rgba(196,160,255,0.5); box-shadow: 0 0 0 1px rgba(196,160,255,0.14); }
+  
+  /* MARKERINGSFUNKTIONEN */
   .match.marked { background: #3d3420; border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
   .match.drag-highlight { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; background: #1b2332; }
+
   .match.locked-highlight { background: linear-gradient(rgba(51,224,138,0.10), rgba(51,224,138,0.10)), var(--panel2); border-color: var(--green); box-shadow: 0 0 0 1px var(--green) inset, 0 0 14px rgba(51,224,138,0.25); }
   .match-tag.halv { color: var(--blue); background: rgba(143,199,255,0.14); border: 1px solid rgba(143,199,255,0.55); }
   .match-tag.hel { color: #c9a7ff; background: rgba(196,160,255,0.14); border: 1px solid rgba(196,160,255,0.55); }
@@ -107,24 +113,40 @@
   .match.locked-highlight .signs { pointer-events: none; }
   .match-grid.placed .signs, .match-grid.placed .btn-lock { pointer-events: none; }
   .match-grid.placed .signs, .match-grid.placed .teams { opacity: 0.7; }
-  .btn-clear:disabled, .field-mini:disabled { opacity: 0.4; cursor: not-allowed; }
-  .tab-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 8px; border-radius: 999px; background: var(--red); color: #fff; font-size: 10px; font-weight: 800; line-height: 1; vertical-align: middle; }
+  .match-grid.placed .team-input { pointer-events: none; }
+  
   .match-no{font-size:10px;font-weight:700;color:var(--gold)}
   .match-actions{display:flex;gap:2px}
   .btn-move{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:10px;padding:1px 3px;}
   .match-tag{font-size:8px;font-weight:700;padding:1px 4px;border-radius:999px;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.05);}
   .teams{display:flex;flex-direction:column;gap:2px;}
-  .team-input{background:transparent;border:1px solid transparent;color:var(--text);font-size:11px;padding:2px 4px;border-radius:4px;width:100%;outline:none;}
+  .team-input{background:transparent;border:1px solid transparent;color:var(--text);font-size:11px;padding:2px 4px;border-radius:4px;width:100%;outline:none;transition:0.2s;}
   .signs{display:flex;gap:3px;margin-top:auto}
-  .sign{flex:1;text-align:center;font-size:11px;font-weight:700;padding:3px 0;border-radius:4px;color:var(--muted);background:rgba(255,255,255,0.02);border:1px solid var(--border-soft);cursor:pointer;}
+  .sign{flex:1;text-align:center;font-size:11px;font-weight:700;padding:3px 0;border-radius:4px;color:var(--muted);background:rgba(255,255,255,0.02);border:1px solid var(--border-soft);cursor:pointer;transition:0.2s;}
   .sign.on{color:var(--gold);background:rgba(232,193,90,0.1);border-color:rgba(232,193,90,0.3)}
   
-  details.stats-accordion { margin-top: 4px; border-top: 1px dashed var(--border-soft); padding-top: 8px; }
+  details.stats-accordion { position: relative; margin-top: 4px; border-top: 1px dashed var(--border-soft); padding-top: 8px; }
   details.stats-accordion summary { font-size: 11px; color: var(--muted); cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
   details.stats-accordion summary::after { content: "▼"; font-size: 9px; transition: transform 0.2s; display: inline-block; color: var(--muted); }
   details.stats-accordion[open] summary::after { transform: rotate(180deg); color: var(--gold); }
   details.stats-accordion.has-tips summary::after { color: var(--red) !important; }
-  .stats-content { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+  
+  .stats-content { 
+      position: absolute; 
+      top: 100%; 
+      left: -8px; 
+      right: -8px; 
+      background: var(--panel); 
+      border: 1px solid var(--border); 
+      border-radius: 8px; 
+      padding: 12px; 
+      z-index: 999; 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.8); 
+      margin-top: 6px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 4px; 
+  }
   .stat-bar-row { display: flex; align-items: center; gap: 8px; font-size: 11px; }
   .stat-label { width: 32px; font-weight: 700; color: var(--muted); text-align: left; }
   .stat-label.active { color: var(--text); }
@@ -136,19 +158,57 @@
   .notes-card { background: var(--panel2); border: 1px dashed var(--border); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 6px; min-height: 150px; }
   .notes-card textarea { flex: 1; width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 8px; resize: none; outline: none; font-family: inherit; font-size: 12px; }
 
+  /* SYSTEMTABELL DESIGN */
+  .accordion-container { width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; flex-shrink: 0; }
+  .accordion-header { padding: 16px 22px; background: var(--panel2); border-bottom: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;}
+  .accordion-header h2 { font-size: 15px; font-weight: 700; margin: 0;}
+  .accordion-header .arrow { color: var(--muted); font-size: 12px; transition: 0.3s; }
+  .accordion-container.open .accordion-header .arrow { transform: rotate(180deg); color: var(--gold); }
+  .accordion-body { display: none; }
+  .accordion-container.open .accordion-body { display: block; }
+  
+  .table-wrapper { width: 100%; overflow-x: auto; max-height: 70vh; position: relative; }
+  .sys-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; text-align: center; white-space: nowrap; }
+  
+  .sys-table thead th { position: sticky; background: var(--panel2); color: var(--muted); font-weight: 700; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; padding: 12px 8px; border-bottom: 1px solid var(--border); z-index: 10; }
+  .sys-table th.bg-green { background: var(--green-bg); color: var(--green); border-bottom: 2px solid var(--green); }
+  .sys-table th.bg-blue { background: var(--blue-bg); color: var(--blue); border-bottom: 2px solid var(--blue); }
+  .sys-table th.bg-yellow { background: var(--yellow-bg); color: var(--yellow); border-bottom: 2px solid var(--yellow); }
+  .sys-table th.bg-red { background: var(--red-bg); color: var(--red); border-bottom: 2px solid var(--red); }
+
+  .sys-table th.sticky-col, .sys-table td.sticky-col { position: sticky; background: var(--panel); z-index: 5; border-right: 1px solid var(--border); }
+  .sys-table th.sticky-col { background: var(--panel2); z-index: 11; }
+  .col-1 { left: 0; width: 70px; }
+  .col-2 { left: 70px; width: 70px; }
+  .col-3 { left: 140px; width: 80px; border-right: 2px solid var(--border); cursor: pointer; user-select: none;}
+
+  .sys-table tbody tr { transition: background 0.2s; cursor: pointer; }
+  .sys-table tbody tr:hover td { background: rgba(255,255,255,0.03); }
+  .sys-table tbody td { padding: 12px 8px; border-bottom: 1px solid var(--border-soft); color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; border-right: 1px solid var(--border-soft); }
+  .sys-table td.val-0 { color: var(--muted); opacity: 0.3; }
+  .sys-table td.val-active { color: var(--text); }
+  .sys-table td:last-child { border-right: none; }
+
+  .sys-table td.data-green { background: var(--green-bg); color: var(--green); }
+  .sys-table td.data-blue { background: var(--blue-bg); color: var(--blue); }
+  .sys-table td.data-yellow { background: var(--yellow-bg); color: var(--yellow); }
+  .sys-table td.data-red { background: var(--red-bg); color: var(--red); }
+  .sys-table tbody tr.selected td { background: rgba(232,193,90,0.15) !important; border-bottom-color: var(--gold); border-top: 1px solid var(--gold); }
+
+  /* LIVE OCH CHATT */
   .live-layout { display: grid; grid-template-columns: 1fr 340px; gap: 16px; width: 100%; height: 100%; overflow: hidden; }
   .live-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; overflow: hidden; }
   .live-header { display:flex; justify-content:space-between; margin-bottom:12px; border-bottom: 1px solid var(--border-soft); padding-bottom: 8px;}
   .live-header h2 { font-size:16px; }
   .live-header span { font-size:11px; color:var(--gold); font-weight: 600;}
-  .live-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); grid-auto-rows: 1fr; gap: 8px; padding: 10px; overflow-y: auto; flex: 1; align-content: stretch; }
+  .live-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); grid-auto-rows: 1fr; gap: 8px; padding: 10px; overflow-y: auto; flex: 1; align-content: stretch; }
   .live-card { display: flex; flex-direction: column; justify-content: space-between; padding: 10px; background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; gap: 6px; transition: 0.2s; }
   .live-card-header { display: flex; justify-content: space-between; align-items: center; }
   .live-card-no { font-size: 10px; font-weight: 800; color: var(--gold); }
-  .live-card-teams { font-size: 12px; font-weight: 600; line-height: 1.3; display: block; }
+  .live-card-teams { font-size: 12px; font-weight: 600; line-height: 1.3; display: block; flex: 1; }
   .live-card-teams span { display: block; }
   .live-card-signs { display: flex; gap: 4px; margin-top: auto; }
-  .live-card-sign { flex: 1; text-align: center; font-size: 12px; font-weight: 700; padding: 6px 0; border-radius: 4px; color: var(--muted); background: rgba(255,255,255,0.02); border: 1px solid var(--border-soft); }
+  .live-card-sign { flex: 1; text-align: center; font-size: 12px; font-weight: 700; padding: 4px 0; border-radius: 4px; color: var(--muted); background: rgba(255,255,255,0.02); border: 1px solid var(--border-soft); }
   .live-card-sign.on { color: var(--gold); background: rgba(232,193,90,0.15); border-color: rgba(232,193,90,0.4); }
   .live-card-content { display: flex; justify-content: space-between; align-items: flex-start; flex-grow: 1; margin: 4px 0; }
   .live-card-score { display: flex; flex-direction: column; align-items: flex-end; font-size: 18px; font-weight: 800; line-height: 1.1; }
@@ -162,7 +222,6 @@
   .live-card-sign.lose { background: #f08a3c !important; color: #000 !important; border-color: #f08a3c !important; }
   .live-card.ft-win { background: rgba(51,224,138,0.15) !important; border-color: var(--green) !important; box-shadow: 0 0 0 1px var(--green) inset !important; }
   .live-card.ft-loss { background: rgba(224,90,90,0.15) !important; border-color: var(--red) !important; box-shadow: 0 0 0 1px var(--red) inset !important; }
-  .live-card-note { background: var(--panel2); border: 1px dashed var(--border); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; }
 
   .chat-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; }
   .chat-header { padding: 12px 16px; border-bottom: 1px solid var(--border-soft); font-size: 14px; font-weight: 700; background: var(--panel2); display: flex; justify-content: space-between; align-items: center; }
@@ -181,47 +240,40 @@
   .chat-input input { flex: 1; padding: 10px 12px; border-radius: 6px; background: var(--panel); border: 1px solid var(--border); color: var(--text); font-size: 12px; outline: none; }
   .chat-input button { padding: 10px 16px; border-radius: 6px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #1a1206; font-weight: 800; font-size: 12px; cursor: pointer; }
 
-  .accordions{display:flex;flex-direction:column;gap:16px;width:100%; overflow-y: auto; padding-bottom: 20px;}
+  /* FREEMARKET */
+  .fm-layout { display: grid; grid-template-columns: 340px 1fr; gap: 16px; padding: 16px; align-items: start; }
+  .fm-form { background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; height: fit-content; }
+  .fm-form h3 { font-size: 14px; color: var(--gold); margin-bottom: 12px; }
+  .fm-group { margin-bottom: 8px; }
+  .fm-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;}
+  .fm-input { width:100%; padding:8px; background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:4px; margin-top:4px; outline: none; font-family:inherit; font-size:13px;}
+  .fm-row { display:flex; gap:8px; margin-bottom: 12px; }
+  .fm-col { flex:1; }
+  .fm-btn-yes { flex:1; text-align:center; padding:8px; background:rgba(51,224,138,0.15); border:1px solid var(--green); color:var(--green); border-radius:4px; cursor:pointer; font-weight:800; user-select:none;}
+  .fm-btn-no { flex:1; text-align:center; padding:8px; background:var(--bg); border:1px solid var(--border); color:var(--muted); border-radius:4px; cursor:pointer; font-weight:800; user-select:none;}
+  .fm-publish { width:100%; padding:10px; background:var(--gold); color:#000; font-weight:800; border:none; border-radius:4px; cursor:pointer; font-family:inherit;}
+  .fm-publish:disabled { opacity: 0.5; cursor: not-allowed; }
+  .fm-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+  .fm-card { background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .fm-card-top { display:flex; justify-content:space-between; align-items:center; }
+  .fm-time { font-size:10px; color:var(--muted); font-weight:800; text-transform:uppercase; }
+  .fm-lock { font-size:9px; color:var(--red); font-weight:800; border:1px solid var(--red); padding:2px 4px; border-radius:4px; }
+  .fm-q { font-size:13px; font-weight:700; line-height:1.3; }
+  .fm-info { display:flex; justify-content:space-between; align-items:center; background:var(--bg); padding:8px 10px; border-radius:6px; border:1px solid var(--border-soft); gap:8px;}
+  .fm-sells { font-size:9px; color:var(--muted); font-weight:800; text-transform:uppercase; }
+  .fm-odds-row { display:flex; gap:8px; align-items:baseline; margin-top:2px; flex-wrap:wrap;}
+  .fm-odds { font-weight:800; color:var(--gold); font-size:13px; }
+  .fm-amt { color:var(--text); font-weight:800; font-size:13px; }
+  .fm-match-btn { background:rgba(232,193,90,0.15); color:var(--gold); border:1px solid rgba(232,193,90,0.4); padding:6px 12px; border-radius:6px; font-weight:800; cursor:pointer; font-size:12px; white-space:nowrap; font-family:inherit;}
+  .fm-match-btn:hover { background:rgba(232,193,90,0.25); }
+  .fm-empty { color:var(--muted); font-size:13px; text-align:center; padding:24px; grid-column:1/-1; }
+
+  /* ACCORDIONS (INSTÄLLNINGAR) */
   .accordion{background:linear-gradient(180deg,rgba(19,26,38,0.92),rgba(15,20,29,0.96));border:1px solid var(--border);border-radius:14px;overflow: hidden;}
-  .acc-header{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;background:var(--panel2);cursor:pointer;border-bottom:1px solid transparent; user-select: none;}
-  .acc-header h2{font-size:15px;font-weight:700;margin:0;}
   .acc-content{display:none;padding:22px;}
   .accordion.open .acc-content{display:block;}
   .accordion.open .acc-header{border-bottom-color:var(--border);}
-  .arrow{font-size:12px;color:var(--muted);transition:transform 0.3s;display:flex;align-items:center;justify-content:center;width:24px;height:24px;background:rgba(255,255,255,0.05);border-radius:50%;}
-  .accordion.open .arrow{transform:rotate(180deg);color:var(--gold);}
   
-  .sys-table-wrap { --hh: 34px; overflow: auto; max-height: 70vh; min-height: 200px; border-radius: 8px; border: 1px solid var(--border); background: #0f141d; }
-  .sys-table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; text-align: center; white-space: nowrap; }
-  .sys-table th, .sys-table td { border-right: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 0 10px; min-width: 40px; }
-  .sys-table td { height: 38px; color: #f1f5fb; }
-  .sys-table thead th { position: sticky; height: var(--hh); background: #1a2230; color: #fff; font-weight: 700; z-index: 5; }
-  .sys-table thead tr:nth-child(1) th { top: 0; }
-  .sys-table thead tr:nth-child(2) th { top: var(--hh); }
-  .sys-table thead tr:nth-child(3) th { top: calc(var(--hh) * 2); }
-  .sys-table thead th.sortable { cursor: pointer; user-select: none; }
-  .sys-table thead th.sortable:hover { background: #253044; }
-  .sys-table thead tr:first-child th:nth-child(-n+3), .sys-table td:nth-child(-n+3) { position: sticky; background-color: #1a2230; min-width: 0; }
-  .sys-table thead tr:first-child th:nth-child(1), .sys-table td:nth-child(1) { left: 0; width: 56px; min-width: 56px; }
-  .sys-table thead tr:first-child th:nth-child(2), .sys-table td:nth-child(2) { left: 56px; width: 66px; min-width: 66px; }
-  .sys-table thead tr:first-child th:nth-child(3), .sys-table td:nth-child(3) { left: 122px; width: 66px; min-width: 66px; border-right: 2px solid rgba(255,255,255,0.18); }
-  .sys-table td:nth-child(-n+3) { z-index: 3; }
-  .sys-table thead tr:first-child th:nth-child(-n+3) { z-index: 7; }
-  .sys-table thead th.bg-green  { background-color: #1e7a52; }
-  .sys-table thead th.bg-blue   { background-color: #3d5f82; }
-  .sys-table thead th.bg-yellow { background-color: #7a6528; }
-  .sys-table thead th.bg-red    { background-color: #7a2f3c; }
-  .sys-table td.bg-green  { background-color: #123d2b; }
-  .sys-table td.bg-blue   { background-color: #1d2e42; }
-  .sys-table td.bg-yellow { background-color: #3d3420; }
-  .sys-table td.bg-red    { background-color: #3d1f27; }
-  .sys-table tbody tr { cursor: pointer; }
-  .sys-table tbody tr:hover td { background-image: linear-gradient(rgba(232,193,90,0.35), rgba(232,193,90,0.35)); color: #fff; }
-  .sys-table tbody tr.locked-row td { background-color: #e8c15a !important; background-image: none !important; color: #1a1405 !important; font-weight: 800; border-bottom-color: #c9962f; }
-  .sys-table tbody tr.locked-row td:nth-child(3) { color: #1a1405 !important; }
-  .accordion { flex-shrink: 0; }
-  .accordions { flex: 1; min-height: 0; }
-
   .admin-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
   .admin-table th { padding: 12px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; border-bottom: 1px solid var(--border);}
   .admin-table td { padding: 12px; font-size: 14px; border-bottom: 1px solid var(--border-soft); vertical-align: middle; }
@@ -232,28 +284,25 @@
   .rss-list-url { font-size: 13px; color: var(--blue); word-break: break-all; }
   .rss-add-form { display: flex; gap: 10px; margin-top: 10px; align-items: stretch; }
   .rss-add-form input { flex: 1; padding: 10px 14px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: inherit; font-size: 13px; outline: none; }
-  .rss-add-form input:focus { border-color: rgba(232,193,90,0.5); }
   .btn-add { padding: 10px 20px; border-radius: 6px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #1a1206; font-family: inherit; font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .btn-add:hover { transform: translateY(-1px); }
   .btn-icon { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); padding: 4px 8px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; }
   .btn-icon:hover { border-color: var(--red); color: var(--red); }
 
-  .custom-toast {
-      position: fixed; bottom: 30px; left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--panel); border: 1px solid var(--gold);
-      color: var(--text); padding: 12px 24px; border-radius: 8px;
-      font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      opacity: 0; transition: all 0.3s; z-index: 99999; pointer-events: none;
-  }
+  .perm-toggle { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 4px; background: var(--panel2); border: 1px solid var(--border); cursor: pointer; transition: 0.2s; font-size: 14px; color: transparent; }
+  .perm-toggle.on { background: rgba(51,224,138,0.15); border-color: var(--green); color: var(--green); }
+  .perm-toggle:hover { border-color: var(--gold); }
+
+  .custom-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--panel); border: 1px solid var(--gold); color: var(--text); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5); opacity: 0; transition: all 0.3s; z-index: 99999; pointer-events: none; }
   .custom-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   @media (max-width: 768px) {
     body { height: auto; overflow-y: auto; }
     #app { height: auto; min-height: 100vh; overflow: visible; }
-    .tabs-nav { overflow-x: auto; overflow-y: hidden; white-space: nowrap; }
+    .tabs-nav { overflow-x: auto; overflow-y: hidden; white-space: nowrap; position: static; }
     .tab-btn { flex-shrink: 0; }
     .live-layout { display: flex; flex-direction: column; height: auto; overflow: visible; gap: 16px; }
+    .fm-layout { grid-template-columns: 1fr; }
     .live-panel { min-height: 400px; flex-shrink: 0; order: 2; }
     .chat-panel { min-height: 400px; flex-shrink: 0; margin-bottom: 20px; order: 1; }
     .main { padding: 12px; }
@@ -282,9 +331,7 @@
 <div id="app">
   <header class="topbar">
     <div class="logo-mark"><img src="logo.png" alt="Logo"></div>
-    <div>
-      <div class="brand-name">LEE BETTING</div>
-    </div>
+    <div><div class="brand-name">LEE BETTING</div></div>
     <div class="spacer"></div>
     <div class="top-controls">
       <span style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-right:8px;">Nedräkning till inlämning:</span>
@@ -304,23 +351,30 @@
     </div>
   </div>
 
+  <!-- FLIKAR -->
   <div class="tabs-nav">
     <button class="tab-btn active" onclick="switchTab('kupong')">Kupong</button>
-    <button class="tab-btn" onclick="switchTab('playerview')">Spelarvy<span class="tab-badge" id="chatBadge" style="display:none">0</span></button>
-    <button class="tab-btn" onclick="switchTab('tabell')">Systemtabell</button>
-    <button class="tab-btn" onclick="switchTab('admin')">Admin</button>
+    <button class="tab-btn" onclick="switchTab('playerview')">Live & Chat <span class="tab-badge" id="timeAlertBadge" style="display:none; background:var(--red);">!</span></button>
+    <button class="tab-btn" onclick="switchTab('freemarket')">Freemarket</button>
+    <button class="tab-btn" onclick="switchTab('mina-matcher')">Mina Matcher</button>
+    <button class="tab-btn" onclick="switchTab('hantera-matcher')">Hantera Matcher</button>
+    <button class="tab-btn" onclick="switchTab('highscore')">Highscore</button>
+    <button class="tab-btn" onclick="switchTab('historik')">Historik</button>
+    <button class="tab-btn" onclick="switchTab('installningar')">Inställningar</button>
   </div>
 
   <main class="main">
     
+    <!-- KUPONG -->
     <div id="tab-kupong" class="tab-content active">
+      <!-- Panelen med korten -->
       <div class="panel">
         <div class="top-single-row">
           <h1>Kupong</h1>
           <div class="group-left">
             <div class="data-group amount-group">
               <span class="data-label">Mål (kr)</span>
-              <input id="amount" class="field-mini" type="text" inputmode="numeric" value="">
+              <input id="amount" class="field-mini" type="text" inputmode="numeric" autocomplete="off" value="">
             </div>
             <div class="data-group combo-box">
               <span class="data-label">Målets Kombination</span>
@@ -337,7 +391,7 @@
               <span class="data-label">Din Kombination</span>
               <span id="liveCombo" class="data-value">–</span>
             </div>
-            <button class="btn-primary" id="placeBtn" type="button">Placera spel</button>
+            <button class="btn-primary" id="placeBtn" type="button" onclick="publishPicks()">Placera spel</button>
             <button class="btn-clear" id="clearBtn" type="button">Rensa</button>
           </div>
         </div>
@@ -348,8 +402,53 @@
           </div>
         </div>
       </div>
+
+      <!-- SYSTEMTABELLEN (UTANFÖR PANELEN, STÄNGD SOM STANDARD) -->
+      <div class="accordion-container">
+        <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+          <h2>Antalet vinstrader vid olika system</h2>
+          <div class="arrow">▼</div>
+        </div>
+        <div class="accordion-body">
+          <div class="table-wrapper">
+            <table class="sys-table">
+              <thead>
+                <tr>
+                  <th rowspan="3" class="sticky-col col-1">HELG.</th>
+                  <th rowspan="3" class="sticky-col col-2">HALVG.</th>
+                  <th rowspan="3" class="sticky-col col-3" onclick="sortTable()">RADER ▲</th>
+                  <th colspan="4" class="bg-green">ALLA MATCHER RÄTT</th>
+                  <th colspan="6" class="bg-blue">EN MATCH FEL</th>
+                  <th colspan="6" class="bg-yellow">TVÅ MATCHER FEL</th>
+                  <th colspan="4" class="bg-red">TRE MATCHER FEL</th>
+                </tr>
+                <tr>
+                  <th class="bg-green">13</th><th class="bg-green">12</th><th class="bg-green">11</th><th class="bg-green">10</th>
+                  <th class="bg-blue" colspan="3">Ogarderade</th>
+                  <th class="bg-blue" colspan="3">Halvgarderade</th>
+                  <th class="bg-yellow" colspan="2">2 og*</th>
+                  <th class="bg-yellow" colspan="2">1 og+1hg</th>
+                  <th class="bg-yellow" colspan="2">2 hg</th>
+                  <th class="bg-red">3og</th><th class="bg-red">2 og+1 hg</th><th class="bg-red">1 og+2 hg</th><th class="bg-red">3hg</th>
+                </tr>
+                <tr>
+                  <th class="bg-blue">12</th><th class="bg-blue">11</th><th class="bg-blue">10</th>
+                  <th class="bg-blue">12</th><th class="bg-blue">11</th><th class="bg-blue">10</th>
+                  <th class="bg-yellow">11</th><th class="bg-yellow">10</th>
+                  <th class="bg-yellow">11</th><th class="bg-yellow">10</th>
+                  <th class="bg-yellow">11</th><th class="bg-yellow">10</th>
+                </tr>
+              </thead>
+              <tbody id="system-table-body">
+                <!-- Renderas via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <!-- LIVE & CHAT -->
     <div id="tab-playerview" class="tab-content">
       <div class="live-layout">
         <div class="live-panel">
@@ -367,72 +466,117 @@
       </div>
     </div>
 
-    <div id="tab-tabell" class="tab-content">
-      <div class="accordions">
-        <div class="accordion open" id="acc-system">
-          <div class="acc-header" onclick="toggleAccordion('acc-system')"><h2>Antalet vinstrader vid olika system</h2><div class="arrow">▼</div></div>
-          <div class="acc-content" style="padding: 0;">
-            <div class="sys-table-wrap">
-              <table class="sys-table">
-                <thead>
-                  <tr>
-                    <th rowspan="3" class="sortable" onclick="sortTable(0)">HELG. <span id="sort-icon-0"></span></th>
-                    <th rowspan="3" class="sortable" onclick="sortTable(1)">HALVG. <span id="sort-icon-1"></span></th>
-                    <th rowspan="3" class="sortable" onclick="sortTable(2)">RADER <span id="sort-icon-2"></span></th>
-                    <th colspan="4" class="bg-green">ALLA MATCHER RÄTT TIPPADE</th>
-                    <th colspan="6" class="bg-blue">EN MATCH FELTIPPAD</th>
-                    <th colspan="6" class="bg-yellow">TVÅ MATCHER FELTIPPADE</th>
-                    <th colspan="4" class="bg-red">TRE MATCHER FELTIPPADE</th>
-                  </tr>
-                  <tr>
-                    <th class="bg-green" rowspan="2" style="width:35px;">13</th>
-                    <th class="bg-green" rowspan="2" style="width:35px;">12</th>
-                    <th class="bg-green" rowspan="2" style="width:35px;">11</th>
-                    <th class="bg-green" rowspan="2" style="width:35px;">10</th>
-                    <th class="bg-blue" colspan="3">Ogarderade</th>
-                    <th class="bg-blue" colspan="3">Halvgarderade</th>
-                    <th class="bg-yellow" colspan="2">2 og*</th>
-                    <th class="bg-yellow" colspan="2">1 og+1hg</th>
-                    <th class="bg-yellow" colspan="2">2 hg</th>
-                    <th class="bg-red" rowspan="2" style="width:35px;">3og</th>
-                    <th class="bg-red" rowspan="2" style="width:45px;">2 og+1 hg</th>
-                    <th class="bg-red" rowspan="2" style="width:45px;">1 og+2 hg</th>
-                    <th class="bg-red" rowspan="2" style="width:35px;">3hg</th>
-                  </tr>
-                  <tr>
-                    <th class="bg-blue" style="width:30px;">12</th><th class="bg-blue" style="width:30px;">11</th><th class="bg-blue" style="width:30px;">10</th>
-                    <th class="bg-blue" style="width:30px;">12</th><th class="bg-blue" style="width:30px;">11</th><th class="bg-blue" style="width:30px;">10</th>
-                    <th class="bg-yellow" style="width:30px;">11</th><th class="bg-yellow" style="width:30px;">10</th>
-                    <th class="bg-yellow" style="width:30px;">11</th><th class="bg-yellow" style="width:30px;">10</th>
-                    <th class="bg-yellow" style="width:30px;">11</th><th class="bg-yellow" style="width:30px;">10</th>
-                  </tr>
-                </thead>
-                <tbody id="system-table-body"></tbody>
-              </table>
+    <!-- FREEMARKET -->
+    <div id="tab-freemarket" class="tab-content">
+      <div class="panel">
+        <div class="panel-head" style="padding: 16px 22px; border-bottom: 1px solid var(--border-soft);">
+          <h2 style="font-size:16px;">Freemarket</h2>
+        </div>
+        <div class="fm-layout">
+          <div class="fm-form">
+            <h3>Skapa Eget Spel</h3>
+            <div class="fm-group"><label class="fm-label">Ja/Nej Fråga</label><input type="text" id="fm-q" class="fm-input" placeholder="T.ex. Gör Bayern mål?"></div>
+            <div class="fm-group"><label class="fm-label">Matchstart</label><input type="datetime-local" id="fm-time" class="fm-input"></div>
+            <div class="fm-row">
+              <div class="fm-col"><label class="fm-label">Odds</label><input type="text" inputmode="decimal" id="fm-odds" class="fm-input" placeholder="2.00"></div>
+              <div class="fm-col"><label class="fm-label">Belopp (kr)</label><input type="text" inputmode="numeric" id="fm-amount" class="fm-input" placeholder="100"></div>
             </div>
+            <div class="fm-group">
+              <label class="fm-label" style="display:block; margin-bottom:4px;">Jag säljer</label>
+              <div style="display:flex; gap:8px;">
+                <div id="fm-btn-yes" onclick="selectOutcome('yes')" class="fm-btn-yes">JA</div>
+                <div id="fm-btn-no" onclick="selectOutcome('no')" class="fm-btn-no">NEJ</div>
+              </div>
+              <input type="hidden" id="fm-outcome" value="yes">
+            </div>
+            <button onclick="createMarket()" id="fmPublish" class="fm-publish" style="margin-top:12px">Publicera</button>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <h3 style="font-size:14px;color:var(--gold)">Aktiva marknader</h3>
+              <button onclick="loadActiveMarkets()" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">Uppdatera</button>
+            </div>
+            <div id="marketList" class="fm-list"></div>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="tab-admin" class="tab-content">
+    <!-- MINA MATCHER -->
+    <div id="tab-mina-matcher" class="tab-content">
+      <div class="panel">
+        <div class="panel-head" style="padding: 16px 22px; border-bottom: 1px solid var(--border-soft); display:flex; justify-content:space-between; align-items:center;">
+          <h2 style="font-size:16px;">Mina aktiva matcher</h2>
+          <button onclick="loadMyActiveMatches()" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">Uppdatera</button>
+        </div>
+        <div class="fm-layout" style="grid-template-columns: 1fr; padding: 16px;">
+          <div id="myActiveMatchesList" class="fm-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HANTERA MATCHER -->
+    <div id="tab-hantera-matcher" class="tab-content">
+      <div class="panel">
+        <div class="panel-head" style="padding: 16px 22px; border-bottom: 1px solid var(--border-soft); display:flex; justify-content:space-between; align-items:center;">
+          <h2 style="font-size:16px;">Hantera Matcher (Admin)</h2>
+          <button onclick="loadFreemarkets()" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">Uppdatera</button>
+        </div>
+        <div class="sys-table-wrap" style="max-height: none; border: none; border-radius: 0;">
+          <table class="admin-table" style="width: 100%;">
+            <thead><tr><th>Fråga</th><th>Matchtid</th><th>Status</th><th style="text-align:right">Åtgärder</th></tr></thead>
+            <tbody id="fmAdminBody">
+              <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">Laddar...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- HIGHSCORE -->
+    <div id="tab-highscore" class="tab-content">
+      <div class="panel">
+        <div class="panel-head"><h2>Highscore</h2></div>
+        <div class="table-wrapper" style="padding: 16px;">
+          <table class="admin-table" style="width:100%;">
+            <thead><tr><th>#</th><th>Spelare</th><th style="text-align:right">Saldo</th></tr></thead>
+            <tbody id="highscoreBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORIK -->
+    <div id="tab-historik" class="tab-content">
+      <div class="panel">
+        <div class="panel-head"><h2>Min historik</h2></div>
+        <div class="table-wrapper" style="padding: 16px;">
+          <table class="admin-table" style="width:100%;">
+            <thead><tr><th>Datum</th><th>Spel</th><th>Roll</th><th>Insats</th><th>Resultat</th><th>Status</th></tr></thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSTÄLLNINGAR -->
+    <div id="tab-installningar" class="tab-content">
       <div class="accordions">
         <div class="accordion open" id="acc-users">
-          <div class="acc-header" onclick="toggleAccordion('acc-users')"><h2>Hantera Användare</h2><div class="arrow">▼</div></div>
+          <div class="accordion-header" onclick="document.getElementById('acc-users').classList.toggle('open')"><h2>Hantera Användare</h2><div class="arrow">▼</div></div>
           <div class="acc-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-              <p style="font-size:13px; color:var(--muted);">Hantera spelare i databasen.</p>
+              <p style="font-size:13px; color:var(--muted);">Hantera spelare och deras behörigheter.</p>
               <button class="btn-add" onclick="showCreateUser()">+ Skapa användare</button>
             </div>
             <table class="admin-table">
-              <thead><tr><th>Visningsnamn</th><th>E-postadress</th><th>Lösenord</th><th style="text-align:right;">Åtgärder</th></tr></thead>
+              <thead><tr><th>Visningsnamn</th><th>E-postadress</th><th>Lösenord</th><th style="text-align:center">Kupong</th><th style="text-align:center">Freemarket</th><th style="text-align:right;">Åtgärder</th></tr></thead>
               <tbody id="usersTableBody"></tbody>
             </table>
           </div>
         </div>
-
         <div class="accordion" id="acc-rss">
-          <div class="acc-header" onclick="toggleAccordion('acc-rss')"><h2>Hantera RSS-flöden</h2><div class="arrow">▼</div></div>
+          <div class="accordion-header" onclick="document.getElementById('acc-rss').classList.toggle('open')"><h2>Hantera RSS-flöden</h2><div class="arrow">▼</div></div>
           <div class="acc-content">
             <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">Lägg till upp till 10 nyhetsflöden som visas i tickeren.</p>
             <div class="rss-list" id="adminRssList"></div>
@@ -448,6 +592,7 @@
   </main>
 </div>
 
+<!-- MODALER -->
 <div id="createUserModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
   <div class="login-card" style="position:relative;">
     <h1>SKAPA SPELARE</h1>
@@ -466,9 +611,23 @@
   <div class="login-card" style="position:relative; text-align:center; border-color:var(--border);">
     <h1 style="font-size:14px; margin-bottom:16px; letter-spacing:1px;">BEKRÄFTA</h1>
     <p id="customConfirmMsg" style="margin-bottom:20px; color:var(--text); font-size:13px;">Är du säker?</p>
+    <input type="text" id="customConfirmInput" style="display:none; margin-bottom:20px; text-align:left;" placeholder="Förklaring">
     <div style="display:flex; gap:10px;">
       <button type="button" onclick="resolveConfirm(false)" style="background:transparent; border:1px solid var(--border); color:var(--muted); flex:1; margin:0;">Avbryt</button>
-      <button type="button" onclick="resolveConfirm(true)" style="flex:1; margin:0;">OK</button>
+      <button type="button" onclick="resolveConfirm(true)" style="flex:1; margin:0; background:var(--red); color:#fff;">OK</button>
+    </div>
+  </div>
+</div>
+
+<div id="matchModal" class="custom-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; padding: 24px;">
+  <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 400px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <h3 style="font-size: 16px; margin-bottom: 8px; color: var(--text);">Matcha spel</h3>
+    <p id="matchModalDesc" style="font-size: 12px; color: var(--muted); margin-bottom: 16px;"></p>
+    <input type="text" inputmode="numeric" id="matchAmountInput" oninput="recalcMatch()" style="width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); color: white; border-radius: 6px; margin-bottom: 12px; font-size: 16px; outline: none;">
+    <div id="matchCalc" style="background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:16px;font-size:12px;line-height:1.6;"></div>
+    <div style="display: flex; gap: 12px;">
+      <button onclick="closeMatchModal()" style="flex: 1; padding: 12px; background: transparent; border: 1px solid var(--border); color: var(--muted); font-weight: 600; border-radius: 6px; cursor: pointer;">Avbryt</button>
+      <button onclick="confirmMatch()" style="flex: 1; padding: 12px; background: var(--gold); color: #000; font-weight: 800; border: none; border-radius: 6px; cursor: pointer;">Matcha</button>
     </div>
   </div>
 </div>
@@ -476,17 +635,48 @@
 <div class="custom-toast" id="custom-toast"></div>
 
 <script>
-  window.customConfirm = function(msg) {
+  let supabaseClient = null;
+  let currentUser = null;
+  let currentProfile = null;
+  let currentRoundId = null;
+  let currentDeadline = null;
+  let isPublished = false; 
+  let state = { matches: Array.from({ length: 13 }, () => ({ home: '', away: '', signs: [] })) };
+  let lockedIndices = new Set();
+  let markedIndices = new Set();
+  let liveScores = {};
+  let chatInterval = null;
+  let timerInterval = null;
+  let alertInterval = null;
+  let PRICE_PER_ROW = 1;
+  let MATCHES = 13;
+  let pendingMatch = null;
+  let openDetails = new Set(); // NY: Sparar vilka "Visa alla tips" som är öppna
+  let matchVotesCache = {}; // Sparar siffrorna så de inte blinkar
+  
+  let isDragging = false, startIdx = null, endIdx = null;
+
+  const LOCK_SVG_CLOSED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor" fill-opacity="0.25"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  const LOCK_SVG_OPEN   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>';
+
+  function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function fmtKr(n){ const v = Number(n); return isFinite(v) ? v.toFixed(v % 1 === 0 ? 0 : 2) + ' kr' : '–'; }
+
+  window.customConfirm = function(msg, requireInput = false) {
       return new Promise((resolve) => {
           document.getElementById('customConfirmMsg').textContent = msg;
-          const modal = document.getElementById('customConfirmModal');
-          modal.style.display = 'flex';
+          const inp = document.getElementById('customConfirmInput');
+          if (requireInput) { inp.style.display = 'block'; inp.value = ''; inp.placeholder = requireInput; } 
+          else { inp.style.display = 'none'; }
+          document.getElementById('customConfirmModal').style.display = 'flex';
           window._confirmResolve = resolve;
       });
   };
   window.resolveConfirm = function(val) {
       document.getElementById('customConfirmModal').style.display = 'none';
-      if (window._confirmResolve) window._confirmResolve(val);
+      const inp = document.getElementById('customConfirmInput');
+      const textVal = inp.style.display !== 'none' ? inp.value : null;
+      if (window._confirmResolve) window._confirmResolve(val ? (textVal ?? true) : false);
   };
 
   window.alert = function(msg) {
@@ -494,107 +684,268 @@
       t.textContent = msg;
       t.classList.add('show');
       clearTimeout(window.toastTimer);
-      window.toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+      window.toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
   };
 
-  function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  window.addEventListener('DOMContentLoaded', async () => {
+    if (!window.createLeeClient && window.supabase) {
+       window.createLeeClient = function() {
+         return window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.key, {
+           auth: { persistSession: true, storage: window.localStorage, storageKey: 'lee_auth' }
+         });
+       };
+    }
+    supabaseClient = window.createLeeClient();
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) await setupApp(session.user);
 
-  const SB_CFG = window.SUPABASE_CONFIG || {
-    url: "https://yjkyikxtklaokscnpxdj.supabase.co",
-    key: "sb_publishable_ev3HUbED2MIMHhy6feLXlw_i81spvXM"
-  };
-  const supabaseClient = window.supabase.createClient(SB_CFG.url, SB_CFG.key);
-  
+    const grid = document.getElementById('matchGrid');
+    if (grid) {
+      grid.addEventListener('mousedown', (ev) => {
+        if (isPublished || isInteractive(ev.target)) return;
+        const card = ev.target.closest('.match');
+        if (card) {
+          isDragging = true;
+          startIdx = parseInt(card.dataset.idx, 10);
+          endIdx = startIdx;
+          updateDragHighlight();
+        }
+      });
+
+      grid.addEventListener('mouseover', (ev) => {
+        if (!isDragging) return;
+        const card = ev.target.closest('.match');
+        if (card) {
+          endIdx = parseInt(card.dataset.idx, 10);
+          updateDragHighlight();
+        }
+      });
+
+      grid.addEventListener('mouseup', (ev) => {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        const card = ev.target.closest('.match');
+        if (card) {
+            endIdx = parseInt(card.dataset.idx, 10);
+        }
+
+        if (startIdx !== null && endIdx !== null) {
+          const min = Math.min(startIdx, endIdx), max = Math.max(startIdx, endIdx);
+          if (min === max) {
+             if (markedIndices.has(min)) markedIndices.delete(min); else markedIndices.add(min);
+          } else {
+             let allMarked = true; 
+             for (let i = min; i <= max; i++) if (!markedIndices.has(i)) allMarked = false;
+             for (let i = min; i <= max; i++) { if (allMarked) markedIndices.delete(i); else markedIndices.add(i); }
+          }
+          renderMatches();
+        }
+        document.querySelectorAll('.match').forEach(el => el.classList.remove('drag-highlight'));
+        startIdx = null; endIdx = null;
+      });
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+     if(isDragging) {
+         isDragging = false;
+         document.querySelectorAll('.match').forEach(el => el.classList.remove('drag-highlight'));
+         startIdx = null; endIdx = null;
+     }
+  });
+
+  function isInteractive(t) { return !!(t && t.closest && t.closest('input, button, textarea, details, summary, .sign, .btn-lock')); }
+
+  function updateDragHighlight() {
+    if (startIdx === null || endIdx === null) return;
+    const min = Math.min(startIdx, endIdx), max = Math.max(startIdx, endIdx);
+    document.querySelectorAll('.match').forEach((el) => { 
+      const i = parseInt(el.dataset.idx, 10);
+      if (i >= min && i <= max) el.classList.add('drag-highlight'); 
+      else el.classList.remove('drag-highlight'); 
+    });
+  }
+
   async function adminLogin() {
     const email = document.getElementById('adminUser').value.trim();
     const pass = document.getElementById('adminPass').value;
     const err = document.getElementById('adminLoginError');
-    
+    err.textContent = '';
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
-    
-    if (error) {
-      err.textContent = 'FEL: ' + error.message;
+    if (error) { err.textContent = 'FEL: ' + error.message; return; }
+    await setupApp(data.user);
+  }
+
+  async function setupApp(user) {
+    currentUser = user;
+    const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).maybeSingle();
+    if (!profile || !profile.is_admin) {
+      alert('Åtkomst nekad – du är inte admin');
+      await supabaseClient.auth.signOut();
       return;
     }
-    
+    currentProfile = profile;
     document.getElementById('adminLoginScreen').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
-    initApp();
+    
+    try {
+      await loadRound();
+      startClock();
+      loadUsers();
+      loadRssFeeds();
+      fetchRSS();
+      renderSystemTable();
+      renderChat();
+      if (chatInterval) clearInterval(chatInterval);
+      chatInterval = setInterval(() => { if (!document.hidden) renderChat(); }, 4000);
+
+      if (alertInterval) clearInterval(alertInterval);
+      checkTimeAlerts();
+      alertInterval = setInterval(checkTimeAlerts, 60000);
+    } catch(e) {
+      console.error("Kraschade vid uppstart:", e);
+      alert("Ett fel uppstod vid laddning: " + e.message);
+    }
   }
 
   async function adminLogout() {
     await supabaseClient.auth.signOut();
-    sessionStorage.clear();
     location.reload();
   }
 
-  supabaseClient.auth.getSession().then(({ data: { session } }) => {
-    if (session) {
-      document.getElementById('adminLoginScreen').style.display = 'none';
-      document.getElementById('app').style.display = 'flex';
-      initApp();
-    } else {
-      document.getElementById('adminLoginScreen').style.display = 'flex';
-      document.getElementById('app').style.display = 'none';
+  // LADDA RUNDA & MATCHER
+  async function loadRound() {
+    const { data: rounds } = await supabaseClient.from('rounds').select('*').order('created_at', { ascending: false }).limit(1);
+    if (rounds && rounds.length > 0) {
+      currentRoundId = rounds[0].id;
+      currentDeadline = rounds[0].deadline;
+      isPublished = !!rounds[0].live_started;
+      
+      const { data: ms } = await supabaseClient.from('matches').select('*').eq('round_id', currentRoundId).order('match_order');
+      if (ms && ms.length === 13) {
+        ms.forEach((m, i) => {
+          state.matches[i].home = m.home;
+          state.matches[i].away = m.away;
+        });
+      }
+      
+      if (rounds[0].admin_picks) {
+        const picks = rounds[0].admin_picks;
+        if (Array.isArray(picks)) {
+          picks.forEach((s, i) => { 
+            if (state.matches[i]) {
+              state.matches[i].signs = Array.isArray(s) ? s : [];
+            } 
+          });
+        }
+      }
+      if (rounds[0].admin_locked) {
+        const locked = rounds[0].admin_locked;
+        Object.keys(locked).forEach(k => {
+          const i = +k;
+          if (state.matches[i]) { 
+            state.matches[i].signs = Array.isArray(locked[k]) ? locked[k] : []; 
+            lockedIndices.add(i); 
+          }
+        });
+      }
     }
-  });
+    renderMatches();
+    updateAdminLiveStatusText();
+  }
 
-  const PRICE_PER_ROW = 1;
-  const MATCHES = 13;
-  const $amount = document.getElementById('amount');
-  const $targetCombo = document.getElementById('targetCombo');
-  const $comboSub = document.getElementById('comboSub');
-  const $liveInsats = document.getElementById('liveInsats');
-  const $liveCombo = document.getElementById('liveCombo');
-  const $placeBtn = document.getElementById('placeBtn');
-  const $grid = document.getElementById('matchGrid');
-  const $sysBody = document.getElementById('system-table-body');
-  const $notes = document.getElementById('notesArea');
-  const $notesCard = document.getElementById('notesCard');
-  try { $notes.value = localStorage.getItem('lee_admin_notes') || ''; } catch (e) {}
-  $notes.addEventListener('input', () => { try { localStorage.setItem('lee_admin_notes', $notes.value); } catch (e) {} });
-  const $clearBtn = document.getElementById('clearBtn');
-  
-  const state = { matches: Array.from({ length: MATCHES }, () => ({ home: '', away: '', signs: [] })), results: null };
-  let lockedIndices = new Set();
-  const markedIndices = new Set();
-  const LOCK_CLOSED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor" fill-opacity="0.25"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
-  const LOCK_OPEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>';
-  function isPlaced() { return localStorage.getItem('lee_live_started') === 'true'; }
-  function restorePlacedPicks() {
-    try {
-      const lk = JSON.parse(localStorage.getItem('lee_locked_picks') || '{}');
-      Object.keys(lk).forEach(k => { const i = +k; if (state.matches[i] && Array.isArray(lk[k])) { state.matches[i].signs = lk[k]; lockedIndices.add(i); } });
-    } catch (e) {}
-    if (!isPlaced()) return;
-    try {
-      const p = JSON.parse(localStorage.getItem('lee_admin_final') || 'null');
-      if (Array.isArray(p)) p.forEach((s, i) => { if (state.matches[i] && Array.isArray(s)) state.matches[i].signs = s; });
-    } catch (e) {}
-  }
-  // Publicerar l\u00e5sta matcher + placering s\u00e5 att spelarna kan se dem
-  function publishLeeState() {
-    const locked = {}; lockedIndices.forEach(i => { locked[i] = state.matches[i].signs; });
-    try { localStorage.setItem('lee_locked_picks', JSON.stringify(locked)); } catch (e) {}
-    if (!currentRoundId) return;
-    let picks = [];
-    if (isPlaced()) { try { picks = JSON.parse(localStorage.getItem('lee_admin_final') || '[]'); } catch (e) {} }
-    try {
-      supabaseClient.from('rounds').update({ live_started: isPlaced(), admin_picks: picks, admin_locked: locked }).eq('id', currentRoundId)
-        .then(({ error }) => { if (error && !window.__leeSyncWarned) { window.__leeSyncWarned = true; console.warn('Spelstatus delas bara i denna webbl\u00e4sare (kolumner saknas i tabellen rounds):', error.message); } });
-    } catch (e) {}
-  }
-  function applyPlacedState() {
-    const placed = isPlaced();
-    $grid.classList.toggle('placed', placed);
-    $grid.querySelectorAll('.team-input').forEach(inp => { inp.readOnly = placed; });
-    $amount.disabled = placed; $clearBtn.disabled = placed;
-  }
-  
-  let currentRoundId = null;
-  let timerInterval = null;
-  let chatInterval = null;
+  // RENDERA KUPONG
+   function renderMatches() {
+    const $grid = document.getElementById('matchGrid');
+    $grid.innerHTML = '';
+    $grid.classList.toggle('placed', isPublished);
 
+    const btn = document.getElementById('placeBtn');
+    btn.disabled = false;
+    if (isPublished) {
+        btn.textContent = 'Ångra spel';
+        btn.style.background = 'var(--red)';
+        btn.style.color = '#fff';
+    } else {
+        btn.textContent = 'Placera spel';
+        btn.style.background = 'linear-gradient(135deg,#f6da8b,var(--gold-deep))';
+        btn.style.color = '#1a1206';
+    }
+
+    for (let i = 0; i < MATCHES; i++) {
+      const m = state.matches[i] || { home: '', away: '', signs: [] };
+      const signs = Array.isArray(m.signs) ? m.signs : []; 
+      const n = signs.length; 
+      const kind = n === 3 ? 'hel' : n === 2 ? 'halv' : n === 1 ? 'spik' : '';
+      const el = document.createElement('div'); 
+      
+      el.className = 'match' + (n === 2 ? ' halv' : n === 3 ? ' hel' : '') + (lockedIndices.has(i) ? ' locked-highlight' : '') + (markedIndices.has(i) ? ' marked' : '');
+      el.dataset.idx = i;
+      
+      el.innerHTML = `
+        <div class="match-header"><span class="match-no">M${i+1}</span><span class="match-tag ${kind}">${kind ? kind.toUpperCase() : ''}</span>
+          <div class="match-actions"><button type="button" class="btn-move btn-lock ${lockedIndices.has(i) ? 'on' : ''}" title="${lockedIndices.has(i) ? 'Lås upp match' : 'Lås match'}" onclick="toggleCardLock(event, ${i})">${lockedIndices.has(i) ? LOCK_SVG_CLOSED : LOCK_SVG_OPEN}</button></div>
+        </div>
+        <div class="teams"><input type="text" class="team-input" placeholder="Hemmalag" value="${esc(m.home)}" oninput="updateTeam(${i}, 'home', this.value)"><input type="text" class="team-input" placeholder="Bortalag" value="${esc(m.away)}" oninput="updateTeam(${i}, 'away', this.value)"></div>
+        <div class="signs"><div class="sign ${signs.includes('1') ? 'on' : ''}" onclick="toggleSign(event, ${i}, '1')">1</div><div class="sign ${signs.includes('X') ? 'on' : ''}" onclick="toggleSign(event, ${i}, 'X')">X</div><div class="sign ${signs.includes('2') ? 'on' : ''}" onclick="toggleSign(event, ${i}, '2')">2</div></div>
+        <details class="stats-accordion" id="admin-details-${i}" ${openDetails.has(i) ? 'open' : ''}>
+          <summary>Visa alla tips (${matchVotesCache[i] || 0} inlämnade)</summary>
+          <div class="stats-content" id="admin-stats-${i}"></div>
+        </details>`;
+        
+      const det = el.querySelector('details.stats-accordion');
+      if (det) { 
+          det.addEventListener('toggle', () => { 
+              if (det.open) openDetails.add(i); 
+              else openDetails.delete(i); 
+          }); 
+      }
+      $grid.appendChild(el);
+    }
+    
+    const noteCard = document.createElement('div');
+    noteCard.className = 'notes-card';
+    noteCard.id = 'notesCard';
+    noteCard.innerHTML = `<div class="data-label">Egna noteringar</div><textarea id="notesArea" placeholder="Skriv dina egna noteringar här...">${esc(localStorage.getItem('lee_admin_notes') || '')}</textarea>`;
+    $grid.appendChild(noteCard);
+    
+    document.getElementById('notesArea').addEventListener('input', (e) => localStorage.setItem('lee_admin_notes', e.target.value));
+    
+    fitNotes();
+    updateLiveStats();
+    updateAdminBars();
+  }
+  function fitNotes() {
+    const grid = document.getElementById('matchGrid');
+    const note = document.getElementById('notesCard');
+    if (!grid || !note) return;
+    const tpl = getComputedStyle(grid).gridTemplateColumns;
+    if (!tpl || tpl === 'none') return;
+    const cols = tpl.split(' ').filter(Boolean).length || 1;
+    const rem = MATCHES % cols;
+    note.style.gridColumn = 'span ' + (rem === 0 ? cols : cols - rem);
+  }
+  window.addEventListener('resize', fitNotes);
+
+  window.updateTeam = function(idx, field, val) { state.matches[idx][field] = val; };
+  window.toggleSign = function(event, idx, sign) { 
+    if (event) event.stopPropagation(); 
+    if (isPublished || lockedIndices.has(idx)) return; 
+    const m = state.matches[idx]; 
+    if (!Array.isArray(m.signs)) m.signs = [];
+    if (m.signs.includes(sign)) { m.signs = m.signs.filter(s => s !== sign); } 
+    else { m.signs.push(sign); m.signs.sort((a, b) => ['1', 'X', '2'].indexOf(a) - ['1', 'X', '2'].indexOf(b)); } 
+    renderMatches(); 
+  };
+  window.toggleCardLock = function(e, idx) {
+    if (e) e.stopPropagation();
+    if (isPublished) return;
+    if (lockedIndices.has(idx)) lockedIndices.delete(idx); else lockedIndices.add(idx);
+    renderMatches();
+  };
+
+  // BERÄKNA KOMBINATIONER
   const allValidCombos = [];
   for (let h = 0; h <= MATCHES; h++){
     for (let v = 0; v <= MATCHES - h; v++){
@@ -604,125 +955,229 @@
   }
   allValidCombos.sort((a, b) => a.amount - b.amount);
 
-  function initApp() {
-    loadMatches();
-    loadUsers();
-    loadRssFeeds();
-    fetchRSS();
-    startClock();
-    renderSystemTable();
-    updatePlaceBtnState();
-    renderChat();
-    if (chatInterval) clearInterval(chatInterval);
-    chatInterval = setInterval(() => { if (!document.hidden) renderChat(); }, 3000);
-    if (window.__barsTimer) clearInterval(window.__barsTimer);
-    window.__barsTimer = setInterval(() => { if (!document.hidden) updateAdminBars(); }, 15000);
+  function comboText(c){ return c.hela + ' hela ' + c.halva + ' ' + (c.halva === 1 ? 'halv' : 'halva'); }
+  function comboFromAmount(amount){ 
+    const rows = amount / PRICE_PER_ROW; 
+    if (!Number.isInteger(rows) || rows < 1) return null; 
+    for (const c of allValidCombos) { if (c.amount === amount) return { hela: c.hela, halva: c.halva, rows: c.rows }; if (c.amount > amount) break; } 
+    return null; 
   }
 
-  async function loadMatches() {
-    try {
-      const { data: rounds } = await supabaseClient.from('rounds').select('id, deadline').order('created_at', { ascending: false }).limit(1);
-      if (rounds && rounds.length > 0) {
-        currentRoundId = rounds[0].id;
-        if (rounds[0].deadline) localStorage.setItem('lee_deadline', rounds[0].deadline);
-        
-        const { data: matches } = await supabaseClient.from('matches').select('*').eq('round_id', currentRoundId).order('match_order');
-        if (matches && matches.length === 13) {
-          matches.forEach((m, i) => {
-            state.matches[i].home = m.home;
-            state.matches[i].away = m.away;
-          });
-        }
+  function getCurrentCombo() { 
+    let hela = 0, halva = 0, filled = 0; 
+    let rows = 1; 
+    for (const m of state.matches) { 
+      const signs = Array.isArray(m.signs) ? m.signs : [];
+      const len = signs.length;
+      if (len > 0) {
+        filled++;
+        if (len === 3) hela++; 
+        else if (len === 2) halva++; 
+        rows *= len;
       }
-      restorePlacedPicks();
-      renderMatches();
-      updateAdminBars();
-      updateAdminLiveStatusText();
-    } catch(e) { console.error(e); }
+    } 
+    if (filled === 0) rows = 0;
+    return { hela, halva, rows, filled }; 
   }
 
-  function startClock() {
-    if (timerInterval) clearInterval(timerInterval);
-    const cd = document.getElementById('countdown');
-    function update() {
-      let globalDeadline = localStorage.getItem('lee_deadline');
-      if (!globalDeadline) return;
-      const ms = new Date(globalDeadline) - Date.now();
-      if (ms <= 0) { cd.textContent = 'LÅST'; cd.classList.add('warning'); updateAdminLiveStatusText(); return; }
-      if (ms < 4 * 60 * 60 * 1000) cd.classList.add('warning'); else cd.classList.remove('warning');
-      const totalSecs = Math.floor(ms / 1000);
-      const days = Math.floor(totalSecs / (3600 * 24));
-      const hours = Math.floor((totalSecs % (3600 * 24)) / 3600);
-      const mins = Math.floor((totalSecs % 3600) / 60);
-      const secs = totalSecs % 60;
-      let timeStr = ''; if (days > 0) timeStr += days + ' dagar ';
-      timeStr += String(hours).padStart(2,'0') + ':' + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
-      cd.textContent = timeStr;
-      updateAdminLiveStatusText();
+  function updateLiveStats() {
+    const $amount = document.getElementById('amount');
+    const $liveInsats = document.getElementById('liveInsats');
+    const $liveCombo = document.getElementById('liveCombo');
+    if (!$amount || !$liveInsats || !$liveCombo) return;
+    const target = parseInt($amount.value.replace(/\D/g, ''), 10) || 0; 
+    const current = getCurrentCombo();
+    
+    if (current.filled === 0) {
+        $liveInsats.textContent = '-';
+        $liveInsats.style.color = 'var(--muted)';
+        $liveCombo.textContent = 'Inga val';
+        return;
     }
-    update(); timerInterval = setInterval(update, 1000);
+    
+    $liveInsats.textContent = current.rows + ' kr';
+    if (current.rows === target && target > 0) $liveInsats.style.color = 'var(--blue)'; 
+    else if (current.rows > target) $liveInsats.style.color = 'var(--red)'; 
+    else $liveInsats.style.color = 'var(--gold)'; 
+    
+    if (current.hela > 0 || current.halva > 0) { 
+      $liveCombo.textContent = comboText(current); 
+      $liveCombo.className = 'data-value combo-main'; 
+    } else { 
+      $liveCombo.textContent = 'Alla Ogarderade'; 
+      $liveCombo.className = 'data-value'; 
+    }
   }
 
+  const updateTargetCombo = (showInvalid = false) => {
+    const amountInput = document.getElementById('amount');
+    const targetCombo = document.getElementById('targetCombo');
+    const comboSub = document.getElementById('comboSub');
+    const raw = amountInput.value.trim();
+    const amount = /^\d+$/.test(raw) ? parseInt(raw, 10) : null;
+    const combo = amount ? comboFromAmount(amount) : null;
+
+    if (combo) {
+      targetCombo.textContent = comboText(combo);
+      targetCombo.style.color = 'var(--gold)';
+      comboSub.innerHTML = '';
+      comboSub.classList.remove('active');
+      return;
+    }
+
+    targetCombo.textContent = showInvalid && amount ? 'Hittades ej' : '–';
+    targetCombo.style.color = showInvalid && amount ? 'var(--red)' : '';
+    comboSub.innerHTML = '';
+    comboSub.classList.remove('active');
+    if (!showInvalid || !amount) return;
+
+    let lower = null, higher = null;
+    for (const candidate of allValidCombos) {
+      if (candidate.amount < amount) lower = candidate;
+      else if (candidate.amount > amount) { higher = candidate; break; }
+    }
+    if (lower) comboSub.innerHTML += `Närmast under: <a href="#" class="suggest-link" data-amount="${lower.amount}">${lower.amount} kr</a> (${comboText(lower)})<br>`;
+    if (higher) comboSub.innerHTML += `Närmast över: <a href="#" class="suggest-link" data-amount="${higher.amount}">${higher.amount} kr</a> (${comboText(higher)})`;
+    if (comboSub.innerHTML) comboSub.classList.add('active');
+  };
+
+  document.getElementById('amount').addEventListener('input', () => {
+    updateTargetCombo(true);
+    updateLiveStats();
+  });
+  document.getElementById('comboSub').addEventListener('click', (e) => { 
+    if (e.target.classList.contains('suggest-link')) { 
+      e.preventDefault(); 
+      const $amount = document.getElementById('amount');
+      $amount.value = e.target.getAttribute('data-amount'); 
+      $amount.dispatchEvent(new Event('input')); 
+    } 
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', async () => { 
+      if (isPublished) return;
+      if (await customConfirm('Vill du rensa hela kupongen?')) { 
+          state.matches = Array.from({ length: MATCHES }, () => ({ home: '', away: '', signs: [] })); 
+          lockedIndices.clear(); 
+          markedIndices.clear();
+          document.getElementById('notesArea').value = ''; 
+          localStorage.removeItem('lee_admin_notes'); 
+          document.getElementById('amount').value = ''; 
+          document.getElementById('targetCombo').textContent = '–'; 
+          document.getElementById('targetCombo').style.color = ''; 
+          document.getElementById('comboSub').innerHTML = ''; 
+          document.getElementById('comboSub').classList.remove('active'); 
+          renderMatches(); 
+      } 
+  });
+
+async function publishPicks() {
+    if (!currentRoundId) { alert('Kupongen är inte sparad i databasen än.'); return; }
+    
+    const newPublishedState = !isPublished; 
+    const picks = state.matches.map(m => Array.isArray(m.signs) ? m.signs : []);
+    const locked = {};
+    lockedIndices.forEach(i => { locked[i] = state.matches[i].signs || []; });
+    
+    const btn = document.getElementById('placeBtn');
+    btn.disabled = true;
+    
+    const { error } = await supabaseClient.rpc('admin_publish_picks', {
+        p_round_id: currentRoundId, 
+        p_live_started: newPublishedState, 
+        p_admin_picks: picks, 
+        p_admin_locked: locked
+    });
+    
+    btn.disabled = false;
+    if (error) { alert('Fel: ' + error.message); renderMatches(); return; }
+    
+    isPublished = newPublishedState;
+    renderMatches(); 
+    updateAdminLiveStatusText();
+}
+
+  // LIVE STATISTIK
+  async function updateAdminBars() {
+    try {
+      if(!currentRoundId) return;
+      const { data: allSuggestions } = await supabaseClient.from('suggestions').select('*').eq('round_id', currentRoundId);
+      const uniquePlayers = new Map();
+      if (allSuggestions) allSuggestions.forEach(s => uniquePlayers.set(s.player_id, s));
+      const adminSuggestions = Array.from(uniquePlayers.values()).filter(s => s.submitted === true);
+      
+      const combos = ['1', 'X', '2', '1X', '12', 'X2', '1X2'];
+      for (let i = 0; i < MATCHES; i++) {
+        const details = document.getElementById(`admin-details-${i}`); 
+        const container = document.getElementById(`admin-stats-${i}`);
+        if (!details || !container) continue;
+        let matchVotes = 0; let matchCounts = {}; combos.forEach(c => matchCounts[c] = 0);
+        adminSuggestions.forEach(sugg => {
+          const picksArray = sugg.picks;
+          if (picksArray && picksArray[i] && picksArray[i].length > 0) {
+            matchVotes++;
+            const sortedPick = [...picksArray[i]].sort((a,b) => ['1','X','2'].indexOf(a) - ['1','X','2'].indexOf(b));
+            const pickStr = sortedPick.join(''); if (matchCounts[pickStr] !== undefined) matchCounts[pickStr]++;
+          }
+        });
+        if (matchVotes > 0) details.classList.add('has-tips'); else details.classList.remove('has-tips');
+                matchVotesCache[i] = matchVotes; // Spara siffran i minnet
+        const summaryEl = details.querySelector('summary');
+        if (summaryEl) summaryEl.textContent = `Visa alla tips (${matchVotes} inlämnade)`;
+        container.innerHTML = combos.map(c => {
+          const count = matchCounts[c]; const pct = matchVotes > 0 ? Math.round((count / matchVotes) * 100) : 0; const isActive = count > 0 ? 'active' : '';
+          return `<div class="stat-bar-row"><span class="stat-label ${isActive}">${c}</span><div class="stat-track"><div class="stat-fill" style="width:${pct}%"></div></div><span class="stat-count ${isActive}">${count}</span></div>`;
+        }).join('');
+      }
+    } catch (error) { console.error(error); }
+  }
+
+  // LIVE & CHATT
   function updateAdminLiveStatusText() {
     const el = document.getElementById('adminLiveStatusText');
     if (!el) return;
-    const isLiveStarted = localStorage.getItem('lee_live_started') === 'true';
-    const dl = localStorage.getItem('lee_deadline');
-    const isDeadlinePassed = dl && new Date(dl).getTime() < Date.now();
-    if (isLiveStarted) { el.textContent = 'LÅST'; el.style.color = 'var(--red)'; }
-    else if (isDeadlinePassed) { el.textContent = 'LÅST'; el.style.color = 'var(--red)'; }
-    else { el.textContent = 'ÖPPEN'; el.style.color = 'var(--green)'; }
+    el.textContent = isPublished ? 'LÅST' : 'ÖPPEN';
+    el.style.color = isPublished ? 'var(--red)' : 'var(--green)';
   }
 
-  function updatePlaceBtnState() {
-    if (localStorage.getItem('lee_live_started') === 'true') {
-      $placeBtn.textContent = 'Ångra spel'; $placeBtn.style.background = 'var(--red)'; $placeBtn.style.color = '#fff';
-    } else {
-      $placeBtn.textContent = 'Placera spel'; $placeBtn.style.background = 'linear-gradient(135deg,#f6da8b,var(--gold-deep))'; $placeBtn.style.color = '#1a1206';
-    }
-  }
+  async function renderAdminLiveView() {
+    const grid = document.getElementById('adminLiveGrid'); 
+    if(!grid) return; grid.innerHTML = '';
+    
+    const { data: live } = await supabaseClient.from('live_scores').select('*');
+    const scores = {};
+    if (live) live.forEach(m => { scores[m.match_order - 1] = m; });
 
-  $placeBtn.addEventListener('click', () => {
-    if (localStorage.getItem('lee_live_started') === 'true') { localStorage.removeItem('lee_live_started'); } 
-    else {
-      const leePicks = state.matches.map(m => m.signs); localStorage.setItem('lee_admin_final', JSON.stringify(leePicks)); localStorage.setItem('lee_live_started', 'true');
-    }
-    updatePlaceBtnState(); renderAdminLiveView(); updateAdminLiveStatusText(); publishLeeState(); renderMatches();
-  });
-
-  let liveScores = {};
-  function renderAdminLiveView() {
-    const grid = document.getElementById('adminLiveGrid'); if(!grid) return; grid.innerHTML = '';
     for (let i = 0; i < 13; i++) {
-      const m = state.matches[i] || { home: '', away: '', signs: ['1'] };
-      const live = liveScores[i];
-      const p = m.signs || [];
+      const m = state.matches[i] || { home: '', away: '', signs: [] };
+      const lv = scores[i];
+      const p = Array.isArray(m.signs) ? m.signs : [];
       let currentWin = null;
       let isFinished = false;
 
-      if (live && live.home_goals != null && live.away_goals != null) {
-          if (live.home_goals > live.away_goals) currentWin = '1';
-          else if (live.home_goals < live.away_goals) currentWin = '2';
+      if (lv && lv.home_goals != null && lv.away_goals != null) {
+          if (lv.home_goals > lv.away_goals) currentWin = '1';
+          else if (lv.home_goals < lv.away_goals) currentWin = '2';
           else currentWin = 'X';
-          const st = (live.status || '').toLowerCase();
+          const st = (lv.status || '').toLowerCase();
           isFinished = (st === 'ft' || st === 'settled' || st === 'ended');
       }
 
       let badgeHtml = '';
-      if (live) {
-          const st = (live.status || '').toLowerCase();
+      if (lv) {
+          const st = (lv.status || '').toLowerCase();
           if (isFinished) badgeHtml = `<div class="live-badge score" style="color:var(--muted);">SLUT</div>`;
           else if (st === 'pending' || st === 'ns' || !st) {
               let timeStr = '00:00';
-              if (live.datetime) timeStr = new Date(live.datetime).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'});
+              if (lv.datetime) timeStr = new Date(lv.datetime).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'});
               badgeHtml = `<div class="live-badge score">${timeStr}</div>`;
           } else badgeHtml = `<div class="live-badge tid">LIVE</div>`;
       }
 
       let scoreHtml = '';
-      if (live) {
-          let hg = live.home_goals, ag = live.away_goals;
-          const st = (live.status || '').toLowerCase();
+      if (lv) {
+          let hg = lv.home_goals, ag = lv.away_goals;
+          const st = (lv.status || '').toLowerCase();
           if ((st === 'ns' || st === 'pending') && (hg === null || hg === undefined)) { hg = 0; ag = 0; }
           scoreHtml = `<div class="live-card-score ${isFinished ? 'green' : 'red'}"><span>${hg ?? '-'}</span><span>${ag ?? '-'}</span></div>`;
       }
@@ -731,7 +1186,7 @@
       let cx = 'live-card-sign' + (p.includes('X') ? ' on' : '');
       let c2 = 'live-card-sign' + (p.includes('2') ? ' on' : '');
 
-      if (live && currentWin) {
+      if (lv && currentWin) {
           if (currentWin === '1') c1 += ' win'; if (currentWin === 'X') cx += ' win'; if (currentWin === '2') c2 += ' win';
           if (currentWin !== '1' && p.includes('1')) c1 += ' lose'; if (currentWin !== 'X' && p.includes('X')) cx += ' lose'; if (currentWin !== '2' && p.includes('2')) c2 += ' lose';
           if (!p.includes('1') && currentWin !== '1') c1 += ' dim'; if (!p.includes('X') && currentWin !== 'X') cx += ' dim'; if (!p.includes('2') && currentWin !== '2') c2 += ' dim';
@@ -744,18 +1199,17 @@
 
       el.innerHTML = `
         <div class="live-card-header"><span class="live-card-no">M${i+1}</span>${badgeHtml}</div>
-        <div class="live-card-teams"><span>${esc(m.home)}</span><span>${esc(m.away)}</span></div>
-        <div class="live-card-content">${scoreHtml}</div>
+        <div class="live-card-content">
+          <div class="live-card-teams"><span>${esc(m.home)}</span><span>${esc(m.away)}</span></div>
+          ${scoreHtml}
+        </div>
         <div class="live-card-signs"><div class="${c1}">1</div><div class="${cx}">X</div><div class="${c2}">2</div></div>`;
       grid.appendChild(el);
     }
 
     const noteCard = document.createElement('div');
-    noteCard.className = 'live-card-note';
-    noteCard.innerHTML = `
-      <div class="data-label" style="margin-bottom: 6px;">Egna noteringar</div>
-      <textarea placeholder="Skriv dina egna noteringar här..." readonly style="flex:1;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px;resize:none;outline:none;font-family:inherit;font-size:12px;">${esc(localStorage.getItem('lee_admin_notes') || '')}</textarea>
-    `;
+    noteCard.className = 'notes-card';
+    noteCard.innerHTML = `<div class="data-label" style="margin-bottom: 6px;">Egna noteringar</div><textarea readonly style="flex:1;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px;resize:none;outline:none;font-family:inherit;font-size:12px;">${esc(localStorage.getItem('lee_admin_notes') || '')}</textarea>`;
     grid.appendChild(noteCard);
 
     setTimeout(() => {
@@ -768,255 +1222,364 @@
     }, 10);
   }
 
-  // Anteckningsrutan fyller alltid ut det lediga utrymmet i sista raden
-  function fitNotes() {
-    const tpl = getComputedStyle($grid).gridTemplateColumns;
-    if (!tpl || tpl === 'none') return;
-    const cols = tpl.split(' ').filter(Boolean).length || 1;
-    const rem = MATCHES % cols;
-    $notesCard.style.gridColumn = 'span ' + (rem === 0 ? cols : cols - rem);
-  }
-  window.addEventListener('resize', fitNotes);
-
-  function renderMatches() {
-    const scroller = document.querySelector('.main'); const keepTop = scroller ? scroller.scrollTop : 0;
-    $grid.innerHTML = '';
-    const frag = document.createDocumentFragment();
-    for (let i = 0; i < MATCHES; i++) {
-      const m = state.matches[i] || { home: '', away: '', signs: [] };
-      const n = m.signs.length; const kind = n === 3 ? 'hel' : n === 2 ? 'halv' : n === 1 ? 'spik' : '';
-      const el = document.createElement('div'); el.className = 'match' + (n === 2 ? ' halv' : n === 3 ? ' hel' : '') + (markedIndices.has(i) ? ' marked' : '');
-      if (lockedIndices.has(i)) el.classList.add('locked-highlight');
-      
-      el.onmousedown = (ev) => startDrag(ev, i);
-      el.onmouseenter = () => hoverDrag(i);
-      el.onclick = (ev) => cardClick(ev, i);
-      
-      el.innerHTML = `
-        <div class="match-header"><span class="match-no">M${i+1}</span><span class="match-tag ${kind}">${kind ? kind.toUpperCase() : ''}</span>
-          <div class="match-actions"><button type="button" class="btn-move btn-lock ${lockedIndices.has(i) ? 'on' : ''}" title="${lockedIndices.has(i) ? 'L\u00e5s upp match' : 'L\u00e5s match'}" onclick="toggleCardLock(event, ${i})">${lockedIndices.has(i) ? LOCK_CLOSED : LOCK_OPEN}</button></div>
-        </div>
-        <div class="teams"><input type="text" class="team-input" placeholder="Hemmalag" value="${esc(m.home)}" oninput="updateTeam(${i}, 'home', this.value)"><input type="text" class="team-input" placeholder="Bortalag" value="${esc(m.away)}" oninput="updateTeam(${i}, 'away', this.value)"></div>
-        <div class="signs"><div class="sign ${m.signs.includes('1') ? 'on' : ''}" onclick="toggleSign(event, ${i}, '1')">1</div><div class="sign ${m.signs.includes('X') ? 'on' : ''}" onclick="toggleSign(event, ${i}, 'X')">X</div><div class="sign ${m.signs.includes('2') ? 'on' : ''}" onclick="toggleSign(event, ${i}, '2')">2</div></div>
-        <details class="stats-accordion" id="admin-details-${i}"><summary>Visa alla tips (0 inlämnade)</summary><div class="stats-content" id="admin-stats-${i}"></div></details>`;
-      const det = el.querySelector('details.stats-accordion');
-      if (det) { if (openDetails.has(i)) det.open = true; det.addEventListener('toggle', () => { if (det.open) openDetails.add(i); else openDetails.delete(i); }); }
-      frag.appendChild(el);
-    }
-    frag.appendChild($notesCard); $grid.appendChild(frag); applyPlacedState(); updateLiveStats(); paintAdminBars(); fitNotes(); if (scroller) scroller.scrollTop = keepTop;
-  }
-
-  let adminSuggestions = [];
-  const openDetails = new Set();
-
-  async function updateAdminBars() {
-    try {
-      if(!supabaseClient) return;
-      if(!currentRoundId) {
-        const { data: rounds } = await supabaseClient.from('rounds').select('id').order('created_at', { ascending: false }).limit(1);
-        if(rounds && rounds.length > 0) currentRoundId = rounds[0].id; else return;
-      }
-      const { data: allSuggestions } = await supabaseClient.from('suggestions').select('*').eq('round_id', currentRoundId).order('created_at', { ascending: true });
-      const uniquePlayers = new Map();
-      if (allSuggestions) allSuggestions.forEach(s => uniquePlayers.set(s.player_id, s));
-      adminSuggestions = Array.from(uniquePlayers.values()).filter(s => s.submitted === true);
-      paintAdminBars();
-    } catch (error) { console.error("Kunde inte h\u00e4mta tips:", error); }
-  }
-
-  // Ritar "Visa alla tips" fr\u00e5n cachen direkt, utan n\u00e4tverksf\u00f6rdr\u00f6jning
-  function paintAdminBars() {
-    const combos = ['1', 'X', '2', '1X', '12', 'X2', '1X2'];
-    for (let i = 0; i < MATCHES; i++) {
-      const details = document.getElementById(`admin-details-${i}`); const container = document.getElementById(`admin-stats-${i}`);
-      if (!details || !container) continue;
-      let matchVotes = 0; let matchCounts = {}; combos.forEach(c => matchCounts[c] = 0);
-      adminSuggestions.forEach(sugg => {
-        const picksArray = sugg.picks;
-        if (picksArray && picksArray[i] && picksArray[i].length > 0) {
-          matchVotes++;
-          const sortedPick = [...picksArray[i]].sort((a,b) => ['1','X','2'].indexOf(a) - ['1','X','2'].indexOf(b));
-          const pickStr = sortedPick.join(''); if (matchCounts[pickStr] !== undefined) matchCounts[pickStr]++;
-        }
-      });
-      if (matchVotes > 0) details.classList.add('has-tips'); else details.classList.remove('has-tips');
-      details.querySelector('summary').textContent = `Visa alla tips (${matchVotes} inl\u00e4mnade)`;
-      container.innerHTML = combos.map(c => {
-        const count = matchCounts[c]; const pct = matchVotes > 0 ? Math.round((count / matchVotes) * 100) : 0; const isActive = count > 0 ? 'active' : '';
-        return `<div class="stat-bar-row"><span class="stat-label ${isActive}">${c}</span><div class="stat-track"><div class="stat-fill" style="width:${pct}%"></div></div><span class="stat-count ${isActive}">${count}</span></div>`;
-      }).join('');
-    }
-  }
-
-  window.switchTab = function(tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    document.getElementById('tab-' + tabId).classList.add('active');
-    const btns = document.querySelectorAll('.tab-btn');
-    if (tabId === 'kupong') { btns[0].classList.add('active'); updateAdminBars(); }
-    if (tabId === 'playerview') { btns[1].classList.add('active'); const cb = document.getElementById('chatBadge'); if (cb) cb.style.display = 'none'; renderChat(); renderAdminLiveView(); updateAdminLiveStatusText(); }
-    if (tabId === 'tabell') btns[2].classList.add('active');
-    if (tabId === 'admin') { btns[3].classList.add('active'); loadUsers(); loadRssFeeds(); }
-  };
-
-  window.toggleAccordion = function(id) { document.getElementById(id).classList.toggle('open'); };
-
-  function comboText(c){ return c.hela + ' hela ' + c.halva + ' ' + (c.halva === 1 ? 'halv' : 'halva'); }
-  function comboFromAmount(amount){ const rows = amount / PRICE_PER_ROW; if (!Number.isInteger(rows) || rows < 1) return null; for (const c of allValidCombos) { if (c.amount === amount) return { hela: c.hela, halva: c.halva, rows: c.rows }; if (c.amount > amount) break; } return null; }
-  function getCurrentCombo() { let hela = 0, halva = 0; for (const m of state.matches) { if (m.signs.length === 3) hela++; else if (m.signs.length === 2) halva++; } let rows = 1; for (const m of state.matches) rows *= m.signs.length; return { hela, halva, rows }; }
-
-  let isDragging = false, startIdx = null, endIdx = null;
-  function updateDragHighlight() {
-    if (startIdx === null || endIdx === null) return;
-    const min = Math.min(startIdx, endIdx), max = Math.max(startIdx, endIdx);
-    document.querySelectorAll('.match').forEach((el, i) => { if (i >= min && i <= max) el.classList.add('drag-highlight'); else el.classList.remove('drag-highlight'); });
-  }
-  function isInteractive(t) { return !!(t && t.closest && t.closest('input, button, textarea, details, .sign')); }
-  window.startDrag = function(ev, idx) {
-    if (isPlaced() || isInteractive(ev.target)) return;
-    isDragging = true; startIdx = idx; endIdx = idx;
-  };
-  window.hoverDrag = function(idx) {
-    if (isDragging) { endIdx = idx; updateDragHighlight(); }
-  };
-  document.addEventListener('mouseup', () => {
-    if (isDragging && startIdx !== null && endIdx !== null && startIdx !== endIdx) {
-      const min = Math.min(startIdx, endIdx), max = Math.max(startIdx, endIdx);
-      let allMarked = true; for (let i = min; i <= max; i++) if (!markedIndices.has(i)) allMarked = false;
-      for (let i = min; i <= max; i++) { if (allMarked) markedIndices.delete(i); else markedIndices.add(i); }
-      renderMatches();
-    } else {
-      document.querySelectorAll('.match.drag-highlight').forEach(el => el.classList.remove('drag-highlight'));
-    }
-    isDragging = false; startIdx = null; endIdx = null;
-  });
-  // Enkelklick på kortet byter färg (markerar / avmarkerar)
-  window.cardClick = function(ev, idx) {
-    if (isPlaced() || isInteractive(ev.target)) return;
-    if (markedIndices.has(idx)) markedIndices.delete(idx); else markedIndices.add(idx);
-    renderMatches();
-  };
-
-  window.toggleCardLock = function(e, idx) {
-    if (e) e.stopPropagation();
-    if (isPlaced()) return;
-    if (lockedIndices.has(idx)) lockedIndices.delete(idx); else lockedIndices.add(idx);
-    publishLeeState();
-    renderMatches();
-  };
-  window.moveMatch = function(idx, dir) { if (isPlaced()) return; const newIdx = idx + dir; if (newIdx < 0 || newIdx >= MATCHES || lockedIndices.has(idx) || lockedIndices.has(newIdx)) return; [state.matches[idx], state.matches[newIdx]] = [state.matches[newIdx], state.matches[idx]]; renderMatches(); };
-  window.updateTeam = function(idx, field, val) { if (isPlaced()) return; state.matches[idx][field] = val; };
-  window.toggleSign = function(event, idx, sign) { if (event) event.stopPropagation(); if (isPlaced() || lockedIndices.has(idx)) return; const m = state.matches[idx]; if (m.signs.includes(sign)) { m.signs = m.signs.filter(s => s !== sign); } else { m.signs.push(sign); m.signs.sort((a, b) => ['1', 'X', '2'].indexOf(a) - ['1', 'X', '2'].indexOf(b)); } renderMatches(); };
-
-  function updateLiveStats() {
-    const target = parseInt($amount.value.replace(/\D/g, ''), 10) || 0; const current = getCurrentCombo();
-    if (current.rows === 0) {
-        $liveInsats.textContent = '-';
-        $liveInsats.style.color = 'var(--muted)';
-        $liveCombo.textContent = 'Inga val';
-        return;
-    }
-    $liveInsats.textContent = current.rows + ' kr';
-    if (current.rows === target && target > 0) $liveInsats.style.color = 'var(--blue)'; else if (current.rows > target) $liveInsats.style.color = 'var(--red)'; else $liveInsats.style.color = 'var(--gold)'; 
-    if (current.hela > 0 || current.halva > 0) { $liveCombo.textContent = comboText(current); $liveCombo.className = 'data-value combo-main'; } else { $liveCombo.textContent = 'Alla Ogarderade'; $liveCombo.className = 'data-value'; }
-  }
-
-  $amount.addEventListener('input', () => {
-    const raw = $amount.value.trim(); const amount = /^\d+$/.test(raw) ? parseInt(raw, 10) : null; const combo = amount ? comboFromAmount(amount) : null;
-    if (combo) {
-      $targetCombo.textContent = comboText(combo); $targetCombo.style.color = 'var(--gold)'; $comboSub.innerHTML = ''; $comboSub.classList.remove('active');
-    } else {
-      $targetCombo.textContent = 'Hittades ej'; $targetCombo.style.color = 'var(--red)';
-      if (amount) {
-        let lower = null, higher = null; for (const c of allValidCombos) { if (c.amount < amount) lower = c; else if (c.amount > amount) { higher = c; break; } }
-        let sub = ''; if (lower) sub += `Närmast under: <a href="#" class="suggest-link" data-amount="${lower.amount}">${lower.amount} kr</a> (${comboText(lower)})<br>`; if (higher) sub += `Närmast över: <a href="#" class="suggest-link" data-amount="${higher.amount}">${higher.amount} kr</a> (${comboText(higher)})`;
-        $comboSub.innerHTML = sub; $comboSub.classList.add('active');
-      } else { $comboSub.innerHTML = ''; $comboSub.classList.remove('active'); }
-    }
-    updateLiveStats();
-  });
-  $comboSub.addEventListener('click', (e) => { if (e.target.classList.contains('suggest-link')) { e.preventDefault(); $amount.value = e.target.getAttribute('data-amount'); $amount.dispatchEvent(new Event('input')); } });
-
-  $clearBtn.addEventListener('click', async () => { 
-      if (await customConfirm('Vill du rensa hela kupongen?')) { 
-          state.matches = Array.from({ length: MATCHES }, () => ({ home: '', away: '', signs: [] })); 
-          lockedIndices.clear(); markedIndices.clear(); publishLeeState();
-          $notes.value = ''; 
-          try { localStorage.removeItem('lee_admin_notes'); } catch (e) {} 
-          $amount.value = ''; 
-          $targetCombo.textContent = '–'; 
-          $comboSub.innerHTML = ''; 
-          $comboSub.classList.remove('active'); 
-          renderMatches(); 
-          updateLiveStats(); 
-      } 
-  });
-
-  function renderSystemTable() {
-    $sysBody.innerHTML = '';
-    const data = [
-    [0,1,2, 1,1,null,null, 1,1,null, 2,null,null, 1,1, 2,null, null,null, 1,2,null,null],[0,2,4, 1,2,1,null, 1,2,1, 2,2,null, 1,2, 2,2, 4,null, 1,2,null,null],[0,3,8, 1,3,3,1, 1,3,3, 2,4,2, 1,3, 2,4, 4,4, 1,2,4,8],[0,4,16, 1,4,6,4, 1,4,6, 2,6,6, 1,4, 2,6, 4,8, 1,2,4,8],[0,5,32, 1,5,10,10, 1,5,10, 2,8,12, 1,5, 2,8, 4,12, 1,2,4,8],[0,6,64, 1,6,15,20, 1,6,15, 2,10,20, 1,6, 2,10, 4,16, 1,2,4,8],[0,7,128, 1,7,21,35, 1,7,21, 2,12,30, 1,7, 2,12, 4,20, 1,2,4,8],[0,8,256, 1,8,28,56, 1,8,28, 2,14,42, 1,8, 2,14, 4,24, 1,2,4,8],[0,9,512, 1,9,36,84, 1,9,36, 2,16,56, 1,9, 2,16, 4,28, 1,2,4,8],[0,10,1024, 1,10,45,120, 1,10,45, 2,18,72, 1,10, 2,18, 4,32, 1,2,4,8],[0,11,2048, 1,11,55,165, 1,11,55, 2,20,90, 1,11, 2,20, 4,36, null,2,4,8],[0,12,4096, 1,12,66,220, 1,12,66, 2,22,110, null,null, 2,22, 4,40, null,null,4,8],[0,13,8192, 1,13,78,286, null,null,null, 2,24,132, null,null, null,null, 4,44, null,null,null,8],[1,0,3, 1,2,null,null, 1,2,null, 1,2,null, 1,2, null,null, null,null, 1,null,null,null],[1,1,6, 1,3,2,null, 1,3,2, 1,3,2, 1,3, 2,4, null,null, 1,2,null,null],[1,2,12, 1,4,5,2, 1,4,5, 2,6,4, 1,4, 2,6, 4,8, 1,2,4,null],[1,3,24, 1,5,9,7, 1,5,9, 2,8,10, 1,5, 2,8, 4,12, 1,2,4,8],[1,4,48, 1,6,14,16, 1,6,14, 2,10,18, 1,6, 2,10, 4,16, 1,2,4,8],[1,5,96, 1,7,20,30, 1,7,20, 2,12,28, 1,7, 2,12, 4,20, 1,2,4,8],[1,6,192, 1,8,27,50, 1,8,27, 2,14,40, 1,8, 2,14, 4,24, 1,2,4,8],[1,7,384, 1,9,35,77, 1,9,35, 2,16,54, 1,9, 2,16, 4,28, 1,2,4,8],[1,8,768, 1,10,44,112, 1,10,44, 2,18,70, 1,10, 2,18, 4,32, 1,2,4,8],[1,9,1536, 1,11,54,156, 1,11,54, 2,20,88, 1,11, 2,20, 4,36, 1,2,4,8],[1,10,3072, 1,12,65,210, 1,12,65, 2,22,108, 1,12, 2,22, 4,40, 1,2,4,8],[1,11,6144, 1,13,77,275, 1,13,77, 2,24,130, 1,13, 2,24, 4,44, 1,2,4,8],[2,0,9, 1,4,4,null, 1,4,4, 1,4,4, 1,4, null,null, null,null, 1,null,null,null],[2,1,18, 1,5,8,4, 1,5,8, 1,5,8, 1,5, 2,8, null,null, 1,2,null,null],[2,2,36, 1,6,13,12, 1,6,13, 2,10,16, 1,6, 2,10, 4,16, 1,2,4,null],[2,3,72, 1,7,19,25, 1,7,19, 2,12,26, 1,7, 2,12, 4,20, 1,2,4,8],[2,4,144, 1,8,26,44, 1,8,26, 2,14,38, 1,8, 2,14, 4,24, 1,2,4,8],[2,5,288, 1,9,34,70, 1,9,34, 2,16,52, 1,9, 2,16, 4,28, 1,2,4,8],[2,6,576, 1,10,43,104, 1,10,43, 2,18,68, 1,10, 2,18, 4,32, 1,2,4,8],[2,7,1152, 1,11,53,147, 1,11,53, 2,20,86, 1,11, 2,20, 4,36, 1,2,4,8],[2,8,2304, 1,12,64,200, 1,12,64, 2,22,106, 1,12, 2,22, 4,40, 1,2,4,8],[2,9,4608, 1,13,76,264, 1,13,76, 2,24,128, 1,13, 2,24, 4,44, 1,2,4,8],[2,10,9216, 1,14,89,340, 1,14,89, 2,26,152, 1,14, 2,26, 4,48, 1,2,4,8],[3,0,27, 1,6,12,8, 1,6,12, 1,6,12, 1,6, null,null, null,null, 1,null,null,null],[3,1,54, 1,7,18,20, 1,7,18, 2,12,24, 1,7, 2,12, null,null, 1,2,null,null],[3,2,108, 1,8,25,38, 1,8,25, 2,14,36, 1,8, 2,14, 4,24, 1,2,4,null],[3,3,216, 1,9,33,63, 1,9,33, 2,16,50, 1,9, 2,16, 4,28, 1,2,4,8],[3,4,432, 1,10,42,96, 1,10,42, 2,18,66, 1,10, 2,18, 4,32, 1,2,4,8],[3,5,864, 1,11,52,138, 1,11,52, 2,20,84, 1,11, 2,20, 4,36, 1,2,4,8],[3,6,1728, 1,12,63,190, 1,12,63, 2,22,104, 1,12, 2,22, 4,40, 1,2,4,8],[3,7,3456, 1,13,75,253, 1,13,75, 2,24,126, 1,13, 2,24, 4,44, 1,2,4,8],[3,8,6912, 1,14,88,328, 1,14,88, 2,26,150, 1,14, 2,26, 4,48, 1,2,4,8],[4,0,81, 1,8,24,32, 1,8,24, 1,8,24, 1,8, null,null, null,null, 1,null,null,null],[4,1,162, 1,9,32,56, 1,9,32, 2,16,48, 1,9, 2,16, null,null, 1,2,null,null],[4,2,324, 1,10,41,88, 1,10,41, 2,18,64, 1,10, 2,18, 4,32, 1,2,4,null],[4,3,648, 1,11,51,129, 1,11,51, 2,20,82, 1,11, 2,20, 4,36, 1,2,4,8],[4,4,1296, 1,12,62,180, 1,12,62, 2,22,102, 1,12, 2,22, 4,40, 1,2,4,8],[4,5,2592, 1,13,74,242, 1,13,74, 2,24,124, 1,13, 2,24, 4,44, 1,2,4,8],[4,6,5184, 1,14,87,316, 1,14,87, 2,26,148, 1,14, 2,26, 4,48, 1,2,4,8],[5,0,243, 1,10,40,80, 1,10,40, 1,10,40, 1,10, null,null, null,null, 1,null,null,null],[5,1,486, 1,11,50,120, 1,11,50, 2,20,80, 1,11, 2,20, null,null, 1,2,null,null],[5,2,972, 1,12,61,170, 1,12,61, 2,22,100, 1,12, 2,22, 4,40, 1,2,4,null],[5,3,1944, 1,13,73,231, 1,13,73, 2,24,122, 1,13, 2,24, 4,44, 1,2,4,8],[5,4,3888, 1,14,86,304, 1,14,86, 2,26,146, 1,14, 2,26, 4,48, 1,2,4,8],[5,5,7776, 1,15,100,390, 1,15,100, 2,28,172, 1,15, 2,28, 4,52, 1,2,4,8],[6,0,729, 1,12,60,160, 1,12,60, 1,12,60, 1,12, null,null, null,null, 1,null,null,null],[6,1,1458, 1,13,72,220, 1,13,72, 2,24,120, 1,13, 2,24, null,null, 1,2,null,null],[6,2,2916, 1,14,85,292, 1,14,85, 2,26,144, 1,14, 2,26, 4,48, 1,2,4,null],[6,3,5832, 1,15,99,377, 1,15,99, 2,28,170, 1,15, 2,28, 4,52, 1,2,4,8],[7,0,2187, 1,14,84,280, 1,14,84, 1,14,84, 1,14, null,null, null,null, 1,null,null,null],[7,1,4374, 1,15,98,364, 1,15,98, 2,28,168, 1,15, 2,28, null,null, 1,2,null,null],[7,2,8748, 1,16,113,462, 1,16,113, 2,30,196, 1,16, 2,30, 4,56, 1,2,4,null],[8,0,6561, 1,16,112,448, 1,16,112, 1,16,112, 1,16, null,null, null,null, 1,null,null,null]
-    ];
-    data.sort((a, b) => a[2] - b[2]);
-    data.forEach(row => {
-      const tr = document.createElement('tr');
-      const formatCell = (val) => (val !== null && val > 0 ? val : '-');
-      tr.innerHTML = `<td>${row[0]}</td><td>${row[1]}</td><td style="color:var(--green); font-weight:700;">${row[2]}</td>
-      <td class="bg-green">${formatCell(row[3])}</td><td class="bg-green">${formatCell(row[4])}</td><td class="bg-green">${formatCell(row[5])}</td><td class="bg-green">${formatCell(row[6])}</td>
-      <td class="bg-blue">${formatCell(row[7])}</td><td class="bg-blue">${formatCell(row[8])}</td><td class="bg-blue">${formatCell(row[9])}</td><td class="bg-blue">${formatCell(row[10])}</td><td class="bg-blue">${formatCell(row[11])}</td><td class="bg-blue">${formatCell(row[12])}</td>
-      <td class="bg-yellow">${formatCell(row[13])}</td><td class="bg-yellow">${formatCell(row[14])}</td><td class="bg-yellow">${formatCell(row[15])}</td><td class="bg-yellow">${formatCell(row[16])}</td><td class="bg-yellow">${formatCell(row[17])}</td><td class="bg-yellow">${formatCell(row[18])}</td>
-      <td class="bg-red">${formatCell(row[19])}</td><td class="bg-red">${formatCell(row[20])}</td><td class="bg-red">${formatCell(row[21])}</td><td class="bg-red">${formatCell(row[22])}</td>`;
-      tr.dataset.v = JSON.stringify([row[0], row[1], row[2]]);
-      tr.title = 'Klicka för att låsa/låsa upp raden';
-      tr.addEventListener('click', () => tr.classList.toggle('locked-row'));
-      $sysBody.appendChild(tr);
-    });
-  }
-
-  let sortState = { col: 2, dir: 1 };
-  document.getElementById('sort-icon-2').textContent = '▲';
-  window.sortTable = function(col) {
-    sortState.dir = sortState.col === col ? -sortState.dir : 1;
-    sortState.col = col;
-    const rows = Array.from($sysBody.querySelectorAll('tr'));
-    rows.sort((a, b) => (JSON.parse(a.dataset.v)[col] - JSON.parse(b.dataset.v)[col]) * sortState.dir);
-    rows.forEach(r => $sysBody.appendChild(r));
-    [0,1,2].forEach(i => { const el = document.getElementById('sort-icon-' + i); if (el) el.textContent = i === col ? (sortState.dir === 1 ? '▲' : '▼') : ''; });
-  };
-
-  function updateChatBadge(chat) {
-    const badge = document.getElementById('chatBadge'); if (!badge) return;
-    const ts = m => new Date(m.created_at).getTime() || 0;
-    const latest = chat.length ? Math.max(...chat.map(ts)) : 0;
-    let seen = parseInt(localStorage.getItem('lee_chat_seen') || '', 10);
-    if (isNaN(seen)) { seen = latest; localStorage.setItem('lee_chat_seen', String(seen)); }
-    const tab = document.getElementById('tab-playerview');
-    if (tab && tab.classList.contains('active') && !document.hidden) { seen = latest; localStorage.setItem('lee_chat_seen', String(seen)); }
-    const unread = chat.filter(m => m.username !== 'Lee' && ts(m) > seen).length;
-    badge.textContent = unread > 9 ? '9+' : String(unread);
-    badge.style.display = unread > 0 ? 'inline-flex' : 'none';
-  }
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && typeof renderChat === 'function' && document.getElementById('app') && document.getElementById('app').style.display !== 'none') renderChat(); });
-
   async function renderChat() {
-    const { data: chat } = await supabaseClient.from('chat_messages').select('*').order('created_at', { ascending: true }).limit(50);
+    const { data: chat } = await supabaseClient.from('chat_messages').select('*').order('created_at', { ascending: false }).limit(50);
     if(!chat) return;
-    updateChatBadge(chat);
+    const msgs = chat.slice().reverse();
     const container = document.getElementById('adminChatMessages'); if(!container) return;
-    const sig = JSON.stringify(chat.map(m => m.id ?? m.created_at));
-    if (container.dataset.sig === sig) return;
-    container.dataset.sig = sig;
+    
     const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 50;
-    container.innerHTML = chat.map(m => { const isMe = m.username === 'Lee'; return `<div class="msg ${isMe ? 'lee' : 'me'}"><span class="msg-sender">${isMe ? 'Lee (Admin)' : esc(m.username)}</span><div class="msg-bubble">${esc(m.message)}</div></div>`; }).join('');
+    container.innerHTML = msgs.map(m => { 
+      const isMe = m.username === 'Lee' || m.username === currentProfile.display_name; 
+      return `<div class="msg ${isMe ? 'lee' : 'me'}"><span class="msg-sender">${isMe ? 'Lee (Admin)' : esc(m.username)}</span><div class="msg-bubble">${esc(m.message)}</div></div>`; 
+    }).join('');
     if (isScrolledToBottom) container.scrollTop = container.scrollHeight;
   }
 
   async function sendAdminChat() {
     const input = document.getElementById('adminChatInput'); const text = input.value.trim(); if (!text) return;
-    await supabaseClient.from('chat_messages').insert({ username: 'Lee', message: text });
-    input.value = ''; renderChat();
+    input.value = '';
+    const { error } = await supabaseClient.rpc('admin_send_chat', { p_message: text, p_display_name: 'Lee' });
+    if (error) { alert(error.message); return; }
+    renderChat();
   }
 
+  // TABELLER & INSTÄLLNINGAR
+  window.switchTab = function(tabId) {
+    try {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        const btns = document.querySelectorAll('.tab-btn');
+        if (tabId === 'kupong') { btns[0].classList.add('active'); updateAdminBars(); }
+        if (tabId === 'playerview') { btns[1].classList.add('active'); renderAdminLiveView(); renderChat(); }
+        if (tabId === 'freemarket') { btns[2].classList.add('active'); loadActiveMarkets(); }
+        if (tabId === 'mina-matcher') { btns[3].classList.add('active'); loadMyActiveMatches(); }
+        if (tabId === 'hantera-matcher') { btns[4].classList.add('active'); loadFreemarkets(); }
+        if (tabId === 'highscore') { btns[5].classList.add('active'); loadHighscore(); }
+        if (tabId === 'historik') { btns[6].classList.add('active'); loadHistory(); }
+        if (tabId === 'installningar') { btns[7].classList.add('active'); loadUsers(); loadRssFeeds(); }
+    } catch(e) {
+        alert("Kunde inte byta flik: " + e.message);
+    }
+  };
+
+  async function loadHighscore() {
+    const body = document.getElementById('highscoreBody');
+    body.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted)">Laddar...</td></tr>';
+    const { data, error } = await supabaseClient.rpc('get_highscore', { p_limit: 20 });
+    if (error) { body.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--red)">${esc(error.message)}</td></tr>`; return; }
+    if (!data || !data.length) { body.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted)">Inga spelare ännu.</td></tr>'; return; }
+    body.innerHTML = data.map((p, i) => `
+      <tr>
+        <td style="color:${i === 0 ? 'var(--gold)' : 'inherit'};font-weight:800">#${i + 1}</td>
+        <td>${esc(p.display_name || p.username || 'Okänd')}</td>
+        <td style="text-align:right;color:var(--green);font-weight:800">${fmtKr(p.balance)}</td>
+      </tr>
+    `).join('');
+  }
+
+  async function loadHistory() {
+    const body = document.getElementById('historyBody');
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Laddar...</td></tr>';
+    const { data, error } = await supabaseClient.rpc('get_my_history');
+    if (error) { body.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--red)">${esc(error.message)}</td></tr>`; return; }
+    if (!data || !data.length) { body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Ingen historik ännu.</td></tr>'; return; }
+    body.innerHTML = data.map(h => {
+      const date = new Date(h.created_at).toLocaleDateString('sv-SE');
+      const role = h.role === 'seller' ? 'Säljare' : 'Köpare';
+      let status = '', cls = '';
+      if (h.status === 'cancelled') { status = 'Avbruten' + (h.cancel_reason ? ' — ' + h.cancel_reason : ''); cls = 'status-cancelled'; }
+      else if (h.status === 'resolved_yes') { status = h.my_payout > 0 ? 'Vann' : 'Förlorade'; cls = h.my_payout > 0 ? 'status-win' : 'status-loss'; }
+      else if (h.status === 'resolved_no') { status = h.my_payout > 0 ? 'Vann' : 'Förlorade'; cls = h.my_payout > 0 ? 'status-win' : 'status-loss'; }
+      const payoutText = h.status === 'cancelled' ? `Refund ${fmtKr(h.my_payout)}` : (h.my_payout > 0 ? `+${fmtKr(h.my_payout)}` : '–');
+      return `<tr>
+        <td>${date}</td>
+        <td>${esc(h.question)}</td>
+        <td>${role}</td>
+        <td>${fmtKr(h.my_amount)}</td>
+        <td>${payoutText}</td>
+        <td class="${cls}">${esc(status)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // 100-MINUTERSBUBBLA
+  async function checkTimeAlerts() {
+    const { data: live } = await supabaseClient.from('live_scores').select('*');
+    if (!live) return;
+    const now = Date.now();
+    const hasAlert = live.some(m => {
+        if (!m.datetime) return false;
+        const ms = now - new Date(m.datetime).getTime();
+        const st = (m.status || '').toLowerCase();
+        const isNotFinished = (st !== 'ft' && st !== 'settled' && st !== 'ended');
+        return ms > 100 * 60 * 1000 && isNotFinished;
+    });
+    const badge = document.getElementById('timeAlertBadge');
+    if (badge) badge.style.display = hasAlert ? 'inline-flex' : 'none';
+  }
+
+  async function loadUsers() {
+    const { data: users } = await supabaseClient.from('profiles').select('*');
+    const tbody = document.getElementById('usersTableBody');
+    if(!tbody || !users) return;
+    tbody.innerHTML = users.map(u => {
+      const accEuro = !!u.access_europatipset;
+      const accFree = !!u.access_freemarket;
+      return `
+      <tr>
+        <td><input class="input-field" value="${esc(u.display_name || '')}" onchange="updateUser('${u.id}', 'display_name', this.value)"></td>
+        <td style="color: var(--muted); font-size: 13px; padding: 12px;">${esc(u.email || 'Saknas')}</td>
+        <td style="color: var(--muted); font-size: 13px; padding: 12px;">********</td>
+        <td style="text-align:center;"><div class="perm-toggle ${accEuro ? 'on' : ''}" onclick="togglePerm('${u.id}', 'access_europatipset', ${accEuro})">✔</div></td>
+        <td style="text-align:center;"><div class="perm-toggle ${accFree ? 'on' : ''}" onclick="togglePerm('${u.id}', 'access_freemarket', ${accFree})">✔</div></td>
+        <td style="text-align:right;"><button class="btn-icon delete" onclick="deleteUser('${u.id}')">Ta bort</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  window.updateUser = async function(id, field, value) {
+    await supabaseClient.from('profiles').update({ [field]: value }).eq('id', id);
+  };
+
+  window.togglePerm = async function(id, field, currentVal) {
+    const newVal = !currentVal;
+    const { error } = await supabaseClient.rpc('admin_set_access', { 
+      p_user_id: id, 
+      p_access_europatipset: field === 'access_europatipset' ? newVal : null,
+      p_access_freemarket: field === 'access_freemarket' ? newVal : null
+    });
+    if (error) { alert(error.message); return; }
+    loadUsers();
+  };
+
+  window.deleteUser = async function(id) {
+    if (!(await customConfirm('Är du säker på att du vill ta bort spelaren?'))) return;
+    await supabaseClient.from('profiles').delete().eq('id', id);
+    loadUsers();
+  };
+
+  // FREEMARKET
+  function selectOutcome(v) {
+    document.getElementById('fm-outcome').value = v;
+    const by = document.getElementById('fm-btn-yes');
+    const bn = document.getElementById('fm-btn-no');
+    if (v === 'yes') {
+      by.style.background = 'rgba(51,224,138,0.15)'; by.style.borderColor = 'var(--green)'; by.style.color = 'var(--green)';
+      bn.style.background = 'var(--bg)'; bn.style.borderColor = 'var(--border)'; bn.style.color = 'var(--muted)';
+    } else {
+      bn.style.background = 'rgba(224,90,90,0.15)'; bn.style.borderColor = 'var(--red)'; bn.style.color = 'var(--red)';
+      by.style.background = 'var(--bg)'; by.style.borderColor = 'var(--border)'; by.style.color = 'var(--muted)';
+    }
+  }
+
+  async function createMarket() {
+    const q = document.getElementById('fm-q').value.trim();
+    const t = document.getElementById('fm-time').value;
+    const oddsRaw = document.getElementById('fm-odds').value.trim().replace(',', '.');
+    const amountRaw = document.getElementById('fm-amount').value.trim();
+    const odds = parseFloat(oddsRaw);
+    const amount = parseInt(amountRaw, 10);
+    const outcome = document.getElementById('fm-outcome').value;
+
+    if (!q || q.length < 3) { alert('Frågan måste vara minst 3 tecken'); return; }
+    if (!t) { alert('Välj matchtid'); return; }
+    const dt = new Date(t);
+    if (isNaN(dt.getTime()) || dt <= new Date()) { alert('Matchtiden måste vara i framtiden'); return; }
+    if (!isFinite(odds) || odds <= 1 || odds > 100) { alert('Odds måste vara mellan 1 och 100'); return; }
+    if (!isFinite(amount) || amount <= 0) { alert('Beloppet måste vara positivt'); return; }
+
+    const btn = document.getElementById('fmPublish');
+    btn.disabled = true; btn.textContent = 'Publicerar...';
+    const { error } = await supabaseClient.rpc('create_market', {
+      p_question: q, p_match_time: dt.toISOString(), p_odds: odds, p_amount: amount, p_outcome: outcome
+    });
+    btn.disabled = false; btn.textContent = 'Publicera';
+
+    if (error) { alert('Fel: ' + error.message); return; }
+    document.getElementById('fm-q').value = '';
+    document.getElementById('fm-time').value = '';
+    document.getElementById('fm-odds').value = '';
+    document.getElementById('fm-amount').value = '';
+    alert('Spel publicerat — ' + amount + ' kr låsta');
+    loadActiveMarkets();
+  }
+
+  async function loadActiveMarkets() {
+    const container = document.getElementById('marketList');
+    if (!container) return;
+    container.innerHTML = '<div class="fm-empty">Laddar...</div>';
+    const { data, error } = await supabaseClient.from('freemarket_markets').select('id, question, match_time, created_at, freemarket_orders(id, user_id, outcome, odds, amount)').eq('status', 'open').order('created_at', { ascending: false });
+    if (error) { container.innerHTML = '<div class="fm-empty">Kunde inte hämta: ' + esc(error.message) + '</div>'; return; }
+    if (!data || !data.length) { container.innerHTML = '<div class="fm-empty">Inga aktiva marknader just nu.</div>'; return; }
+
+    container.innerHTML = data.map(m => {
+      const order = m.freemarket_orders && m.freemarket_orders[0];
+      if (!order) return '';
+      const isMine = order.user_id === currentUser.id;
+      const sellerPicks = order.outcome === 'yes' ? 'Ja' : 'Nej';
+      const buyerPicks = order.outcome === 'yes' ? 'Nej' : 'Ja';
+      const odds = Number(order.odds);
+      const amt = Number(order.amount);
+      const locked = m.match_time && new Date(m.match_time) < new Date();
+      let timeStr = '–';
+      if (m.match_time) timeStr = new Date(m.match_time).toLocaleString('sv-SE', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      let action;
+      if (isMine) action = '<span style="color:var(--muted);font-size:11px;font-weight:800;padding:6px 12px;border:1px solid var(--border);border-radius:6px">Ditt spel</span>';
+      else if (locked) action = '<span style="color:var(--red);font-size:11px;font-weight:800;padding:6px 12px;border:1px solid rgba(224,90,90,0.4);border-radius:6px">LÅST</span>';
+      else action = `<button class="fm-match-btn" onclick="openMatch('${order.id}','${m.id}',${odds},${amt},'${order.outcome}')">Matcha (${buyerPicks})</button>`;
+
+      return `<div class="fm-card">
+        <div class="fm-card-top"><span class="fm-time">${esc(timeStr)}</span>${locked ? '<span class="fm-lock">LÅST</span>' : ''}</div>
+        <div class="fm-q">${esc(m.question)}</div>
+        <div class="fm-info">
+          <div style="min-width:0">
+            <div class="fm-sells">Säljs: ${sellerPicks}</div>
+            <div class="fm-odds-row"><span class="fm-odds">Odds ${odds.toFixed(2)}</span><span class="fm-amt">${fmtKr(amt)}</span></div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;">Köparens kostnad: ${fmtKr(amt * (odds - 1))} · Vinst: ${fmtKr(amt * odds)}</div>
+          </div>
+          <div style="flex-shrink:0">${action}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  async function loadMyActiveMatches() {
+    const container = document.getElementById('myActiveMatchesList');
+    if (!container) return;
+    container.innerHTML = '<div class="fm-empty">Laddar...</div>';
+    
+    const { data: trades } = await supabaseClient.from('freemarket_trades').select('market_id').or(`buyer_id.eq.${currentUser.id},seller_id.eq.${currentUser.id}`);
+    const marketIds = trades ? [...new Set(trades.map(t => t.market_id))] : [];
+    
+    const { data: created } = await supabaseClient.from('freemarket_markets').select('id').eq('creator_id', currentUser.id);
+    if (created) created.forEach(c => marketIds.push(c.id));
+    
+    if (marketIds.length === 0) { container.innerHTML = '<div class="fm-empty">Du har inga aktiva matcher.</div>'; return; }
+
+    const { data, error } = await supabaseClient.from('freemarket_markets').select('id, question, match_time, created_at, status, freemarket_orders(id, user_id, outcome, odds, amount)').in('id', marketIds).eq('status', 'open').order('created_at', { ascending: false });
+    
+    if (error) { container.innerHTML = '<div class="fm-empty">Kunde inte hämta: ' + esc(error.message) + '</div>'; return; }
+    if (!data || !data.length) { container.innerHTML = '<div class="fm-empty">Inga öppna matcher bland dina.</div>'; return; }
+
+    container.innerHTML = data.map(m => {
+      const order = m.freemarket_orders && m.freemarket_orders[0];
+      if (!order) return '';
+      const isMine = order.user_id === currentUser.id;
+      const sellerPicks = order.outcome === 'yes' ? 'Ja' : 'Nej';
+      const odds = Number(order.odds);
+      const amt = Number(order.amount);
+      const locked = m.match_time && new Date(m.match_time) < new Date();
+      let timeStr = '–';
+      if (m.match_time) timeStr = new Date(m.match_time).toLocaleString('sv-SE', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      return `<div class="fm-card">
+        <div class="fm-card-top"><span class="fm-time">${esc(timeStr)}</span>${locked ? '<span class="fm-lock">LÅST</span>' : ''}</div>
+        <div class="fm-q">${esc(m.question)}</div>
+        <div class="fm-info">
+          <div style="min-width:0">
+            <div class="fm-sells">Säljs: ${sellerPicks}</div>
+            <div class="fm-odds-row"><span class="fm-odds">Odds ${odds.toFixed(2)}</span><span class="fm-amt">${fmtKr(amt)}</span></div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;">${isMine ? 'Du säljer detta spel' : 'Du har matchat detta spel'}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function openMatch(orderId, marketId, odds, maxAmount, sellerOutcome) {
+    pendingMatch = { orderId, marketId, odds, maxAmount, sellerOutcome };
+    document.getElementById('matchModalDesc').innerHTML = `Säljaren har valt <strong>${sellerOutcome === 'yes' ? 'Ja' : 'Nej'}</strong> med odds <strong>${odds.toFixed(2)}</strong>. Du tar motsatt sida.`;
+    const inp = document.getElementById('matchAmountInput');
+    inp.value = maxAmount;
+    recalcMatch();
+    document.getElementById('matchModal').style.display = 'flex';
+  }
+
+  function closeMatchModal() {
+    document.getElementById('matchModal').style.display = 'none';
+    pendingMatch = null;
+  }
+
+  function recalcMatch() {
+    if (!pendingMatch) return;
+    const inp = document.getElementById('matchAmountInput');
+    let v = inp.value.replace(/[^0-9]/g, '');
+    if (v && parseInt(v, 10) > pendingMatch.maxAmount) v = String(pendingMatch.maxAmount);
+    inp.value = v;
+    const amount = parseInt(v, 10) || 0;
+    const cost = amount * (pendingMatch.odds - 1);
+    const payout = amount * pendingMatch.odds;
+    document.getElementById('matchCalc').innerHTML = `
+      Du betalar: <strong>${fmtKr(cost)}</strong><br>
+      Du kan vinna: <strong>${fmtKr(payout)}</strong>
+    `;
+  }
+
+  async function confirmMatch() {
+    if (!pendingMatch) return;
+    const amount = parseInt(document.getElementById('matchAmountInput').value, 10);
+    if (!isFinite(amount) || amount <= 0 || amount > pendingMatch.maxAmount) { alert('Ogiltigt belopp'); return; }
+    const { orderId } = pendingMatch;
+    closeMatchModal();
+    const { error } = await supabaseClient.rpc('match_order', { p_order_id: orderId, p_amount: amount });
+    if (error) { alert('Matchning nekades: ' + error.message); return; }
+    alert('Matchning klar');
+    loadActiveMarkets();
+    loadMyActiveMatches();
+  }
+
+  async function loadFreemarkets() {
+    const body = document.getElementById('fmAdminBody');
+    const { data, error } = await supabaseClient.from('freemarket_markets').select('*, freemarket_orders(amount), freemarket_trades(amount)').order('created_at', { ascending: false }).limit(100);
+    if (error || !data) return;
+    if (data.length === 0) { body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Inga marknader än.</td></tr>'; return; }
+    
+    body.innerHTML = data.map(m => {
+      const timeStr = m.match_time ? new Date(m.match_time).toLocaleString('sv-SE', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
+      const isOpen = m.status === 'open';
+      let statusHtml = '';
+      if (m.status === 'resolved_yes') statusHtml = '<span style="color:var(--green);font-weight:800;">Vann JA</span>';
+      else if (m.status === 'resolved_no') statusHtml = '<span style="color:var(--green);font-weight:800;">Vann NEJ</span>';
+      else if (m.status === 'cancelled') statusHtml = '<span style="color:var(--red);font-weight:800;">Avbruten</span>';
+      else statusHtml = '<span style="color:var(--gold);font-weight:800;">Öppen</span>';
+
+      const actions = isOpen 
+        ? `<button class="btn-primary" style="padding:6px 10px; font-size:11px;" onclick="resolveMarket('${m.id}','yes')">Utlös JA</button>
+           <button class="btn-clear" style="padding:6px 10px; font-size:11px;" onclick="resolveMarket('${m.id}','no')">Utlös NEJ</button>
+           <button class="btn-icon" style="padding:6px 10px; font-size:11px; margin-left:4px;" onclick="cancelMarket('${m.id}')">Avbryt</button>`
+        : `<span style="color:var(--muted);font-size:11px">${esc(m.cancel_reason || '—')}</span>`;
+      return `<tr>
+        <td><strong>${esc(m.question)}</strong></td>
+        <td>${esc(timeStr)}</td>
+        <td>${statusHtml}</td>
+        <td style="text-align:right">${actions}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  window.resolveMarket = async function(id, outcome) {
+    if (!(await customConfirm(`Lös ut ${outcome === 'yes' ? 'JA' : 'NEJ'}?`))) return;
+    const { error } = await supabaseClient.rpc('resolve_market', { p_market_id: id, p_winning_outcome: outcome });
+    if (error) { alert(error.message); return; }
+    alert('Marknaden avgjord');
+    loadFreemarkets();
+    loadMyActiveMatches();
+  };
+
+  window.cancelMarket = async function(id) {
+    const reason = await customConfirm('Avbryt matchen? Ange en förklaring:', 'Förklaring (minst 3 tecken)');
+    if (!reason || reason.trim().length < 3) return;
+    const { error } = await supabaseClient.rpc('cancel_market', { p_market_id: id, p_reason: reason.trim() });
+    if (error) { alert(error.message); return; }
+    alert('Matchen avbruten');
+    loadFreemarkets();
+    loadMyActiveMatches();
+  };
+
+  // RSS & ANVÄNDARE
   window.showCreateUser = function() { document.getElementById('createUserModal').style.display = 'flex'; };
   window.closeCreateUser = function(e) { if (e) e.preventDefault(); document.getElementById('createUserModal').style.display = 'none'; };
 
@@ -1024,44 +1587,11 @@
     const name = document.getElementById('newDisplayName').value.trim();
     const email = document.getElementById('newEmail').value.trim();
     const password = document.getElementById('newPassword').value;
-    
     if (!name || !email || password.length < 6) { alert("Fyll i alla fält. Lösenordet måste vara minst 6 tecken."); return; }
-    
-    const tempClient = window.supabase.createClient(SB_CFG.url, SB_CFG.key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
-    const { data, error } = await tempClient.auth.signUp({
-      email: email, password: password,
-      options: { data: { username: name, display_name: name } }
-    });
-    
-    if (error) { alert("Kunde inte skapa användare: " + error.message); }
-    else {
-      alert("Användaren " + name + " har skapats!");
-      closeCreateUser();
-      loadUsers();
-    }
-  };
-
-  async function loadUsers() {
-    const { data: users } = await supabaseClient.from('profiles').select('*');
-    const tbody = document.getElementById('usersTableBody');
-    if(!tbody || !users) return;
-    tbody.innerHTML = users.map(u => `
-      <tr>
-        <td><input class="input-field" value="${esc(u.display_name || '')}" onchange="updateUser('${u.id}', 'display_name', this.value)"></td>
-        <td style="color: var(--muted); font-size: 13px; padding: 12px;">${esc(u.email || 'Saknas')}</td>
-        <td style="color: var(--muted); font-size: 13px; padding: 12px;">********</td>
-        <td style="text-align:right;"><button class="btn-icon delete" onclick="deleteUser('${u.id}')">Ta bort</button></td>
-      </tr>`).join('');
-  }
-
-  window.updateUser = async function(id, field, value) {
-    await supabaseClient.from('profiles').update({ [field]: value }).eq('id', id);
-  };
-
-  window.deleteUser = async function(id) {
-    if (!(await customConfirm('Är du säker på att du vill ta bort spelaren?'))) return;
-    await supabaseClient.from('profiles').delete().eq('id', id);
-    loadUsers();
+    const tempClient = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.key, { auth: { persistSession: false, autoRefreshToken: false } });
+    const { error } = await tempClient.auth.signUp({ email, password, options: { data: { username: name, display_name: name } } });
+    if (error) { alert("Kunde inte skapa användare: " + error.message); } 
+    else { alert("Användaren " + name + " har skapats!"); closeCreateUser(); loadUsers(); }
   };
 
   async function loadRssFeeds() {
@@ -1089,15 +1619,13 @@
     if ((feeds || []).length >= 10) { alert('Max 10 flöden'); return; }
     await supabaseClient.from('rss_feeds').insert({ url: url });
     document.getElementById('newRssUrl').value = '';
-    loadRssFeeds();
-    fetchRSS();
+    loadRssFeeds(); fetchRSS();
   };
 
   window.deleteRss = async function(id) {
     if(!(await customConfirm('Ta bort detta flöde?'))) return;
     await supabaseClient.from('rss_feeds').delete().eq('id', id);
-    loadRssFeeds();
-    fetchRSS();
+    loadRssFeeds(); fetchRSS();
   };
 
   async function fetchRSS() {
@@ -1105,23 +1633,25 @@
     try {
       const { data: feeds } = await supabaseClient.from('rss_feeds').select('*');
       if (!feeds || feeds.length === 0) return;
-      const safeUrl = u => /^https?:\/\//i.test(u) ? u : '#';
       const parts = await Promise.all(feeds.map(async f => {
         try {
           const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(f.url));
           const data = await res.json();
           if (data.status === 'ok' && data.items) {
-            return data.items.slice(0, 3).map(item => `<a href="${esc(safeUrl(item.link))}" target="_blank" rel="noopener" class="rss-item-link">${esc(item.title)}</a>`).join('');
+            return data.items.slice(0, 3).map(item => `<a href="${esc(item.link)}" target="_blank" rel="noopener" class="rss-item-link">${esc(item.title)}</a>`).join('');
           }
-        } catch (e) { console.warn('RSS-flöde misslyckades:', f.url, e); }
+        } catch (e) {}
         return '';
       }));
       const allHtml = parts.join('');
       if (allHtml) {
         document.getElementById('rssGroup1').innerHTML = allHtml;
         document.getElementById('rssGroup2').innerHTML = allHtml;
+      } else {
+        document.getElementById('rssGroup1').innerHTML = '<span class="rss-item-link" style="color:var(--red)">Kunde inte ladda RSS (kräver lokal server)</span>';
+        document.getElementById('rssGroup2').innerHTML = '<span class="rss-item-link" style="color:var(--red)">Kunde inte ladda RSS (kräver lokal server)</span>';
       }
-    } catch (e) { console.error('RSS fetch misslyckades:', e); }
+    } catch (e) {}
   }
 
   document.getElementById('rssPauseBtn').addEventListener('click', function () {
@@ -1129,6 +1659,78 @@
     const paused = t.classList.toggle('paused');
     this.textContent = paused ? 'Fortsätt' : 'Pausa';
   });
+
+  // SYSTEMTABELL
+  function renderSystemTable() {
+    const $sysBody = document.getElementById('system-table-body');
+    if(!$sysBody) return;
+    const data = [
+    [0,1,2, 1,1,null,null, 1,1,null, 2,null,null, 1,1, 2,null, null,null, 1,2,null,null],[0,2,4, 1,2,1,null, 1,2,1, 2,2,null, 1,2, 2,2, 4,null, 1,2,null,null],[0,3,8, 1,3,3,1, 1,3,3, 2,4,2, 1,3, 2,4, 4,4, 1,2,4,8],[0,4,16, 1,4,6,4, 1,4,6, 2,6,6, 1,4, 2,6, 4,8, 1,2,4,8],[0,5,32, 1,5,10,10, 1,5,10, 2,8,12, 1,5, 2,8, 4,12, 1,2,4,8],[0,6,64, 1,6,15,20, 1,6,15, 2,10,20, 1,6, 2,10, 4,16, 1,2,4,8],[0,7,128, 1,7,21,35, 1,7,21, 2,12,30, 1,7, 2,12, 4,20, 1,2,4,8],[0,8,256, 1,8,28,56, 1,8,28, 2,14,42, 1,8, 2,14, 4,24, 1,2,4,8],[0,9,512, 1,9,36,84, 1,9,36, 2,16,56, 1,9, 2,16, 4,28, 1,2,4,8],[0,10,1024, 1,10,45,120, 1,10,45, 2,18,72, 1,10, 2,18, 4,32, 1,2,4,8],[0,11,2048, 1,11,55,165, 1,11,55, 2,20,90, 1,11, 2,20, 4,36, null,2,4,8],[0,12,4096, 1,12,66,220, 1,12,66, 2,22,110, null,null, 2,22, 4,40, null,null,4,8],[0,13,8192, 1,13,78,286, null,null,null, 2,24,132, null,null, null,null, 4,44, null,null,null,8],[1,0,3, 1,2,null,null, 1,2,null, 1,2,null, 1,2, null,null, null,null, 1,null,null,null],[1,1,6, 1,3,2,null, 1,3,2, 1,3,2, 1,3, 2,4, null,null, 1,2,null,null],[1,2,12, 1,4,5,2, 1,4,5, 2,6,4, 1,4, 2,6, 4,8, 1,2,4,null],[1,3,24, 1,5,9,7, 1,5,9, 2,8,10, 1,5, 2,8, 4,12, 1,2,4,8],[1,4,48, 1,6,14,16, 1,6,14, 2,10,18, 1,6, 2,10, 4,16, 1,2,4,8],[1,5,96, 1,7,20,30, 1,7,20, 2,12,28, 1,7, 2,12, 4,20, 1,2,4,8],[1,6,192, 1,8,27,50, 1,8,27, 2,14,40, 1,8, 2,14, 4,24, 1,2,4,8],[1,7,384, 1,9,35,77, 1,9,35, 2,16,54, 1,9, 2,16, 4,28, 1,2,4,8],[1,8,768, 1,10,44,112, 1,10,44, 2,18,70, 1,10, 2,18, 4,32, 1,2,4,8],[1,9,1536, 1,11,54,156, 1,11,54, 2,20,88, 1,11, 2,20, 4,36, 1,2,4,8],[1,10,3072, 1,12,65,210, 1,12,65, 2,22,108, 1,12, 2,22, 4,40, 1,2,4,8],[1,11,6144, 1,13,77,275, 1,13,77, 2,24,130, 1,13, 2,24, 4,44, 1,2,4,8],[2,0,9, 1,4,4,null, 1,4,4, 1,4,4, 1,4, null,null, null,null, 1,null,null,null],[2,1,18, 1,5,8,4, 1,5,8, 1,5,8, 1,5, 2,8, null,null, 1,2,null,null],[2,2,36, 1,6,13,12, 1,6,13, 2,10,16, 1,6, 2,10, 4,16, 1,2,4,null],[2,3,72, 1,7,19,25, 1,7,19, 2,12,26, 1,7, 2,12, 4,20, 1,2,4,8],[2,4,144, 1,8,26,44, 1,8,26, 2,14,38, 1,8, 2,14, 4,24, 1,2,4,8],[2,5,288, 1,9,34,70, 1,9,34, 2,16,52, 1,9, 2,16, 4,28, 1,2,4,8],[2,6,576, 1,10,43,104, 1,10,43, 2,18,68, 1,10, 2,18, 4,32, 1,2,4,8],[2,7,1152, 1,11,53,147, 1,11,53, 2,20,86, 1,11, 2,20, 4,36, 1,2,4,8],[2,8,2304, 1,12,64,200, 1,12,64, 2,22,106, 1,12, 2,22, 4,40, 1,2,4,8],[2,9,4608, 1,13,76,264, 1,13,76, 2,24,128, 1,13, 2,24, 4,44, 1,2,4,8],[2,10,9216, 1,14,89,340, 1,14,89, 2,26,152, 1,14, 2,26, 4,48, 1,2,4,8],[3,0,27, 1,6,12,8, 1,6,12, 1,6,12, 1,6, null,null, null,null, 1,null,null,null],[3,1,54, 1,7,18,20, 1,7,18, 2,12,24, 1,7, 2,12, null,null, 1,2,null,null],[3,2,108, 1,8,25,38, 1,8,25, 2,14,36, 1,8, 2,14, 4,24, 1,2,4,null],[3,3,216, 1,9,33,63, 1,9,33, 2,16,50, 1,9, 2,16, 4,28, 1,2,4,8],[3,4,432, 1,10,42,96, 1,10,42, 2,18,66, 1,10, 2,18, 4,32, 1,2,4,8],[3,5,864, 1,11,52,138, 1,11,52, 2,20,84, 1,11, 2,20, 4,36, 1,2,4,8],[3,6,1728, 1,12,63,190, 1,12,63, 2,22,104, 1,12, 2,22, 4,40, 1,2,4,8],[3,7,3456, 1,13,75,253, 1,13,75, 2,24,126, 1,13, 2,24, 4,44, 1,2,4,8],[3,8,6912, 1,14,88,328, 1,14,88, 2,26,150, 1,14, 2,26, 4,48, 1,2,4,8],[4,0,81, 1,8,24,32, 1,8,24, 1,8,24, 1,8, null,null, null,null, 1,null,null,null],[4,1,162, 1,9,32,56, 1,9,32, 2,16,48, 1,9, 2,16, null,null, 1,2,null,null],[4,2,324, 1,10,41,88, 1,10,41, 2,18,64, 1,10, 2,18, 4,32, 1,2,4,null],[4,3,648, 1,11,51,129, 1,11,51, 2,20,82, 1,11, 2,20, 4,36, 1,2,4,8],[4,4,1296, 1,12,62,180, 1,12,62, 2,22,102, 1,12, 2,22, 4,40, 1,2,4,8],[4,5,2592, 1,13,74,242, 1,13,74, 2,24,124, 1,13, 2,24, 4,44, 1,2,4,8],[4,6,5184, 1,14,87,316, 1,14,87, 2,26,148, 1,14, 2,26, 4,48, 1,2,4,8],[5,0,243, 1,10,40,80, 1,10,40, 1,10,40, 1,10, null,null, null,null, 1,null,null,null],[5,1,486, 1,11,50,120, 1,11,50, 2,20,80, 1,11, 2,20, null,null, 1,2,null,null],[5,2,972, 1,12,61,170, 1,12,61, 2,22,100, 1,12, 2,22, 4,40, 1,2,4,null],[5,3,1944, 1,13,73,231, 1,13,73, 2,24,122, 1,13, 2,24, 4,44, 1,2,4,8],[5,4,3888, 1,14,86,304, 1,14,86, 2,26,146, 1,14, 2,26, 4,48, 1,2,4,8],[5,5,7776, 1,15,100,390, 1,15,100, 2,28,172, 1,15, 2,28, 4,52, 1,2,4,8],[6,0,729, 1,12,60,160, 1,12,60, 1,12,60, 1,12, null,null, null,null, 1,null,null,null],[6,1,1458, 1,13,72,220, 1,13,72, 2,24,120, 1,13, 2,24, null,null, 1,2,null,null],[6,2,2916, 1,14,85,292, 1,14,85, 2,26,144, 1,14, 2,26, 4,48, 1,2,4,null],[6,3,5832, 1,15,99,377, 1,15,99, 2,28,170, 1,15, 2,28, 4,52, 1,2,4,8],[7,0,2187, 1,14,84,280, 1,14,84, 1,14,84, 1,14, null,null, null,null, 1,null,null,null],[7,1,4374, 1,15,98,364, 1,15,98, 2,28,168, 1,15, 2,28, null,null, 1,2,null,null],[7,2,8748, 1,16,113,462, 1,16,113, 2,30,196, 1,16, 2,30, 4,56, 1,2,4,null],[8,0,6561, 1,16,112,448, 1,16,112, 1,16,112, 1,16, null,null, null,null, 1,null,null,null]
+    ];
+    data.sort((a, b) => a[2] - b[2]);
+    
+    let sortState = { col: 2, dir: 1 };
+    let selectedRowKey = null;
+    
+    function renderRows(rows) {
+      $sysBody.innerHTML = rows.map(row => {
+        const rowKey = JSON.stringify([row[0], row[1], row[2]]);
+        const tr = document.createElement('tr');
+        const formatCell = (val, cl) => {
+          if (val === null || val === 0) return `<td class="val-0 data-${cl}">-</td>`;
+          return `<td class="val-active data-${cl}">${val}</td>`;
+        };
+        tr.innerHTML = `<td class="sticky-col col-1">${row[0]}</td><td class="sticky-col col-2">${row[1]}</td><td class="sticky-col col-3" style="color:var(--green); font-weight:800;">${row[2]}</td>
+        ${formatCell(row[3], 'green')}${formatCell(row[4], 'green')}${formatCell(row[5], 'green')}${formatCell(row[6], 'green')}
+        ${formatCell(row[7], 'blue')}${formatCell(row[8], 'blue')}${formatCell(row[9], 'blue')}${formatCell(row[10], 'blue')}${formatCell(row[11], 'blue')}${formatCell(row[12], 'blue')}
+        ${formatCell(row[13], 'yellow')}${formatCell(row[14], 'yellow')}${formatCell(row[15], 'yellow')}${formatCell(row[16], 'yellow')}${formatCell(row[17], 'yellow')}${formatCell(row[18], 'yellow')}
+        ${formatCell(row[19], 'red')}${formatCell(row[20], 'red')}${formatCell(row[21], 'red')}${formatCell(row[22], 'red')}`;
+        tr.dataset.v = rowKey;
+        if (selectedRowKey === rowKey) tr.classList.add('selected');
+        return tr.outerHTML;
+      }).join('');
+    }
+
+    $sysBody.addEventListener('click', (event) => {
+      const row = event.target.closest('tr');
+      if (!row || !$sysBody.contains(row)) return;
+      const rowKey = row.dataset.v;
+      const wasSelected = selectedRowKey === rowKey;
+      $sysBody.querySelectorAll('tr.selected').forEach(selected => selected.classList.remove('selected'));
+      selectedRowKey = wasSelected ? null : rowKey;
+      if (!wasSelected) row.classList.add('selected');
+    });
+
+    renderRows(data);
+
+    window.sortTable = function() {
+      sortState.dir = sortState.dir === 1 ? -1 : 1;
+      const sorted = [...data].sort((a, b) => (a[2] - b[2]) * sortState.dir);
+      renderRows(sorted);
+    };
+  }
+
+  // NEDRÄKNING
+  function startClock() {
+    if (timerInterval) clearInterval(timerInterval);
+    const cd = document.getElementById('countdown');
+    function update() {
+      if (!currentDeadline) { cd.textContent = '--:--:--'; return; }
+      const ms = new Date(currentDeadline) - Date.now();
+      if (ms <= 0) { cd.textContent = 'LÅST'; cd.classList.add('warning'); return; }
+      cd.classList.toggle('warning', ms < 4 * 60 * 60 * 1000);
+      const totalSecs = Math.floor(ms / 1000);
+      const days = Math.floor(totalSecs / (3600 * 24));
+      const hours = Math.floor((totalSecs % (3600 * 24)) / 3600);
+      const mins = Math.floor((totalSecs % 3600) / 60);
+      const secs = totalSecs % 60;
+      let timeStr = days > 0 ? days + 'd ' : '';
+      timeStr += String(hours).padStart(2,'0') + ':' + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+      cd.textContent = timeStr;
+    }
+    update(); timerInterval = setInterval(update, 1000);
+  }
+
 </script>
 </body>
 </html>

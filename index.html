@@ -21,213 +21,154 @@
   ::-webkit-scrollbar { display: none; }
   * { -ms-overflow-style: none; scrollbar-width: none; }
 
+  /* LOGIN */
   #loginScreen, #resetScreen, #forgotModal {position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;}
   #resetScreen, #forgotModal {display:none;}
-  
   .login-card{width:100%;max-width:320px;padding:24px;background:var(--panel);border:1px solid var(--border);border-radius:12px;}
   .login-card h1{font-size:16px;letter-spacing:2px;text-align:center;margin-bottom:4px;}
   .login-card p{font-size:10px;text-align:center;color:var(--muted);text-transform:uppercase;margin-bottom:20px;}
   .login-card input{width:100%;padding:10px;border-radius:6px;background:var(--panel2);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:13px;outline:none;margin-bottom:10px;}
   .login-card button{width:100%;margin-top:6px;padding:10px;border:none;border-radius:6px;background:linear-gradient(135deg,#f6da8b,var(--gold-deep));color:#1a1206;font-weight:800;font-size:13px;cursor:pointer;}
 
+  /* TOPBAR */
   .topbar{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--border);background:var(--panel);flex-shrink:0;}
   .logo-mark{width: 40px; height: 24px;display:flex;align-items:center;justify-content:center;overflow: hidden; border-radius: 2px;}
   .logo-mark img { width: 100%; height: 100%; object-fit: contain; }
   .brand-name{font-weight:800;font-size:13px;letter-spacing:1.5px}
   .brand-sub{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
   .spacer{flex:1}
-  
   .top-controls { display: flex; align-items: center; gap: 12px; }
   .countdown { font-size: 15px; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; }
-  .countdown.warning { color: var(--red); }
-  .btn-logout { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); padding: 4px 10px; font-size: 11px; cursor: pointer; transition: 0.2s; }
-  .btn-logout:hover { color: var(--text); border-color: rgba(232,193,90,0.35); }
+  .btn-logout { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); padding: 4px 10px; font-size: 11px; cursor: pointer; }
 
-  .main{flex:1;padding:16px;display:grid;grid-template-columns: 1fr 340px;gap: 16px;height: calc(100vh - 60px);overflow: hidden;}
-  .left-column{display:flex;flex-direction:column;overflow:hidden;height:100%;}
-  .panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;flex:1;overflow:hidden;}
+  /* TABS */
+  .tabs-nav {display: flex; padding: 12px 24px 0; border-bottom: 1px solid var(--border); gap: 4px; background: var(--panel); flex-shrink: 0; overflow-x: auto;}
+  .tab-btn {background: transparent; border: none; color: var(--muted);font-family: inherit; font-size: 14px;font-weight: 600;padding: 12px 20px; cursor: pointer; border-radius: 10px 10px 0 0;border-bottom: 2px solid transparent; white-space: nowrap;}
+  .tab-btn.active {color: var(--gold); border-bottom-color: var(--gold); background: linear-gradient(180deg, transparent, rgba(232,193,90,0.05));}
+
+  /* LAYOUT */
+  .main{flex:1;padding:16px;display:flex;gap:16px;height:calc(100vh - 100px);overflow:hidden;}
+  .left-content {flex: 1; display: flex; flex-direction: column; overflow: hidden;}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;flex:1;overflow:hidden;height:100%;}
   .panel-head{padding:10px 16px;border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center;}
   .panel-head h2{font-size:14px;font-weight:700;}
-  
-  .btn-clear { background: transparent; border: 1px solid rgba(224, 90, 90, 0.4); color: var(--red); padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-  .btn-clear:hover { background: rgba(224, 90, 90, 0.1); border-color: var(--red); }
 
-  .match-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      grid-auto-rows: 1fr;
-      gap: 8px;
-      padding: 10px;
-      overflow-y: auto;
-      flex: 1;
-      align-content: stretch;
-  }
-  .match {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 10px;
-      background: var(--panel2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      gap: 6px;
-      transition: 0.2s;
-  }
-  .match.locked, .match.live-mode { pointer-events: none; }
-  
-  .match.locked.live-mode .match-header, 
-  .match.locked.live-mode .teams, 
-  .match.locked.live-mode .signs, 
-  .match.locked.live-mode .lee-row { opacity: 1 !important; }
-  .match.locked.live-mode .sign { pointer-events: none; cursor: default; }
-
-  .sign.dim { opacity: 0.2; }
-  .sign.win { color: var(--green) !important; background: rgba(51,224,138,0.15) !important; border-color: rgba(51,224,138,0.4) !important; }
-  .sign.lose { color: #f08a3c !important; background: rgba(240,138,60,0.15) !important; border-color: rgba(240,138,60,0.4) !important; }
-  
-  /* Layout för innehållet */
-  .match-content { display: flex; justify-content: space-between; align-items: flex-start; flex-grow: 1; margin: 4px 0; }
-  .teams { display: flex; flex-direction: column; font-size: 12px; font-weight: 600; line-height: 1.3; }
-  .score-col { display: flex; flex-direction: column; align-items: flex-end; font-size: 18px; font-weight: 800; line-height: 1.1; }
-  .score-col span { display: block; }
-  .score-col.red { color: var(--red); }
-  .score-col.green { color: var(--green); }
-
-  /* Badges (tid och resultat) */
-  .live-badge { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
-  .live-badge.tid { background: #fff; color: var(--red); }
-  .live-badge.score { background: rgba(51,224,138,0.15); color: var(--green); border: 1px solid rgba(51,224,138,0.4); }
-
-  /* Solida färger på tecknen (som i din bild) */
-  .sign.win { background: var(--green) !important; color: #000 !important; border-color: var(--green) !important; }
-  .sign.lose { background: #f08a3c !important; color: #000 !important; border-color: #f08a3c !important; }
-
-  /* Transparent bakgrund på hela rutan */
-  .match.ft-win { background: rgba(51,224,138,0.15) !important; border-color: var(--green) !important; box-shadow: 0 0 0 1px var(--green) inset !important; }
-  .match.ft-loss { background: rgba(224,90,90,0.15) !important; border-color: var(--red) !important; box-shadow: 0 0 0 1px var(--red) inset !important; }
-
-  /* Resultat-badge i headern */
-  .live-res {
-    font-size: 11px; font-weight: 800; color: var(--text);
-    background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px;
-    display: inline-flex; align-items: center; gap: 4px;
-  }
-  .live-res.ft { background: rgba(51,224,138,0.15); color: var(--green); }
-  .live-res.live { background: rgba(240,138,60,0.15); color: #f08a3c; }
-  .match.lee-known { border-color: rgba(51,224,138,0.35); }
-  .match.locked.lit { pointer-events: auto; cursor: pointer; }
-  .match.locked.lit .match-header, .match.locked.lit .teams, .match.locked.lit .signs { opacity: 1; }
-  .match.locked.lit .sign { pointer-events: none; }
-  .match.marked { background: #3d3420; border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
-  .lee-row { display: flex; align-items: center; gap: 4px; padding-top: 6px; border-top: 1px dashed var(--border-soft); font-size: 10px; }
-  .lee-label { font-weight: 800; letter-spacing: 1px; color: var(--muted); margin-right: 2px; }
-  .lee-sign { min-width: 22px; text-align: center; font-weight: 800; font-size: 12px; padding: 3px 0; border-radius: 4px; color: var(--green); background: rgba(51,224,138,0.12); border: 1px solid rgba(51,224,138,0.35); }
-  .lee-wait { color: var(--muted); font-style: italic; }
+  /* KUPONG */
+  .match-grid {display: grid;grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));grid-auto-rows: 1fr;gap: 8px;padding: 10px;overflow-y: auto;flex: 1;align-content: stretch;}
+  .match {display: flex;flex-direction: column;justify-content: space-between;padding: 10px;background: var(--panel2);border: 1px solid var(--border);border-radius: 6px;gap: 6px;}
   .match-header{display:flex;justify-content:space-between;align-items:center;}
-  .live-score {
-    font-size: 13px; font-weight: 800; color: var(--text);
-    background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;
-    display: inline-flex; align-items: center; gap: 6px;
-  }
-  .live-score.live {
-    color: var(--gold); background: rgba(232,193,90,0.15);
-    border: 1px solid rgba(232,193,90,0.3);
-  }
-  .live-min { font-size: 10px; color: var(--gold); font-weight: 600; }
   .match-no{font-size:10px;font-weight:800;color:var(--gold);}
   .teams{font-size:12px;font-weight:600;line-height:1.3;}
   .teams span{display:block;}
   .signs{display:flex;gap:4px; margin-top: auto;}
-  .sign{flex:1;text-align:center;font-size:12px;font-weight:700;padding:6px 0;border-radius:4px;color:var(--muted);background:rgba(255,255,255,0.02);border:1px solid var(--border-soft);cursor:pointer;transition:0.15s;}
-  .sign:hover{background:rgba(255,255,255,0.05);}
+  .sign{flex:1;text-align:center;font-size:12px;font-weight:700;padding:6px 0;border-radius:4px;color:var(--muted);background:rgba(255,255,255,0.02);border:1px solid var(--border-soft);cursor:pointer;}
   .sign.on{color:var(--gold);background:rgba(232,193,90,0.15);border-color:rgba(232,193,90,0.4);}
   
-  .notes-card { 
-      grid-column: span 2; 
-      background: var(--panel2); 
-      border: 1px dashed var(--border); 
-      border-radius: 10px; 
-      padding: 10px; 
-      display: flex; 
-      flex-direction: column; 
-  }
-  .data-label { font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
-  .notes-card textarea { flex: 1; width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 8px; resize: none; outline: none; font-family: inherit; font-size: 12px; }
+  .submit-bar{padding:10px 16px;border-top:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center;background:var(--panel2);}
+  .submit-info{font-size:12px;color:var(--muted);}
+  .btn-submit{padding:8px 16px;border:none;border-radius:6px;background:linear-gradient(135deg,#f6da8b,var(--gold-deep));color:#1a1206;font-weight:800;font-size:12px;cursor:pointer;}
+  .btn-submit:disabled{opacity:0.5;cursor:not-allowed;}
+  .btn-clear{padding:8px 12px;background:transparent;border:1px solid rgba(224,90,90,0.4);color:var(--red);border-radius:6px;font-weight:800;font-size:12px;cursor:pointer;}
 
-  .live-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; overflow: hidden; }
-  .live-header { display:flex; justify-content:space-between; margin-bottom:12px; border-bottom: 1px solid var(--border-soft); padding-bottom: 8px;}
-  .live-header h2 { font-size:16px; }
-  .live-header span { font-size:11px; color:var(--gold); font-weight: 600;}
+  /* ANTECKNINGAR */
+  .notes-card {background: var(--panel2);border: 1px dashed var(--border);border-radius: 8px;padding: 10px;display: flex;flex-direction: column;gap: 6px;min-height: 150px;}
+  .notes-card textarea {flex: 1;width: 100%;background: var(--panel);border: 1px solid var(--border);border-radius: 6px;color: var(--text);padding: 8px;resize: none;outline: none;font-family: inherit;font-size: 12px;}
 
-  .chat-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; }
-  .chat-header { padding: 12px 16px; border-bottom: 1px solid var(--border-soft); font-size: 14px; font-weight: 700; background: var(--panel2); display: flex; justify-content: space-between; align-items: center; }
-  .chat-status { font-size: 10px; color: var(--green); display: flex; align-items: center; gap: 4px; font-weight: 600; }
-  .chat-status::before { content: ""; display: block; width: 6px; height: 6px; background: var(--green); border-radius: 50%; }
+  /* LIVE / LÅST-VY */
+  .match.locked.live-mode .match-header, .match.locked.live-mode .teams, .match.locked.live-mode .signs, .match.locked.live-mode .lee-row { opacity: 1 !important; }
+  .match.locked.live-mode .sign { pointer-events: none !important; cursor: default; }
+  .sign.dim { opacity: 0.2; }
+  .sign.win { color: #1a1206 !important; background: var(--green) !important; border-color: var(--green) !important; box-shadow: 0 0 10px rgba(51,224,138,0.4); }
+  .sign.lose { color: #1a1206 !important; background: #f08a3c !important; border-color: #f08a3c !important; box-shadow: 0 0 10px rgba(240,138,60,0.4); }
+  
+  .match-content { display: flex; justify-content: space-between; align-items: flex-start; flex-grow: 1; margin: 4px 0; }
+  .score-col { display: flex; flex-direction: column; align-items: flex-end; font-size: 18px; font-weight: 800; line-height: 1.1; color: var(--red); }
+  .score-col span { display: block; }
+  .score-col.green { color: var(--green); }
+  .live-badge { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+  .live-badge.tid { background: #fff; color: var(--red); }
+  .live-badge.score { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .match.ft-win { background: rgba(51,224,138,0.15) !important; border-color: var(--green) !important; box-shadow: 0 0 0 1px var(--green) inset !important; }
+  .match.ft-loss { background: rgba(224,90,90,0.15) !important; border-color: var(--red) !important; box-shadow: 0 0 0 1px var(--red) inset !important; }
+  .lee-row { display: flex; align-items: center; gap: 4px; padding-top: 6px; border-top: 1px dashed var(--border-soft); font-size: 10px; }
+  .lee-label { font-weight: 800; letter-spacing: 1px; color: var(--muted); margin-right: 2px; }
+  .lee-sign { min-width: 22px; text-align: center; font-weight: 800; font-size: 12px; padding: 3px 0; border-radius: 4px; color: var(--green); background: rgba(51,224,138,0.12); border: 1px solid rgba(51,224,138,0.35); }
+  .lee-wait { color: var(--muted); font-style: italic; }
+
+  /* CHAT */
+  .chat-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; width: 340px; flex-shrink: 0;}
+  .chat-header { padding: 12px 16px; border-bottom: 1px solid var(--border-soft); font-size: 14px; font-weight: 700; background: var(--panel2); }
   .chat-messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
   .msg { max-width: 85%; display: flex; flex-direction: column; gap: 4px; }
   .msg.lee { align-self: flex-start; }
   .msg.me { align-self: flex-end; align-items: flex-end; }
-  .msg-sender { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-  .msg.lee .msg-sender { color: var(--gold); }
-  .msg-bubble { padding: 10px 14px; border-radius: 10px; font-size: 12px; line-height: 1.4; }
-  .msg.lee .msg-bubble { background: rgba(232,193,90,0.1); border: 1px solid rgba(232,193,90,0.3); border-bottom-left-radius: 2px; }
-  .msg.me .msg-bubble { background: var(--panel2); border: 1px solid var(--border); border-bottom-right-radius: 2px; }
+  .msg-sender { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+  .msg-bubble { padding: 10px 14px; border-radius: 10px; font-size: 12px; }
+  .msg.lee .msg-bubble { background: rgba(232,193,90,0.1); border: 1px solid rgba(232,193,90,0.3); }
+  .msg.me .msg-bubble { background: var(--panel2); border: 1px solid var(--border); }
   .chat-input { padding: 12px; border-top: 1px solid var(--border-soft); background: var(--panel2); display: flex; gap: 8px; }
-  .chat-input input { flex: 1; padding: 10px 12px; border-radius: 6px; background: var(--panel); border: 1px solid var(--border); color: var(--text); font-size: 12px; outline: none; }
+  .chat-input input { flex: 1; padding: 10px; border-radius: 6px; background: var(--panel); border: 1px solid var(--border); color: var(--text); font-size: 12px; outline: none; }
   .chat-input button { padding: 10px 16px; border-radius: 6px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #1a1206; font-weight: 800; font-size: 12px; cursor: pointer; }
 
-  .submit-bar{padding:10px 16px;border-top:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center;background:var(--panel2);flex-shrink:0;}
-  .submit-info{font-size:12px;color:var(--muted);}
-  .submit-info strong{color:var(--text);}
-  .btn-submit{padding:8px 16px;border:none;border-radius:6px;background:linear-gradient(135deg,#f6da8b,var(--gold-deep));color:#1a1206;font-weight:800;font-size:12px;cursor:pointer;transition:0.2s;}
-  .btn-submit:disabled{opacity:0.5;cursor:not-allowed;}
-  .btn-submit.is-locked{background:rgba(224,90,90,0.12);color:var(--red);border:1px solid rgba(224,90,90,0.4);opacity:1;cursor:default;display:inline-flex;align-items:center;gap:6px;}
-  .btn-submit.is-locked svg{width:14px;height:14px;}
+  /* FREEMARKET */
+  .fm-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; padding: 16px; flex: 1; overflow-y: auto; align-items: start; }
+  .fm-form { background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; height: fit-content; }
+  .fm-form h3 { font-size: 14px; color: var(--gold); margin-bottom: 12px; }
+  .fm-group { margin-bottom: 8px; }
+  .fm-label { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+  .fm-input { width:100%; padding:8px; background:var(--bg); border:1px solid var(--border); color:white; border-radius:4px; margin-top:4px; outline: none; }
+  .fm-row { display:flex; gap:8px; margin-bottom: 12px; }
+  .fm-col { flex:1; }
+  .fm-btn-yes { flex:1; text-align:center; padding:8px; background:rgba(51,224,138,0.15); border:1px solid var(--green); color:var(--green); border-radius:4px; cursor:pointer; font-weight:800; }
+  .fm-btn-no { flex:1; text-align:center; padding:8px; background:var(--bg); border:1px solid var(--border); color:var(--muted); border-radius:4px; cursor:pointer; font-weight:800; }
+  .fm-publish { width:100%; padding:10px; background:var(--gold); color:#000; font-weight:800; border:none; border-radius:4px; cursor:pointer; }
+  
+  .fm-list { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+  .fm-card { background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .fm-card-top { display:flex; justify-content:space-between; align-items:center; }
+  .fm-time { font-size:10px; color:var(--muted); font-weight:800; text-transform:uppercase; }
+  .fm-lock { font-size:9px; color:var(--red); font-weight:800; border:1px solid var(--red); padding:2px 4px; border-radius:4px; }
+  .fm-q { font-size: 13px; font-weight: 700; line-height: 1.3; }
+  .fm-info { display:flex; justify-content:space-between; align-items:center; background:var(--bg); padding:8px 10px; border-radius:6px; border:1px solid var(--border-soft); }
+  .fm-sells { font-size:9px; color:var(--muted); font-weight:800; text-transform:uppercase; }
+  .fm-odds-row { display:flex; gap:8px; align-items:center; margin-top:2px; }
+  .fm-odds { font-weight:800; color:var(--gold); font-size:13px; }
+  .fm-amt { color:var(--text); font-weight:800; font-size:13px; }
+  .fm-match-btn { background:rgba(232,193,90,0.15); color:var(--gold); border:1px solid rgba(232,193,90,0.4); padding:6px 12px; border-radius:6px; font-weight:800; cursor:pointer; font-size:12px; }
 
-  .custom-toast {
-      position: fixed; bottom: 30px; left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--panel); border: 1px solid var(--gold);
-      color: var(--text); padding: 12px 24px; border-radius: 8px;
-      font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      opacity: 0; transition: all 0.3s; z-index: 99999; pointer-events: none;
-  }
+  /* TABLES */
+  .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow-x: auto; margin: 16px; }
+  .table-wrap table { width: 100%; border-collapse: collapse; text-align: left; }
+  .table-wrap th { background: var(--panel2); padding: 16px; font-size: 11px; text-transform: uppercase; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); }
+  .table-wrap td { padding: 16px; border-bottom: 1px solid var(--border-soft); font-size: 14px; font-weight: 600; }
+  .roi-pos { color: var(--green); }
+  .roi-neg { color: var(--red); }
+
+  /* RULES */
+  .rules-container { max-width: 800px; margin: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 32px; }
+  .rule-item { margin-bottom: 20px; }
+  .rule-item h3 { font-size: 15px; color: var(--text); margin-bottom: 8px; }
+  .rule-item p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  .custom-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--panel); border: 1px solid var(--gold); color: var(--text); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5); opacity: 0; transition: all 0.3s; z-index: 99999; pointer-events: none; }
   .custom-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  /* --- LIVE OCH LÅST-VY --- */
-  .match.locked.live-mode .match-header, 
-  .match.locked.live-mode .teams, 
-  .match.locked.live-mode .signs, 
-  .match.locked.live-mode .lee-row { opacity: 1 !important; }
-  
-  .match.locked.live-mode .sign { pointer-events: none !important; cursor: default; }
-  
-  .sign.dim { opacity: 0.2; }
-  .sign.win { 
-    color: #1a1206 !important; 
-    background: var(--green) !important; 
-    border-color: var(--green) !important; 
-    box-shadow: 0 0 10px rgba(51,224,138,0.4); 
-  }
-  .sign.pending { 
-    color: #1a1206 !important; 
-    background: #f08a3c !important; 
-    border-color: #f08a3c !important; 
-    box-shadow: 0 0 10px rgba(240,138,60,0.4); 
-  }
-  
-
+  .custom-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   @media (max-width: 768px) {
     body { height: auto; overflow-y: auto; }
     #app { height: auto; min-height: 100vh; overflow: visible; }
-    .main { display: flex; flex-direction: column; height: auto; overflow: visible; padding: 12px; gap: 16px; }
-    .left-column { height: auto; overflow: visible; order: 2; }
-    .panel { height: auto; min-height: 450px; flex: none; }
-    .chat-panel { height: 450px; flex: none; margin-bottom: 20px; order: 1; }
+    .main { padding: 8px; flex-direction: column; height: auto; overflow: visible; }
+    .left-content { order: 1; min-height: auto; overflow: visible; }
+    .chat-panel { width: 100%; height: 350px; flex-shrink: 0; order: 2; margin-top: 16px; }
+    .fm-layout { grid-template-columns: 1fr; padding: 12px; }
+    .tabs-nav { padding: 8px 12px 0; overflow-x: auto; }
+    .tab-btn { padding: 10px 12px; font-size: 12px; white-space: nowrap; }
+    .topbar .brand-sub { display: none; }
     .match-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-    .topbar { flex-wrap: wrap; gap: 8px; padding: 8px; }
-    .top-controls { width: 100%; justify-content: space-between; margin-top: 8px; }
+    .table-wrap { margin: 8px; }
   }
+</style>
+</head>
 </style>
 </head>
 <body>
@@ -275,195 +216,179 @@
     </div>
     <div class="spacer"></div>
     <div class="top-controls">
-      <span style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-right:8px;">Nedräkning till inlämning:</span>
+      <span style="font-size:10px; color:var(--muted); text-transform:uppercase;">Inlämning:</span>
       <span class="countdown" id="countdown">--:--:--</span>
       <button class="btn-logout" onclick="logout()">Logga ut</button>
     </div>
   </header>
 
+  <div class="tabs-nav" id="mainTabs" style="display:none;">
+    <button class="tab-btn active" id="tab-btn-kupong" onclick="switchMainTab('kupong')">Kupong</button>
+    <button class="tab-btn" id="tab-btn-freemarket" onclick="switchMainTab('freemarket')">Freemarket</button>
+    <button class="tab-btn" id="tab-btn-mina-matcher" onclick="switchMainTab('mina-matcher')">Mina Matcher</button>
+    <button class="tab-btn" id="tab-btn-highscore" onclick="switchMainTab('highscore')">Highscore</button>
+    <button class="tab-btn" id="tab-btn-historik" onclick="switchMainTab('historik')">Historik</button>
+    <button class="tab-btn" id="tab-btn-regler" onclick="switchMainTab('regler')">Regler</button>
+  </div>
+
   <main class="main">
-      <div class="left-column">
-        <section class="panel" id="tipView">
-          <div class="panel-head">
-            <h2>Dina tips</h2>
-            <button class="btn-clear" id="clearBtn" onclick="clearMyCoupon()">Rensa</button>
-          </div>
-          <div class="match-grid" id="matchGrid"></div>
-          <div class="submit-bar">
-            <div class="submit-info" id="submitInfo">Ifyllda: <strong>0</strong> / 13</div>
-            <button class="btn-submit" id="submitBtn" onclick="submitTips()">Lämna in tips</button>
-          </div>
-        </section>
-
-      </div>
-
-      <div class="chat-panel">
-        <div class="chat-header">
-          <span>Live Chatt</span>
-          <div class="chat-status">Ansluten</div>
+    <div class="left-content">
+      
+      <section class="panel" id="tipView" style="display:none;">
+        <div class="panel-head"><h2>Dina tips</h2><button class="btn-clear" onclick="clearMyCoupon()">Rensa</button></div>
+        <div class="match-grid" id="matchGrid"></div>
+        <div class="submit-bar">
+          <div class="submit-info" id="submitInfo">Ifyllda: <strong>0</strong> / 13</div>
+          <button class="btn-submit" id="submitBtn" onclick="submitTips()">Lämna in tips</button>
         </div>
-        <div class="chat-messages" id="chatMessages"></div>
-        <div class="chat-input">
-          <input type="text" id="chatInput" placeholder="Skriv ett meddelande..." onkeypress="if(event.key === 'Enter') sendChat()">
-          <button onclick="sendChat()">Skicka</button>
+      </section>
+
+      <section class="panel" id="freemarketView" style="display:none;">
+        <div class="panel-head"><h2>Freemarket</h2><span id="headerBalance" style="font-weight:800; color:var(--gold);">Laddar...</span></div>
+        <div class="fm-layout">
+          <div class="fm-form">
+            <h3>Skapa Eget Spel</h3>
+            <div class="fm-group"><label class="fm-label">Ja/Nej Fråga</label><input type="text" id="fm-question" class="fm-input" placeholder="T.ex. Gör Bayern mål?"></div>
+            <div class="fm-group"><label class="fm-label">Matchstart</label><input type="datetime-local" id="fm-time" class="fm-input"></div>
+            <div class="fm-row">
+              <div class="fm-col"><label class="fm-label">Odds</label><input type="text" id="fm-odds" class="fm-input" placeholder="2.00"></div>
+              <div class="fm-col"><label class="fm-label">Belopp</label><input type="text" id="fm-amount" class="fm-input" placeholder="100"></div>
+            </div>
+            <div class="fm-group">
+              <label class="fm-label" style="display:block; margin-bottom:4px;">Säljer du?</label>
+              <div style="display:flex; gap:8px;">
+                <div id="btn-outcome-yes" onclick="selectOutcome('yes')" class="fm-btn-yes">JA</div>
+                <div id="btn-outcome-no" onclick="selectOutcome('no')" class="fm-btn-no">NEJ</div>
+              </div>
+              <input type="hidden" id="fm-outcome" value="yes">
+            </div>
+            <button onclick="createMarket()" class="fm-publish">Publicera</button>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <h3 style="font-size: 14px; color: var(--gold); margin-bottom: 4px;">Aktiva Marknader</h3>
+            <div id="fm-markets-list" class="fm-list"></div>
+          </div>
         </div>
+      </section>
+
+      <section class="panel" id="minaMatcherView" style="display:none;">
+        <div class="panel-head"><h2>Mina Matcher</h2></div>
+        <div style="padding: 24px; overflow-y: auto;">
+          <div id="my-matches-list" class="fm-list"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="highscoreView" style="display:none;">
+        <div class="panel-head"><h2>Highscore</h2></div>
+        <div style="padding: 24px; overflow-y: auto;">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Rank</th><th>Spelare</th><th>Saldo</th></tr></thead>
+              <tbody id="highscoreBody"><tr><td colspan="3" style="text-align:center; color:var(--muted);">Laddar...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="historikView" style="display:none;">
+        <div class="panel-head"><h2>Min Historik</h2></div>
+        <div style="padding: 24px; overflow-y: auto;">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Datum</th><th>Spel</th><th>Status</th><th>Info / Förklaring</th></tr></thead>
+              <tbody id="historikBody"><tr><td colspan="4" style="text-align:center; color:var(--muted);">Laddar...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="reglerView" style="display:none;">
+        <div class="panel-head"><h2>Regler</h2></div>
+        <div style="padding: 24px; overflow-y: auto;">
+          <div class="rules-container">
+            <div class="rule-item"><h3>1. Veckosystem & Startkapital</h3><p>Alla startar med 2 000 kr i fiktiva pengar. Spelet stänger söndag kl 24:00.</p></div>
+            <div class="rule-item"><h3>2. Skapa Egna Spel</h3><p>Alla med access får skapa marknader, men måste lägga en startorder.</p></div>
+            <div class="rule-item"><h3>3. Orderboken & Odds</h3><p>Oddsen sätts av spelarna. Matcha en order för att spela.</p></div>
+            <div class="rule-item"><h3>4. Utlösning</h3><p>Admin (Lee) klickar ut vinnaren när matchen är slut.</p></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="chat-panel" id="chatPanel" style="display:none;">
+      <div class="chat-header">Live Chatt</div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Skriv..." onkeypress="if(event.key === 'Enter') sendChat()">
+        <button onclick="sendChat()">Skicka</button>
       </div>
-    </main>
+    </div>
+  </main>
+</div>
+
+<div id="matchModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; padding: 24px;">
+  <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 400px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <h3 style="font-size: 16px; margin-bottom: 8px; color: var(--text);">Matcha spel</h3>
+    <p id="matchModalDesc" style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">Hur mycket vill du matcha?</p>
+    <input type="text" inputmode="numeric" pattern="[0-9]*" id="matchAmountInput" oninput="validateMatchInput(this)" style="width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); color: white; border-radius: 6px; margin-bottom: 20px; font-size: 16px; outline: none;">
+    <div style="display: flex; gap: 12px;">
+      <button onclick="closeMatchModal()" style="flex: 1; padding: 12px; background: transparent; border: 1px solid var(--border); color: var(--muted); font-weight: 600; border-radius: 6px; cursor: pointer;">Avbryt</button>
+      <button onclick="confirmMatch()" style="flex: 1; padding: 12px; background: var(--gold); color: #000; font-weight: 800; border: none; border-radius: 6px; cursor: pointer;">Matcha</button>
+    </div>
+  </div>
 </div>
 
 <script>
   window.alert = function(msg) {
       let t = document.getElementById('custom-toast');
-      if (!t) {
-        t = document.createElement('div');
-        t.id = 'custom-toast';
-        t.className = 'custom-toast';
-        document.body.appendChild(t);
-      }
-      t.textContent = msg;
-      t.classList.add('show');
-      clearTimeout(window.toastTimer);
-      window.toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+      if (!t) { t = document.createElement('div'); t.id = 'custom-toast'; t.className = 'custom-toast'; document.body.appendChild(t); }
+      t.textContent = msg; t.classList.add('show'); clearTimeout(window.toastTimer); window.toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
   };
-</script>
-
-<script>
   function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-  const SB_CFG = window.SUPABASE_CONFIG || {
-    url: "https://yjkyikxtklaokscnpxdj.supabase.co",
-    key: "sb_publishable_ev3HUbED2MIMHhy6feLXlw_i81spvXM"
-  };
+  const SB_CFG = window.SUPABASE_CONFIG || { url: "https://yjkyikxtklaokscnpxdj.supabase.co", key: "sb_publishable_ev3HUbED2MIMHhy6feLXlw_i81spvXM" };
   const supabaseClient = window.supabase.createClient(SB_CFG.url, SB_CFG.key);
 
-  const FALLBACK_MATCHES = [
-    { home: 'Bayern München', away: 'Arsenal' }, { home: 'Aston Villa', away: 'Viking' },
-    { home: 'Inter', away: 'Shakhtar Donetsk' }, { home: 'Real Madrid', away: 'RB Leipzig' },
-    { home: 'Real Betis', away: 'Feyenoord' }, { home: 'Club Brügge', away: 'Lens' },
-    { home: 'Sporting Lissabon', away: 'LASK Linz' }, { home: 'Reading', away: 'Leyton Orient' },
-    { home: 'Iberia 1999', away: 'Mjällby' }, { home: 'Juventus', away: 'Rennes' },
-    { home: 'Lech Poznan', away: 'Sunderland' }, { home: 'Sturm Graz', away: 'Marseille' },
-    { home: 'Crvena Zvezda', away: 'FC Köpenhamn' }
-  ];
-
-  let MATCHES = [...FALLBACK_MATCHES];
-  let liveScores = {};
-  let currentPlayer = '';
-  let currentUserId = null;
-  let currentRoundId = null;
+  let currentPlayer = '', currentUserId = null, currentRoundId = null;
   let picks = Array(13).fill(null).map(() => []);
   let isSubmitted = false;
-  const LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor" fill-opacity="0.25"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
-  let deadline = 0;
-  let timerInterval = null;
-  let chatInterval = null;
-  
+  let deadline = 0, timerInterval = null, chatInterval = null;
+  let liveScores = {};
+  let pendingMatch = {};
+  let leeRemote = null;
+  let leeInterval = null;
+
+  const FALLBACK_MATCHES = [
+    { home: 'Chelsea', away: 'Tottenham' }, { home: 'Arsenal', away: 'Everton' }, { home: 'Coventry', away: 'Fulham' }, { home: 'Blackburn', away: 'Wrexham' },
+    { home: 'Cardiff', away: 'Birmingham' }, { home: 'Lincoln', away: 'Burnley' }, { home: 'Preston', away: 'West Bromwich' }, { home: 'Queens Park Rangers', away: 'Swansea' },
+    { home: 'Stoke', away: 'Bristol City' }, { home: 'West Ham', away: 'Southampton' }, { home: 'Wolverhampton', away: 'Watford' }, { home: 'Cambridge', away: 'Plymouth' }, { home: 'Oxford', away: 'Bradford' }
+  ];
+  let MATCHES = [...FALLBACK_MATCHES];
+
+  const MARKS_KEY = 'lee_player_marks';
+  let marks = new Set();
+  try { marks = new Set(JSON.parse(localStorage.getItem(MARKS_KEY) || '[]')); } catch(e){}
+
+  function getLee() {
+    if (leeRemote) return leeRemote;
+    return { started: localStorage.getItem('lee_live_started') === 'true', picks: readJson('lee_admin_final', []), locked: readJson('lee_locked_picks', {}) };
+  }
+  function readJson(key, fallback) { try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch (e) { return fallback; } }
+  function applyRound(row) {
+    if (row && 'live_started' in row) leeRemote = { started: !!row.live_started, picks: row.admin_picks || [], locked: row.admin_locked || {} };
+  }
+
   async function fetchLiveScores() {
       try {
           const { data, error } = await supabaseClient.from('live_scores').select('*');
           if (!error && data) {
               liveScores = {};
-              data.forEach(m => {
-                  liveScores[m.match_order - 1] = m;
-              });
+              data.forEach(m => { liveScores[m.match_order - 1] = m; });
               renderMatches();
-          } else if (error) {
-              console.warn('Kunde inte hämta från live_scores:', error);
           }
-      } catch (e) {
-          console.warn('Fel vid hämtning:', e);
-      }
+      } catch (e) { console.warn('Fel vid hämtning:', e); }
   }
 
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (event === 'PASSWORD_RECOVERY') {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('resetScreen').style.display = 'flex';
-    }
-  });
-
-  function checkLiveStatus() {
-      if (localStorage.getItem('lee_live_started') === 'true') {
-          document.getElementById('tipView').style.display = 'none';
-          document.getElementById('liveView').style.display = 'flex';
-          renderLiveView(); updatePlayerLiveStatusText();
-          renderChat();
-      } else {
-          document.getElementById('tipView').style.display = 'flex';
-          document.getElementById('liveView').style.display = 'none';
-          renderMatches();
-      }
-  }
-
-  async function login() {
-    const email = document.getElementById('loginUser').value.trim();
-    const password = document.getElementById('loginPass').value;
-    if (!email || !password) { alert('Fyll i både e-post och lösenord.'); return; }
-    
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) { 
-      let msg = error.message;
-      if (msg.includes('Invalid login credentials')) msg = 'Fel e-post eller lösenord.';
-      else msg = 'Ett fel uppstod: ' + msg;
-      alert(msg); return; 
-    }
-    
-    const { data: profile } = await supabaseClient.from('profiles').select('display_name, username').eq('id', data.user.id).maybeSingle();
-    currentPlayer = profile ? (profile.display_name || profile.username) : email.split('@')[0];
-    currentUserId = data.user.id;
-
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('app').style.display = 'flex';
-    document.getElementById('brandSub').textContent = currentPlayer;
-    
-    await loadState();
-    renderMatches();
-    startCountdown();
-    
-    if (chatInterval) clearInterval(chatInterval);
-    chatInterval = setInterval(() => { if (!document.hidden) renderChat(); }, 300000);
-    fetchLiveScores();
-    setInterval(fetchLiveScores, 300000);
-    if (leeInterval) clearInterval(leeInterval);
-    leeInterval = setInterval(() => { if (!document.hidden) refreshLee(); }, 5000);
-  }
-
-  async function saveNewPassword() {
-    const newPass = document.getElementById('newPass').value;
-    if (newPass.length < 6) { alert('Lösenordet måste vara minst 6 tecken.'); return; }
-    const { error } = await supabaseClient.auth.updateUser({ password: newPass });
-    if (error) { alert('Kunde inte spara: ' + error.message); } 
-    else { alert('Lösenordet har uppdaterats! Du kan nu logga in.'); await supabaseClient.auth.signOut(); location.reload(); }
-  }
-
-  async function logout() {
-    clearInterval(timerInterval);
-    clearInterval(chatInterval);
-    await supabaseClient.auth.signOut();
-    location.reload();
-  }
-
-  function showForgotPassword(e) { e.preventDefault(); document.getElementById('forgotEmail').value = ''; document.getElementById('forgotModal').style.display = 'flex'; }
-  function closeForgotPassword(e) { if (e) e.preventDefault(); document.getElementById('forgotModal').style.display = 'none'; }
-
-  async function submitForgotPassword() {
-    const email = document.getElementById('forgotEmail').value.trim();
-    if (!email) { alert('Ange din e-postadress.'); return; }
-    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
-    if (error) { alert('Fel: ' + error.message); } else { alert('En återställningslänk har skickats till ' + email + '!'); closeForgotPassword(); }
-  }
-
-  // Lees spelstatus: från databasen om kolumnerna finns i rounds, annars från webbläsaren
-  let leeRemote = null;
-  let leeInterval = null;
-  function readJson(key, fallback) { try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch (e) { return fallback; } }
-  function getLee() {
-    if (leeRemote) return leeRemote;
-    return { started: localStorage.getItem('lee_live_started') === 'true', picks: readJson('lee_admin_final', []), locked: readJson('lee_locked_picks', {}) };
-  }
-  function applyRound(row) {
-    if (row && 'live_started' in row) leeRemote = { started: !!row.live_started, picks: row.admin_picks || [], locked: row.admin_locked || {} };
-  }
   async function refreshLee() {
     try {
       const { data } = await supabaseClient.from('rounds').select('*').order('created_at', { ascending: false }).limit(1);
@@ -473,25 +398,112 @@
       }
     } catch (e) {}
   }
-  window.addEventListener('storage', (e) => { if (e.key && e.key.startsWith('lee_')) renderMatches(); });
 
-  // Egna markeringar (beläser kort) när Lee har placerat spelet
-  const MARKS_KEY = 'lee_player_marks';
-  const marks = new Set(readJson(MARKS_KEY, []));
-  function markCard(i) {
-    if (!isSubmitted || !getLee().started) return;
-    if (marks.has(i)) marks.delete(i); else marks.add(i);
-    try { localStorage.setItem(MARKS_KEY, JSON.stringify([...marks])); } catch (e) {}
-    renderMatches();
+  async function setupUI(user, profile) {
+    currentPlayer = profile ? (profile.display_name || profile.username) : user.email.split('@')[0];
+    currentUserId = user.id;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    document.getElementById('brandSub').textContent = currentPlayer;
+    document.getElementById('mainTabs').style.display = 'flex';
+    
+        // Hantera behörigheter
+    const hasKupong = profile && profile.access_europatipset;
+    const hasFreemarket = profile && profile.access_freemarket;
+
+    document.getElementById('tab-btn-kupong').style.display = hasKupong ? 'block' : 'none';
+    document.getElementById('tab-btn-freemarket').style.display = hasFreemarket ? 'block' : 'none';
+    document.getElementById('tab-btn-mina-matcher').style.display = hasFreemarket ? 'block' : 'none';
+    document.getElementById('tab-btn-highscore').style.display = 'block';
+    document.getElementById('tab-btn-historik').style.display = 'block';
+    document.getElementById('tab-btn-regler').style.display = 'block';
+
+    // Skicka spelaren till rätt flik beroende på behörighet
+    if (hasKupong) {
+        switchMainTab('kupong');
+    } else if (hasFreemarket) {
+        switchMainTab('freemarket');
+    } else {
+        alert('Du har inte behörighet till något spel. Kontakta admin.');
+        return;
+    }
+    await loadState();
+    startCountdown();
+    
+    if (chatInterval) clearInterval(chatInterval);
+    chatInterval = setInterval(() => { if (!document.hidden) renderChat(); }, 5000);
+    if (leeInterval) clearInterval(leeInterval);
+    leeInterval = setInterval(() => { if (!document.hidden) refreshLee(); }, 5000);
+    
+    fetchLiveScores();
+    setInterval(fetchLiveScores, 300000);
+    updateBalanceUI();
   }
 
-  async function saveState() {
-    if (!currentUserId || !currentRoundId) return;
-    const { error } = await supabaseClient.from('suggestions').upsert({
-      player_id: currentUserId, round_id: currentRoundId, picks: picks, submitted: isSubmitted
-    }, { onConflict: 'player_id, round_id' });
-    if (error) console.error('Kunde inte spara tips:', error);
-    updateSubmitInfo();
+  async function login() {
+    const email = document.getElementById('loginUser').value.trim();
+    const password = document.getElementById('loginPass').value;
+    if (!email || !password) { alert('Fyll i både e-post och lösenord.'); return; }
+    
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) { 
+      let msg = error.message.includes('Invalid login credentials') ? 'Fel e-post eller lösenord.' : 'Ett fel uppstod: ' + error.message;
+      alert(msg); return; 
+    }
+    
+    const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
+    await setupUI(data.user, profile);
+  }
+
+  supabaseClient.auth.getSession().then(async ({ data: { session } }) => {
+    if (session) {
+      const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+      await setupUI(session.user, profile);
+    }
+  });
+
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('resetScreen').style.display = 'flex';
+    }
+  });
+
+    function switchMainTab(tab) {
+    ['tipView', 'freemarketView', 'minaMatcherView', 'highscoreView', 'historikView', 'reglerView'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.style.display = 'none';
+    });
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    const chatPanel = document.getElementById('chatPanel');
+    
+    if (tab === 'kupong') {
+        document.getElementById('tipView').style.display = 'flex';
+        document.getElementById('tab-btn-kupong').classList.add('active');
+        if(chatPanel) chatPanel.style.display = 'flex';
+        
+        // Rensa den röda notisen när man går in på Kupong
+        const badge = document.getElementById('chatBadge');
+        if (badge) {
+            badge.style.display = 'none';
+            localStorage.setItem('lee_chat_seen', String(Date.now()));
+        }
+    } else {
+        if(chatPanel) chatPanel.style.display = 'none';
+        let viewId = tab === 'mina-matcher' ? 'minaMatcherView' : tab + 'View';
+        if (document.getElementById(viewId)) document.getElementById(viewId).style.display = 'flex';
+        if (document.getElementById('tab-btn-' + tab)) document.getElementById('tab-btn-' + tab).classList.add('active');
+        if (tab === 'freemarket') loadMarkets();
+        if (tab === 'mina-matcher') loadMyMatches();
+        if (tab === 'highscore') loadHighscore();
+        if (tab === 'historik') loadHistory();
+    }
+  }
+
+  async function updateBalanceUI() {
+      if(!currentUserId) return;
+      const { data } = await supabaseClient.from('profiles').select('balance').eq('id', currentUserId).single();
+      const el = document.getElementById('headerBalance');
+      if (data && el) el.textContent = data.balance + ' kr';
   }
 
   async function loadState() {
@@ -502,60 +514,36 @@
         if (rounds[0].deadline) deadline = new Date(rounds[0].deadline).getTime();
         
         const { data: matches } = await supabaseClient.from('matches').select('*').eq('round_id', currentRoundId).order('match_order');
-        if (matches && matches.length === 13) {
-          MATCHES = matches.map(m => ({ home: m.home, away: m.away }));
-        }
+        if (matches && matches.length === 13) MATCHES = matches.map(m => ({ home: m.home, away: m.away }));
 
         const { data: suggestion } = await supabaseClient.from('suggestions').select('*').eq('player_id', currentUserId).eq('round_id', currentRoundId).maybeSingle();
-        if (suggestion) {
-          picks = suggestion.picks || Array(13).fill(null).map(() => []);
-          isSubmitted = suggestion.submitted || false;
-        }
+        if (suggestion) { picks = suggestion.picks || Array(13).fill(null).map(() => []); isSubmitted = suggestion.submitted || false; }
       }
+      renderMatches();
     } catch (e) { console.error(e); }
-  }
-
-  function startCountdown() {
-    if (timerInterval) clearInterval(timerInterval);
-    const cd = document.getElementById('countdown');
-    function update() {
-      if (!deadline && !isSubmitted) { cd.textContent = '--:--:--'; return; }
-      const ms = deadline - Date.now();
-      if (isSubmitted || ms <= 0) {
-        cd.textContent = 'LÅST'; cd.classList.add('warning');
-        if (ms <= 0 && !isSubmitted) { isSubmitted = true; renderMatches(); saveState(); }
-        return;
-      }
-      if (ms < 4 * 60 * 60 * 1000) cd.classList.add('warning'); else cd.classList.remove('warning');
-      const totalSecs = Math.floor(ms / 1000);
-      const days = Math.floor(totalSecs / (3600 * 24));
-      const hours = Math.floor((totalSecs % (3600 * 24)) / 3600);
-      const mins = Math.floor((totalSecs % 3600) / 60);
-      const secs = totalSecs % 60;
-      let timeStr = ''; if (days > 0) timeStr += days + ' dagar ';
-      timeStr += String(hours).padStart(2,'0') + ':' + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
-      cd.textContent = timeStr;
-      }
-    update(); timerInterval = setInterval(update, 1000);
   }
 
   function renderMatches() {
     const grid = document.getElementById('matchGrid');
+    
+    // Spara var markören är om man skriver i anteckningsrutan
+    const activeEl = document.activeElement;
+    const isNotesFocused = activeEl && activeEl.id === 'notesArea';
+    const selStart = isNotesFocused ? activeEl.selectionStart : 0;
+    const selEnd = isNotesFocused ? activeEl.selectionEnd : 0;
+
     grid.innerHTML = '';
     const lee = getLee(); const lit = isSubmitted && lee.started;
     
     MATCHES.forEach((m, i) => {
       const live = liveScores[i];
       const p = picks[i] || [];
-      
-      let currentWin = null;
-      let isFinished = false;
+      let currentWin = null, isFinished = false;
 
       if (live && live.home_goals != null && live.away_goals != null) {
           if (live.home_goals > live.away_goals) currentWin = '1';
           else if (live.home_goals < live.away_goals) currentWin = '2';
           else currentWin = 'X';
-          
           const st = (live.status || '').toLowerCase();
           isFinished = (st === 'ft' || st === 'settled' || st === 'ended');
       }
@@ -565,14 +553,10 @@
       
       const el = document.createElement('div');
       let cardClass = 'match';
-      
-      if (isSubmitted || live) cardClass += ' locked live-mode';
+      if (isSubmitted) cardClass += ' locked live-mode';
       if (lit && marks.has(i)) cardClass += ' marked';
       if (isSubmitted && leeKnown && !lit) cardClass += ' lee-known';
-      
-      if (isFinished && currentWin && p.length > 0) {
-          cardClass += p.includes(currentWin) ? ' ft-win' : ' ft-loss';
-      }
+      if (isFinished && currentWin && p.length > 0) cardClass += p.includes(currentWin) ? ' ft-win' : ' ft-loss';
       
       el.className = cardClass;
       if (lit) el.onclick = () => markCard(i);
@@ -584,64 +568,38 @@
       let c2 = 'sign' + (p.includes('2') ? ' on' : '');
 
       if (live && currentWin) {
-          if (currentWin === '1') c1 += ' win';
-          if (currentWin === 'X') cx += ' win';
-          if (currentWin === '2') c2 += ' win';
-
-          if (currentWin !== '1' && p.includes('1')) c1 += ' lose';
-          if (currentWin !== 'X' && p.includes('X')) cx += ' lose';
-          if (currentWin !== '2' && p.includes('2')) c2 += ' lose';
-
-          if (!p.includes('1') && currentWin !== '1') c1 += ' dim';
-          if (!p.includes('X') && currentWin !== 'X') cx += ' dim';
-          if (!p.includes('2') && currentWin !== '2') c2 += ' dim';
+          if (currentWin === '1') c1 += ' win'; if (currentWin === 'X') cx += ' win'; if (currentWin === '2') c2 += ' win';
+          if (currentWin !== '1' && p.includes('1')) c1 += ' lose'; if (currentWin !== 'X' && p.includes('X')) cx += ' lose'; if (currentWin !== '2' && p.includes('2')) c2 += ' lose';
+          if (!p.includes('1') && currentWin !== '1') c1 += ' dim'; if (!p.includes('X') && currentWin !== 'X') cx += ' dim'; if (!p.includes('2') && currentWin !== '2') c2 += ' dim';
       }
 
-      // Rätt logik för Badgen uppe till höger:
-      // Om matchen är live -> Vit ruta med röd tid (t.ex. 74')
-      // Om matchen är slut -> Grön ruta med resultat (t.ex. 2 - 2)
       let badgeHtml = '';
       if (live) {
           const st = (live.status || '').toLowerCase();
-          if (st === 'ft' || st === 'settled' || st === 'ended') {
-              badgeHtml = `<div class="live-badge score" style="background:transparent; color:var(--muted); border:1px solid var(--border);">SLUT</div>`;
-          } else if (st === 'pending' || st === 'ns' || !st) {
+          if (isFinished) badgeHtml = `<div class="live-badge score" style="color:var(--muted);">SLUT</div>`;
+          else if (st === 'pending' || st === 'ns' || !st) {
               let timeStr = '00:00';
-              if (live.datetime) {
-                  const d = new Date(live.datetime);
-                  timeStr = d.toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'});
-              }
-              badgeHtml = `<div class="live-badge score" style="background:transparent; color:var(--text); border:1px solid var(--border);">${timeStr}</div>`;
-          } else {
-              badgeHtml = `<div class="live-badge tid">LIVE</div>`;
-          }
+              if (live.datetime) timeStr = new Date(live.datetime).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'});
+              badgeHtml = `<div class="live-badge score">${timeStr}</div>`;
+          } else badgeHtml = `<div class="live-badge tid">LIVE</div>`;
       }
 
-      // Siffrorna till höger
-      const scoreHtml = live ? (
-        `<div class="score-col ${isFinished ? 'green' : 'red'}">
-           <span>${live.home_goals ?? '-'}</span>
-           <span>${live.away_goals ?? '-'}</span>
-         </div>`
-      ) : '';
+      let scoreHtml = '';
+      if (live) {
+          let hg = live.home_goals, ag = live.away_goals;
+          const st = (live.status || '').toLowerCase();
+          if ((st === 'ns' || st === 'pending') && (hg === null || hg === undefined)) { hg = 0; ag = 0; }
+          scoreHtml = `<div class="score-col ${isFinished ? 'green' : 'red'}"><span>${hg ?? '-'}</span><span>${ag ?? '-'}</span></div>`;
+      }
 
       el.innerHTML = `
-        <div class="match-header">
-          <span class="match-no">M${i+1}</span>
-          ${badgeHtml}
-        </div>
-        
+        <div class="match-header"><span class="match-no">M${i+1}</span>${badgeHtml}</div>
         <div class="match-content">
           <div class="teams"><span>${esc(m.home)}</span><span>${esc(m.away)}</span></div>
           ${scoreHtml}
         </div>
-
-        <div class="signs">
-          <div class="${c1}" onclick="toggleSign(${i}, '1')">1</div>
-          <div class="${cx}" onclick="toggleSign(${i}, 'X')">X</div>
-          <div class="${c2}" onclick="toggleSign(${i}, '2')">2</div>
-        </div>${leeRow}`;
-        
+        <div class="signs"><div class="${c1}" onclick="toggleSign(${i}, '1')">1</div><div class="${cx}" onclick="toggleSign(${i}, 'X')">X</div><div class="${c2}" onclick="toggleSign(${i}, '2')">2</div></div>
+        ${leeRow}`;
       grid.appendChild(el);
     });
     
@@ -652,16 +610,21 @@
       <textarea id="notesArea" placeholder="Skriv dina egna noteringar här...">${esc(localStorage.getItem('lee_player_notes') || '')}</textarea>
     `;
     grid.appendChild(noteCard);
+    document.getElementById('notesArea').addEventListener('input', (e) => localStorage.setItem('lee_player_notes', e.target.value));
 
-    document.getElementById('notesArea').addEventListener('input', (e) => {
-      localStorage.setItem('lee_player_notes', e.target.value);
-    });
+    // Sätt tillbaka markören om man skrev
+    if (isNotesFocused) {
+      const newNotes = document.getElementById('notesArea');
+      if (newNotes) {
+        newNotes.focus();
+        newNotes.setSelectionRange(selStart, selEnd);
+      }
+    }
 
     fitNotes();
     updateSubmitInfo();
   }
 
-  // Noteringsrutan fyller alltid ut det lediga utrymmet i sista raden
   function fitNotes() {
     const grid = document.getElementById('matchGrid');
     const note = grid && grid.querySelector('.notes-card');
@@ -674,66 +637,369 @@
   }
   window.addEventListener('resize', fitNotes);
 
+  function markCard(i) {
+    if (!isSubmitted || !getLee().started) return;
+    if (marks.has(i)) marks.delete(i); else marks.add(i);
+    try { localStorage.setItem(MARKS_KEY, JSON.stringify([...marks])); } catch (e) {}
+    renderMatches();
+  }
+
   function toggleSign(idx, sign) {
     if (isSubmitted) return;
-    let currentPicks = picks[idx] || [];
-    if (currentPicks.includes(sign)) { 
-        currentPicks = currentPicks.filter(s => s !== sign); 
-    } else { 
-        currentPicks.push(sign); 
-        currentPicks.sort((a,b) => ['1','X','2'].indexOf(a) - ['1','X','2'].indexOf(b)); 
-    }
-    picks[idx] = currentPicks; renderMatches(); saveState();
+    let p = picks[idx] || [];
+    if (p.includes(sign)) { if (p.length > 1) p = p.filter(s => s !== sign); }
+    else { p.push(sign); p.sort((a,b) => ['1','X','2'].indexOf(a) - ['1','X','2'].indexOf(b)); }
+    picks[idx] = p; renderMatches(); saveState();
   }
 
   function updateSubmitInfo() {
     const filled = picks.filter(p => p && p.length > 0).length;
-    const info = document.getElementById('submitInfo');
-    const submitBtn = document.getElementById('submitBtn');
-    const clearBtn = document.getElementById('clearBtn');
+    document.getElementById('submitInfo').innerHTML = isSubmitted ? '<strong style="color:var(--green)">Inlämnat!</strong>' : `Ifyllda: <strong>${filled}</strong> / 13`;
+    document.getElementById('submitBtn').style.display = isSubmitted ? 'none' : 'block';
+    document.getElementById('submitBtn').disabled = filled === 0 || (deadline > 0 && Date.now() > deadline);
+  }
+
+  async function saveState() {
+        await supabaseClient.from('suggestions').upsert({ player_id: currentUserId, round_id: currentRoundId, picks: picks, submitted: isSubmitted }, { onConflict: 'player_id,round_id' });
+  }
+
+  function submitTips() { if(isSubmitted) return; isSubmitted = true; renderMatches(); saveState(); }
+  function clearMyCoupon() { if(isSubmitted) return; picks = Array(13).fill(null).map(() => []); renderMatches(); saveState(); }
+  
+  function startCountdown() {
+    if (timerInterval) clearInterval(timerInterval);
+    const cd = document.getElementById('countdown');
+    function update() {
+      if (!deadline && !isSubmitted) { cd.textContent = '--:--:--'; return; }
+      const ms = deadline - Date.now();
+      if (isSubmitted || ms <= 0) { cd.textContent = 'LÅST'; cd.classList.add('warning'); if (ms <= 0 && !isSubmitted) { isSubmitted = true; renderMatches(); saveState(); } return; }
+      if (ms < 4 * 60 * 60 * 1000) cd.classList.add('warning'); else cd.classList.remove('warning');
+      const totalSecs = Math.floor(ms / 1000);
+      const d = Math.floor(totalSecs / 86400);
+      const h = Math.floor((totalSecs % 86400) / 3600);
+      const m = Math.floor((totalSecs % 3600) / 60);
+      const s = totalSecs % 60;
+      const prefix = d > 0 ? d + 'd ' : '';
+      cd.textContent = `${prefix}${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+    update(); timerInterval = setInterval(update, 1000);
+  }
+
+    async function renderChat() {
+    const { data } = await supabaseClient.from('chat_messages').select('*').order('created_at', { ascending: false }).limit(50);
+    if(!data) return;
     
-    if (isSubmitted) {
-      info.innerHTML = '<strong style="color:var(--green)">Inlämnat!</strong>';
-      submitBtn.style.display = 'inline-flex'; submitBtn.disabled = true; submitBtn.classList.add('is-locked');
-      submitBtn.innerHTML = LOCK_SVG + ' Låst';
-      clearBtn.style.display = 'none';
-    } else {
-      info.innerHTML = `Ifyllda: <strong>${filled}</strong> / 13`;
-      submitBtn.style.display = 'block'; submitBtn.classList.remove('is-locked'); submitBtn.textContent = 'Lämna in tips';
-      clearBtn.style.display = 'block';
-      submitBtn.disabled = filled === 0 || (deadline > 0 && Date.now() > deadline);
+    data.reverse();
+    
+    const c = document.getElementById('chatMessages');
+    c.innerHTML = data.map(m => `<div class="msg ${m.username === currentPlayer ? 'me' : 'lee'}"><span class="msg-sender">${esc(m.username)}</span><div class="msg-bubble">${esc(m.message)}</div></div>`).join('');
+    c.scrollTop = c.scrollHeight;
+
+    // Hantera röd notis (Badge) - KORRIGERAD
+    const badge = document.getElementById('chatBadge');
+    if (data.length > 0 && badge) {
+        const latestTs = new Date(data[data.length-1].created_at).getTime();
+        let seenTs = parseInt(localStorage.getItem('lee_chat_seen') || '0', 10);
+        
+        if (seenTs === 0) {
+            localStorage.setItem('lee_chat_seen', String(latestTs));
+            seenTs = latestTs;
+        }
+        
+        const currentTabIsKupong = document.getElementById('tipView').style.display !== 'none';
+        
+        if (currentTabIsKupong && !document.hidden) {
+            localStorage.setItem('lee_chat_seen', String(latestTs));
+            badge.style.display = 'none';
+        } else {
+            const unreadCount = data.filter(m => new Date(m.created_at).getTime() > seenTs).length;
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    }
+  }
+    async function createMarket() {
+    const q = document.getElementById('fm-question').value.trim();
+    const t = document.getElementById('fm-time').value;
+    const o = parseFloat(document.getElementById('fm-odds').value.replace(',', '.'));
+    const a = parseFloat(document.getElementById('fm-amount').value);
+    const out = document.getElementById('fm-outcome').value;
+    
+    if (!q || !o || !a || !t) { alert('Fyll i alla fält.'); return; }
+    const matchDate = new Date(t);
+    if (matchDate < new Date()) { alert("Matchtiden måste vara i framtiden."); return; }
+    
+    const btn = document.querySelector('.fm-publish');
+    btn.disabled = true;
+    btn.innerText = "Publicerar...";
+    
+    try {
+        // HÄR ANVÄNDER VI DIN SÄKRA DATABASFUNKTION
+        const { error } = await supabaseClient.rpc('create_market', {
+            p_question: q,
+            p_match_time: matchDate.toISOString(),
+            p_odds: o,
+            p_amount: a,
+            p_outcome: out
+        });
+        
+        if (error) throw error;
+
+        document.getElementById('fm-question').value = ''; 
+        document.getElementById('fm-time').value = '';
+        document.getElementById('fm-odds').value = ''; 
+        document.getElementById('fm-amount').value = '';
+        
+        updateBalanceUI();
+        alert("Spel publicerat och " + a + " kr låsta!");
+        loadMarkets();
+    } catch (e) {
+        alert("FEL: " + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Publicera";
     }
   }
 
-  function submitTips() { if (isSubmitted) return; isSubmitted = true; renderMatches(); saveState(); }
-  
-  function clearMyCoupon() {
-    if (isSubmitted) return;
-    picks = Array(13).fill(null).map(() => []);
-    renderMatches();
-    saveState();
-  }
+    async function loadMarkets() {
+    const container = document.getElementById('fm-markets-list');
+    if (!container) return;
+    container.innerHTML = '<div style="color: var(--muted); grid-column: 1/-1;">Laddar...</div>';
 
-  async function renderChat() {
-    const { data: chat } = await supabaseClient.from('chat_messages').select('*').order('created_at', { ascending: true }).limit(50);
-    if(!chat) return;
-    const container = document.getElementById('chatMessages'); if(!container) return;
-    const sig = JSON.stringify(chat.map(m => m.id ?? m.created_at));
-    if (container.dataset.sig === sig) return;
-    container.dataset.sig = sig;
-    const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 50;
-    container.innerHTML = chat.map(m => {
-      const isMe = m.username === currentPlayer;
-      return `<div class="msg ${isMe ? 'me' : 'lee'}"><span class="msg-sender">${isMe ? 'Du' : esc(m.username)}</span><div class="msg-bubble">${esc(m.message)}</div></div>`;
+    // 1. Hämta alla spel du redan är inblandad i (köpt eller sålt)
+    const { data: myTrades } = await supabaseClient.from('freemarket_trades').select('market_id').or(`buyer_id.eq.${currentUserId},seller_id.eq.${currentUserId}`);
+    const myMarketIds = myTrades ? myTrades.map(t => t.market_id) : [];
+
+    // 2. Hämta alla öppna marknader
+    const { data: markets } = await supabaseClient.from('freemarket_markets').select('*, freemarket_orders(*)').eq('status', 'open').order('created_at', { ascending: false });
+    
+    if(!markets || markets.length === 0) { 
+        container.innerHTML = '<div style="color: var(--muted); grid-column: 1/-1;">Inga marknader.</div>'; 
+        return; 
+    }
+
+    // 3. Filtrera bort: 1. Dina egna skapade spel, 2. Spel du redan matchat
+    const availableMarkets = markets.filter(m => m.creator_id !== currentUserId && !myMarketIds.includes(m.id));
+
+    if (availableMarkets.length === 0) {
+        container.innerHTML = '<div style="color: var(--muted); grid-column: 1/-1;">Inga tillgängliga marknader just nu.</div>';
+        return;
+    }
+
+    container.innerHTML = availableMarkets.map(m => {
+        const order = m.freemarket_orders[0]; if(!order || Number(order.amount) <= 0) return '';
+        const sP = order.outcome === 'yes' ? 'Ja' : 'Nej', bP = order.outcome === 'yes' ? 'Nej' : 'Ja';
+        let isLocked = false, timeStr = "";
+        if (m.match_time) {
+            const d = new Date(m.match_time); timeStr = d.toLocaleString('sv-SE', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+            if (d < new Date()) isLocked = true;
+        }
+        let btn = isLocked ? '<span style="color:var(--red); font-size:11px; font-weight:800; background:rgba(224,90,90,0.1); padding:6px 12px; border-radius:6px; border:1px solid rgba(224,90,90,0.3);">LÅST</span>' 
+                : `<button onclick="doMatch('${order.id}', '${m.id}', '${order.user_id}', ${order.odds}, ${order.amount}, '${order.outcome}')" class="fm-match-btn">Matcha (${bP})</button>`;
+
+        return `<div class="fm-card">
+          <div class="fm-card-top"><span class="fm-time">${timeStr}</span>${isLocked ? '<span class="fm-lock">LÅST</span>' : ''}</div>
+          <div class="fm-q">${esc(m.question)}</div>
+          <div class="fm-info">
+            <div style="flex: 1; min-width: 0;">
+              <div class="fm-sells">Säljs (${sP})</div>
+              <div class="fm-odds-row"><span class="fm-odds">Odds: ${parseFloat(order.odds).toFixed(2)}</span><span class="fm-amt">${order.amount} kr</span></div>
+            </div>
+            <div style="flex-shrink: 0; margin-left: 10px;">${btn}</div>
+          </div>
+        </div>`;
     }).join('');
-    if (isScrolledToBottom) container.scrollTop = container.scrollHeight;
+  }
+    async function loadMyMatches() {
+    const container = document.getElementById('my-matches-list');
+    if (!container) return;
+    container.innerHTML = '<div style="color: var(--muted); grid-column: 1/-1;">Laddar...</div>';
+
+    // Hämta spel du matchat
+    const { data: trades } = await supabaseClient.from('freemarket_trades').select('market_id').or(`buyer_id.eq.${currentUserId},seller_id.eq.${currentUserId}`);
+    const marketIds = trades ? trades.map(t => t.market_id) : [];
+
+    // Hämta spel du skapat
+    const { data: created } = await supabaseClient.from('freemarket_markets').select('id').eq('creator_id', currentUserId);
+    if (created) created.forEach(c => marketIds.push(c.id));
+
+    const uniqueIds = [...new Set(marketIds)];
+
+    if (uniqueIds.length === 0) {
+        container.innerHTML = '<div style="color: var(--muted); grid-column: 1/-1;">Du har inga aktiva matcher.</div>';
+        return;
+    }
+
+    // Hämta info för alla dessa spel (både skapade och matchade)
+    const { data: markets } = await supabaseClient.from('freemarket_markets').select('*, freemarket_orders(*)').in('id', uniqueIds).eq('status', 'open').order('created_at', { ascending: false });
+
+    if (!markets || markets.length === 0) {
+        container.innerHTML = '<div style="color: var(--muted); grid-column: 1/-1;">Du har inga aktiva matcher.</div>';
+        return;
+    }
+
+    container.innerHTML = markets.map(m => {
+        const order = m.freemarket_orders[0]; 
+        if(!order) return '';
+        const isMine = order.user_id === currentUserId;
+        const sP = order.outcome === 'yes' ? 'Ja' : 'Nej';
+        let timeStr = m.match_time ? new Date(m.match_time).toLocaleString('sv-SE', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' }) : '';
+
+        return `<div class="fm-card" style="opacity: 0.8; border-color: var(--gold);">
+          <div class="fm-card-top"><span class="fm-time">${timeStr}</span><span class="fm-lock" style="color:var(--gold); border-color:var(--gold);">DIN MATCH</span></div>
+          <div class="fm-q">${esc(m.question)}</div>
+          <div class="fm-info">
+            <div style="flex: 1; min-width: 0;">
+              <div class="fm-sells">Du är: ${isMine ? 'Säljare ('+sP+')' : 'Köpare'}</div>
+              <div class="fm-odds-row"><span class="fm-odds">Odds: ${parseFloat(order.odds).toFixed(2)}</span><span class="fm-amt">${Number(order.amount) > 0 ? order.amount + ' kr' : 'Fullt matchad'}</span></div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
   }
 
+  function doMatch(orderId, marketId, creatorId, odds, maxAmount, sellerOutcome) {
+    if (currentUserId === creatorId) { alert("Du kan inte matcha din egen order."); return; }
+    pendingMatch = { orderId, marketId, creatorId, odds, maxAmount, sellerOutcome };
+    document.getElementById('matchModalDesc').innerText = `Säljer: ${odds} odds | Max: ${maxAmount} kr`;
+    const input = document.getElementById('matchAmountInput');
+    input.value = maxAmount; input.max = maxAmount;
+    document.getElementById('matchModal').style.display = 'flex';
+  }
+  function closeMatchModal() { document.getElementById('matchModal').style.display = 'none'; }
+  function validateMatchInput(input) {
+    input.value = input.value.replace(/[^0-9]/g, '');
+    if (input.value !== '' && parseInt(input.value, 10) > pendingMatch.maxAmount) input.value = pendingMatch.maxAmount;
+  }
+  async function confirmMatch() {
+    const amount = parseInt(document.getElementById('matchAmountInput').value, 10);
+    if (isNaN(amount) || amount <= 0 || amount > pendingMatch.maxAmount) { alert("Ogiltigt belopp."); return; }
+    
+    const { orderId } = pendingMatch;
+    closeMatchModal();
+    
+    try {
+        // HÄR ANVÄNDER VI DIN SÄKRA DATABASFUNKTION
+        const { error } = await supabaseClient.rpc('match_order', { 
+            p_order_id: orderId, 
+            p_amount: amount 
+        });
+
+        if (error) throw error;
+        
+        updateBalanceUI();
+        alert("Matchning genomförd! " + amount + " kr drogs.");
+        loadMarkets();
+        if (typeof loadMyMatches === 'function') loadMyMatches();
+    } catch (e) { 
+        alert("FEL: " + e.message); 
+    }
+  }
+// ... (massa annan kod ovanför) ...
+
+  // --- GLÖMT LÖSENORD ---
+  function showForgotPassword(e) {
+    if (e) e.preventDefault();
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('forgotModal').style.display = 'flex';
+  }
+  function closeForgotPassword(e) {
+    if (e) e.preventDefault();
+    document.getElementById('forgotModal').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+  async function submitForgotPassword() {
+    const email = document.getElementById('forgotEmail').value.trim();
+    if (!email) { alert("Ange din e-postadress."); return; }
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+    if (error) { alert("Fel: " + error.message); }
+    else { alert("En återställningslänk har skickats till " + email); closeForgotPassword(); }
+  }
+  async function saveNewPassword() {
+    const pass = document.getElementById('newPass').value;
+    if (pass.length < 6) { alert("Lösenordet måste vara minst 6 tecken."); return; }
+    const { error } = await supabaseClient.auth.updateUser({ password: pass });
+    if (error) { alert("Fel: " + error.message); }
+    else { alert("Ditt lösenord har uppdaterats! Du kan nu logga in."); location.reload(); }
+  }
   async function sendChat() {
-    const input = document.getElementById('chatInput'); const text = input.value.trim();
-    if (!text) return;
-    await supabaseClient.from('chat_messages').insert({ username: currentPlayer, message: text });
-    input.value = ''; renderChat();
+    const input = document.getElementById('chatInput'); 
+    if(!input.value.trim()) return;
+    
+    const msg = input.value.trim();
+    input.value = ''; 
+    
+    // Använder den säkra databasfunktionen
+    const { error } = await supabaseClient.rpc('send_chat_message', { p_message: msg });
+    
+            if (error) {
+        alert("Kunde inte skicka meddelande: " + error.message);
+        input.value = msg;
+    } else {
+        renderChat();
+    }
+  }
+  async function logout() {
+      await supabaseClient.auth.signOut();
+      location.reload();
+  }
+
+  async function loadHighscore() {
+      const body = document.getElementById('highscoreBody');
+      body.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--muted);">Laddar...</td></tr>';
+      const { data, error } = await supabaseClient.rpc('get_highscore', { p_limit: 10 });
+      if (error) { 
+          body.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--red);">Kunde inte hämta highscore.</td></tr>`; 
+          return; 
+      }
+      if (!data || !data.length) { 
+          body.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--muted);">Inga spelare ännu.</td></tr>'; 
+          return; 
+      }
+      body.innerHTML = data.map((p, i) => `
+          <tr style="border-bottom: 1px solid var(--border-soft);">
+          <td style="padding: 16px 12px; font-weight: 800; color: ${i === 0 ? 'var(--gold)' : 'var(--text)'};">#${i+1}</td>
+          <td style="padding: 16px 12px;">${esc(p.display_name || p.username || 'Okänd')}</td>
+          <td style="padding: 16px 12px; color: var(--green); font-weight: 800;">${p.balance || 0} kr</td>
+          </tr>
+      `).join('');
+  }
+
+  async function loadHistory() {
+      const body = document.getElementById('historikBody');
+      body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--muted);">Laddar...</td></tr>';
+      const { data, error } = await supabaseClient.rpc('get_my_history');
+      if (error) { 
+          body.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--red);">${esc(error.message)}</td></tr>`; 
+          return; 
+      }
+      if (!data || !data.length) { 
+          body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--muted);">Ingen historik ännu.</td></tr>'; 
+          return; 
+      }
+      body.innerHTML = data.map(h => {
+          const date = new Date(h.created_at).toLocaleDateString('sv-SE');
+          let statusText = '', extraStyle = '';
+          if (h.status === 'cancelled') {
+              statusText = `<span style="color:var(--red); font-weight:800;">AVBRUTEN</span>`;
+              extraStyle = 'text-decoration: line-through; opacity: 0.5;';
+          } else if (h.status === 'resolved_yes') {
+              statusText = `<span style="color:var(--green); font-weight:800;">Vann: JA</span>`;
+          } else if (h.status === 'resolved_no') {
+              statusText = `<span style="color:var(--green); font-weight:800;">Vann: NEJ</span>`;
+          }
+          return `
+          <tr style="border-bottom: 1px solid var(--border-soft); ${extraStyle}">
+            <td style="padding: 16px 12px;">${date}</td>
+            <td style="padding: 16px 12px; font-weight:700;">${esc(h.question)}</td>
+            <td style="padding: 16px 12px;">${statusText}</td>
+            <td style="padding: 16px 12px; color:var(--gold); font-weight:600;">${h.status === 'cancelled' ? esc(h.cancel_reason || 'Ingen förklaring') : '-'}</td>
+          </tr>`;
+      }).join('');
   }
 </script>
 </body>
