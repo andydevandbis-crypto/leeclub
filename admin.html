@@ -1697,34 +1697,45 @@
     loadRssFeeds(); fetchRSS();
   };
 
-  async function fetchRSS() {
+    async function fetchRSS() {
     if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return;
     try {
       const { data: feeds } = await supabaseClient.from('rss_feeds').select('*');
       if (!feeds || feeds.length === 0) return;
+      
       const parts = await Promise.all(feeds.map(async f => {
         try {
-          const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(f.url));
-          const data = await res.json();
-          if (data.status === 'ok' && data.items) {
-            return data.items.slice(0, 3).map(item => `<a href="${esc(item.link)}" target="_blank" rel="noopener" class="rss-item-link">${esc(item.title)}</a>`).join('');
+          // Använder en proxy för att kringgå CORS
+          const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(f.url);
+          const res = await fetch(proxyUrl);
+          const text = await res.text();
+          
+          // Tolkar XML-datan
+          const parser = new DOMParser();
+          const xml = parser.parseFromString(text, "text/xml");
+          const items = xml.querySelectorAll("item");
+          
+          let html = '';
+          for (let i = 0; i < Math.min(items.length, 3); i++) {
+            const title = items[i].querySelector("title")?.textContent || '';
+            const link = items[i].querySelector("link")?.textContent || '#';
+            html += `<a href="${esc(link)}" target="_blank" rel="noopener" class="rss-item-link">${esc(title)}</a>`;
           }
-        } catch (e) {}
-        return '';
+          return html;
+        } catch (e) { 
+          return ''; 
+        }
       }));
+      
       const allHtml = parts.join('');
       if (allHtml) {
         document.getElementById('rssGroup1').innerHTML = allHtml;
         document.getElementById('rssGroup2').innerHTML = allHtml;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error("RSS-fel:", e);
+    }
   }
-
-  document.getElementById('rssPauseBtn').addEventListener('click', function () {
-    const t = document.getElementById('rssFeed');
-    const paused = t.classList.toggle('paused');
-    this.textContent = paused ? 'Fortsätt' : 'Pausa';
-  });
 
   function renderSystemTable() {
     const $sysBody = document.getElementById('system-table-body');
