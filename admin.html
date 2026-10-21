@@ -1648,8 +1648,8 @@ async function publishPicks() {
         document.getElementById('rssGroup1').innerHTML = allHtml;
         document.getElementById('rssGroup2').innerHTML = allHtml;
       } else {
-        document.getElementById('rssGroup1').innerHTML = '<span class="rss-item-link" style="color:var(--red)">Kunde inte ladda RSS (kräver lokal server)</span>';
-        document.getElementById('rssGroup2').innerHTML = '<span class="rss-item-link" style="color:var(--red)">Kunde inte ladda RSS (kräver lokal server)</span>';
+        document.getElementById('rssGroup1').innerHTML = '<span class="rss-item-link">Inga nyheter         	tillgängliga just nu.</span>';
+        document.getElementById('rssGroup2').innerHTML = '';
       }
     } catch (e) {}
   }
