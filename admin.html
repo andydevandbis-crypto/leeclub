@@ -792,6 +792,7 @@
       renderChat();
       if (chatInterval) clearInterval(chatInterval);
       chatInterval = setInterval(() => { if (!document.hidden) renderChat(); }, 4000);
+      setInterval(() => { if (!document.hidden) updateAdminBars(); }, 10000);
 
       if (alertInterval) clearInterval(alertInterval);
       checkTimeAlerts();
