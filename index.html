@@ -152,7 +152,6 @@
 
   .custom-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--panel); border: 1px solid var(--gold); color: var(--text); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5); opacity: 0; transition: all 0.3s; z-index: 99999; pointer-events: none; }
   .custom-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .custom-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   @media (max-width: 768px) {
     body { height: auto; overflow-y: auto; }
@@ -167,8 +166,6 @@
     .match-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
     .table-wrap { margin: 8px; }
   }
-</style>
-</head>
 </style>
 </head>
 <body>
@@ -228,7 +225,7 @@
     <button class="tab-btn" id="tab-btn-mina-matcher" onclick="switchMainTab('mina-matcher')">Mina Matcher</button>
     <button class="tab-btn" id="tab-btn-highscore" onclick="switchMainTab('highscore')">Highscore</button>
     <button class="tab-btn" id="tab-btn-historik" onclick="switchMainTab('historik')">Historik</button>
-    <button class="tab-btn" id="tab-btn-regler" onclick="switchMainTab('regler')">Regler</button>
+    <button class="tab-btn" id="tab-btn-faq" onclick="switchMainTab('faq')">Frågor & Svar (FAQ)</button>
   </div>
 
   <main class="main">
@@ -278,13 +275,20 @@
         </div>
       </section>
 
-      <section class="panel" id="highscoreView" style="display:none;">
+            <section class="panel" id="highscoreView" style="display:none;">
         <div class="panel-head"><h2>Highscore</h2></div>
         <div style="padding: 24px; overflow-y: auto;">
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Rank</th><th>Spelare</th><th>Saldo</th></tr></thead>
-              <tbody id="highscoreBody"><tr><td colspan="3" style="text-align:center; color:var(--muted);">Laddar...</td></tr></tbody>
+              <thead>
+                <tr>
+                  <th style="text-align: left;">Rank</th>
+                  <th style="text-align: left;">Spelare</th>
+                  <th style="text-align: right;">Vinst (7 dagar)</th>
+                  <th style="text-align: right;">Antal spel</th>
+                </tr>
+              </thead>
+              <tbody id="highscoreBody"><tr><td colspan="4" style="text-align:center; color:var(--muted);">Laddar...</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -302,14 +306,17 @@
         </div>
       </section>
 
-      <section class="panel" id="reglerView" style="display:none;">
-        <div class="panel-head"><h2>Regler</h2></div>
+      <section class="panel" id="faqView" style="display:none;">
+        <div class="panel-head"><h2>Frågor & Svar (FAQ)</h2></div>
         <div style="padding: 24px; overflow-y: auto;">
           <div class="rules-container">
-            <div class="rule-item"><h3>1. Veckosystem & Startkapital</h3><p>Alla startar med 2 000 kr i fiktiva pengar. Spelet stänger söndag kl 24:00.</p></div>
-            <div class="rule-item"><h3>2. Skapa Egna Spel</h3><p>Alla med access får skapa marknader, men måste lägga en startorder.</p></div>
-            <div class="rule-item"><h3>3. Orderboken & Odds</h3><p>Oddsen sätts av spelarna. Matcha en order för att spela.</p></div>
-            <div class="rule-item"><h3>4. Utlösning</h3><p>Admin (Lee) klickar ut vinnaren när matchen är slut.</p></div>
+            <div class="rule-item"><h3>Hur fungerar startkapitalet?</h3><p>Alla spelare börjar med 2 000 kr i fiktiva pengar. Du kan sedan öka ditt saldo genom att vinna spel på Kupongen eller i Freemarket.</p></div>
+            <div class="rule-item"><h3>Hur fungerar Kupongen?</h3><p>Det är 13 matcher. Du väljer 1 (hemmavinst), X (oavgjort) eller 2 (bortavinst) för varje match. Du kan välja flera tecken i samma match för att gardera dig. När du lämnar in låses dina tips.</p></div>
+            <div class="rule-item"><h3>Hur fungerar Freemarket?</h3><p>Freemarket är en marknad där du spelar mot andra spelare istället för mot ett bettingbolag. Du kan skapa ett eget Ja/Nej-spel eller matcha någon annans spel. Säljaren anger odds och belopp, och köparen betalar en avgift för att ta motsatt sida.</p></div>
+            <div class="rule-item"><h3>Vem bestämmer vinnaren?</h3><p>När en match eller händelse är över markerar Admin (Lee) vilket utfall som var rätt i systemet. Detta kallas att spelet "avgörs".</p></div>
+            <div class="rule-item"><h3>Vad händer om en match ställs in?</h3><p>Om en händelse inte kan genomföras kan Admin välja att "avbryta" spelet. Alla inblandade spelare får då tillbaka exakt de pengar de satsade.</p></div>
+            <div class="rule-item"><h3>Hur får jag ut mina vinster?</h3><p>När Admin har avgjort ett spel betalas vinsten ut automatiskt till vinnarens saldo. Du behöver inte göra något själv.</p></div>
+            <div class="rule-item"><h3>Varför kan jag inte se Lees tips direkt?</h3><p>Lees egna tips och garderingar ligger dolda tills han har lämnat in och låst sin kupong, för att spelet ska vara rättvist.</p></div>
           </div>
         </div>
       </section>
@@ -378,6 +385,21 @@
     if (row && 'live_started' in row) leeRemote = { started: !!row.live_started, picks: row.admin_picks || [], locked: row.admin_locked || {} };
   }
 
+  window.selectOutcome = function(val) {
+    document.getElementById('fm-outcome').value = val;
+    const by = document.getElementById('btn-outcome-yes');
+    const bn = document.getElementById('btn-outcome-no');
+    if (!by || !bn) return;
+    
+    if (val === 'yes') {
+      by.style.background = 'rgba(51,224,138,0.15)'; by.style.borderColor = 'var(--green)'; by.style.color = 'var(--green)';
+      bn.style.background = 'var(--bg)'; bn.style.borderColor = 'var(--border)'; bn.style.color = 'var(--muted)';
+    } else {
+      bn.style.background = 'rgba(224,90,90,0.15)'; bn.style.borderColor = 'var(--red)'; bn.style.color = 'var(--red)';
+      by.style.background = 'var(--bg)'; by.style.borderColor = 'var(--border)'; by.style.color = 'var(--muted)';
+    }
+  };
+
   async function fetchLiveScores() {
       try {
           const { data, error } = await supabaseClient.from('live_scores').select('*');
@@ -407,7 +429,7 @@
     document.getElementById('brandSub').textContent = currentPlayer;
     document.getElementById('mainTabs').style.display = 'flex';
     
-        // Hantera behörigheter
+    // Hantera behörigheter
     const hasKupong = profile && profile.access_europatipset;
     const hasFreemarket = profile && profile.access_freemarket;
 
@@ -416,7 +438,7 @@
     document.getElementById('tab-btn-mina-matcher').style.display = hasFreemarket ? 'block' : 'none';
     document.getElementById('tab-btn-highscore').style.display = 'block';
     document.getElementById('tab-btn-historik').style.display = 'block';
-    document.getElementById('tab-btn-regler').style.display = 'block';
+    document.getElementById('tab-btn-faq').style.display = 'block';
 
     // Skicka spelaren till rätt flik beroende på behörighet
     if (hasKupong) {
@@ -469,8 +491,8 @@
     }
   });
 
-    function switchMainTab(tab) {
-    ['tipView', 'freemarketView', 'minaMatcherView', 'highscoreView', 'historikView', 'reglerView'].forEach(id => {
+  function switchMainTab(tab) {
+    ['tipView', 'freemarketView', 'minaMatcherView', 'highscoreView', 'historikView', 'faqView'].forEach(id => {
         const el = document.getElementById(id); if (el) el.style.display = 'none';
     });
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -480,13 +502,6 @@
         document.getElementById('tipView').style.display = 'flex';
         document.getElementById('tab-btn-kupong').classList.add('active');
         if(chatPanel) chatPanel.style.display = 'flex';
-        
-        // Rensa den röda notisen när man går in på Kupong
-        const badge = document.getElementById('chatBadge');
-        if (badge) {
-            badge.style.display = 'none';
-            localStorage.setItem('lee_chat_seen', String(Date.now()));
-        }
     } else {
         if(chatPanel) chatPanel.style.display = 'none';
         let viewId = tab === 'mina-matcher' ? 'minaMatcherView' : tab + 'View';
@@ -685,7 +700,7 @@
     update(); timerInterval = setInterval(update, 1000);
   }
 
-    async function renderChat() {
+  async function renderChat() {
     const { data } = await supabaseClient.from('chat_messages').select('*').order('created_at', { ascending: false }).limit(50);
     if(!data) return;
     
@@ -722,7 +737,8 @@
         }
     }
   }
-    async function createMarket() {
+
+  async function createMarket() {
     const q = document.getElementById('fm-question').value.trim();
     const t = document.getElementById('fm-time').value;
     const o = parseFloat(document.getElementById('fm-odds').value.replace(',', '.'));
@@ -765,7 +781,7 @@
     }
   }
 
-    async function loadMarkets() {
+  async function loadMarkets() {
     const container = document.getElementById('fm-markets-list');
     if (!container) return;
     container.innerHTML = '<div style="color: var(--muted); grid-column: 1/-1;">Laddar...</div>';
@@ -807,14 +823,16 @@
           <div class="fm-info">
             <div style="flex: 1; min-width: 0;">
               <div class="fm-sells">Säljs (${sP})</div>
-              <div class="fm-odds-row"><span class="fm-odds">Odds: ${parseFloat(order.odds).toFixed(2)}</span><span class="fm-amt">${order.amount} kr</span></div>
+                            <div class="fm-odds-row"><span class="fm-odds">Odds: ${parseFloat(order.odds).toFixed(2)}</span><span class="fm-amt">${Number(order.amount) > 0 ? order.amount + ' kr' : 'Fullt matchad'}</span></div>
+              <div style="font-size:10px; color:var(--muted); margin-top:4px;">Köparens kostnad: ${(order.amount * (order.odds - 1)).toFixed(2)} kr · Vinst: ${(order.amount * order.odds).toFixed(2)} kr</div>
             </div>
             <div style="flex-shrink: 0; margin-left: 10px;">${btn}</div>
           </div>
         </div>`;
     }).join('');
   }
-    async function loadMyMatches() {
+
+  async function loadMyMatches() {
     const container = document.getElementById('my-matches-list');
     if (!container) return;
     container.innerHTML = '<div style="color: var(--muted); grid-column: 1/-1;">Laddar...</div>';
@@ -899,7 +917,6 @@
         alert("FEL: " + e.message); 
     }
   }
-// ... (massa annan kod ovanför) ...
 
   // --- GLÖMT LÖSENORD ---
   function showForgotPassword(e) {
@@ -936,7 +953,7 @@
     // Använder den säkra databasfunktionen
     const { error } = await supabaseClient.rpc('send_chat_message', { p_message: msg });
     
-            if (error) {
+    if (error) {
         alert("Kunde inte skicka meddelande: " + error.message);
         input.value = msg;
     } else {
@@ -948,27 +965,34 @@
       location.reload();
   }
 
-  async function loadHighscore() {
+      async function loadHighscore() {
       const body = document.getElementById('highscoreBody');
-      body.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--muted);">Laddar...</td></tr>';
-      const { data, error } = await supabaseClient.rpc('get_highscore', { p_limit: 10 });
+      body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--muted);">Laddar...</td></tr>';
+      
+      const { data, error } = await supabaseClient.rpc('get_weekly_profit', { p_limit: 10 });
+      
       if (error) { 
-          body.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--red);">Kunde inte hämta highscore.</td></tr>`; 
+          body.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--red);">Kunde inte hämta highscore.</td></tr>`; 
           return; 
       }
       if (!data || !data.length) { 
-          body.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--muted);">Inga spelare ännu.</td></tr>'; 
+          body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--muted);">Inga spelare ännu.</td></tr>'; 
           return; 
       }
-      body.innerHTML = data.map((p, i) => `
+      
+      body.innerHTML = data.map((p, i) => {
+          const profit = Number(p.profit) || 0;
+          const profitClass = profit > 0 ? 'var(--green)' : (profit < 0 ? 'var(--red)' : 'var(--muted)');
+          const profitSign = profit > 0 ? '+' : '';
+          return `
           <tr style="border-bottom: 1px solid var(--border-soft);">
-          <td style="padding: 16px 12px; font-weight: 800; color: ${i === 0 ? 'var(--gold)' : 'var(--text)'};">#${i+1}</td>
-          <td style="padding: 16px 12px;">${esc(p.display_name || p.username || 'Okänd')}</td>
-          <td style="padding: 16px 12px; color: var(--green); font-weight: 800;">${p.balance || 0} kr</td>
-          </tr>
-      `).join('');
+            <td style="padding: 16px 12px; font-weight: 800; color: ${i === 0 ? 'var(--gold)' : 'var(--text)'};">#${i+1}</td>
+            <td style="padding: 16px 12px;">${esc(p.display_name || p.username || 'Okänd')}</td>
+            <td style="padding: 16px 12px; color: ${profitClass}; font-weight: 800; text-align: right;">${profitSign}${profit.toFixed(2)} kr</td>
+            <td style="padding: 16px 12px; color: var(--muted); font-weight: 600; text-align: right;">${p.total_trades}</td>
+          </tr>`;
+      }).join('');
   }
-
   async function loadHistory() {
       const body = document.getElementById('historikBody');
       body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--muted);">Laddar...</td></tr>';

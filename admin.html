@@ -102,8 +102,8 @@
   /* MARKERINGSFUNKTIONEN */
   .match.marked { background: #3d3420; border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
   .match.drag-highlight { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; background: #1b2332; }
-
   .match.locked-highlight { background: linear-gradient(rgba(51,224,138,0.10), rgba(51,224,138,0.10)), var(--panel2); border-color: var(--green); box-shadow: 0 0 0 1px var(--green) inset, 0 0 14px rgba(51,224,138,0.25); }
+  
   .match-tag.halv { color: var(--blue); background: rgba(143,199,255,0.14); border: 1px solid rgba(143,199,255,0.55); }
   .match-tag.hel { color: #c9a7ff; background: rgba(196,160,255,0.14); border: 1px solid rgba(196,160,255,0.55); }
   .match-tag.spik { color: var(--gold); background: rgba(232,193,90,0.14); border: 1px solid rgba(232,193,90,0.55); }
@@ -131,22 +131,7 @@
   details.stats-accordion[open] summary::after { transform: rotate(180deg); color: var(--gold); }
   details.stats-accordion.has-tips summary::after { color: var(--red) !important; }
   
-  .stats-content { 
-      position: absolute; 
-      top: 100%; 
-      left: -8px; 
-      right: -8px; 
-      background: var(--panel); 
-      border: 1px solid var(--border); 
-      border-radius: 8px; 
-      padding: 12px; 
-      z-index: 999; 
-      box-shadow: 0 10px 25px rgba(0,0,0,0.8); 
-      margin-top: 6px; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 4px; 
-  }
+  .stats-content { position: absolute; top: 100%; left: -8px; right: -8px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px; z-index: 999; box-shadow: 0 10px 25px rgba(0,0,0,0.8); margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
   .stat-bar-row { display: flex; align-items: center; gap: 8px; font-size: 11px; }
   .stat-label { width: 32px; font-weight: 700; color: var(--muted); text-align: left; }
   .stat-label.active { color: var(--text); }
@@ -167,33 +152,37 @@
   .accordion-body { display: none; }
   .accordion-container.open .accordion-body { display: block; }
   
-  .table-wrapper { width: 100%; overflow-x: auto; max-height: 70vh; position: relative; }
-  .sys-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; text-align: center; white-space: nowrap; }
+  .table-wrapper { width: 100%; max-height: 70vh; overflow: auto; position: relative; -ms-overflow-style: none; scrollbar-width: none; }
+  .table-wrapper::-webkit-scrollbar { display: none; }
   
-  .sys-table thead th { position: sticky; background: var(--panel2); color: var(--muted); font-weight: 700; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; padding: 12px 8px; border-bottom: 1px solid var(--border); z-index: 10; }
-  .sys-table th.bg-green { background: var(--green-bg); color: var(--green); border-bottom: 2px solid var(--green); }
-  .sys-table th.bg-blue { background: var(--blue-bg); color: var(--blue); border-bottom: 2px solid var(--blue); }
-  .sys-table th.bg-yellow { background: var(--yellow-bg); color: var(--yellow); border-bottom: 2px solid var(--yellow); }
-  .sys-table th.bg-red { background: var(--red-bg); color: var(--red); border-bottom: 2px solid var(--red); }
+  .sys-table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; text-align: center; white-space: nowrap; }
+  .sys-table thead th { position: sticky !important; background: #1a2230 !important; color: var(--muted); font-weight: 700; font-size: 11px; text-transform: uppercase; padding: 12px 8px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border-soft); }
+  .sys-table th.bg-green { background: #123d2b !important; color: var(--green) !important; border-bottom: 2px solid var(--green) !important; }
+  .sys-table th.bg-blue { background: #1d2e42 !important; color: var(--blue) !important; border-bottom: 2px solid var(--blue) !important; }
+  .sys-table th.bg-yellow { background: #3d3420 !important; color: var(--yellow) !important; border-bottom: 2px solid var(--yellow) !important; }
+  .sys-table th.bg-red { background: #3d1f27 !important; color: var(--red) !important; border-bottom: 2px solid var(--red) !important; }
+  .sys-table thead tr:nth-child(1) th { top: 0 !important; z-index: 50 !important; }
+  .sys-table thead tr:nth-child(2) th { top: 35px !important; z-index: 49 !important; }
+  .sys-table thead tr:nth-child(3) th { top: 70px !important; z-index: 48 !important; }
 
-  .sys-table th.sticky-col, .sys-table td.sticky-col { position: sticky; background: var(--panel); z-index: 5; border-right: 1px solid var(--border); }
-  .sys-table th.sticky-col { background: var(--panel2); z-index: 11; }
+  .sys-table th.sticky-col, .sys-table td.sticky-col { position: sticky; background: #0f141d; z-index: 5; border-right: 1px solid var(--border); }
+  .sys-table th.sticky-col { background: #131a26; z-index: 60 !important; }
   .col-1 { left: 0; width: 70px; }
   .col-2 { left: 70px; width: 70px; }
   .col-3 { left: 140px; width: 80px; border-right: 2px solid var(--border); cursor: pointer; user-select: none;}
 
   .sys-table tbody tr { transition: background 0.2s; cursor: pointer; }
   .sys-table tbody tr:hover td { background: rgba(255,255,255,0.03); }
-  .sys-table tbody td { padding: 12px 8px; border-bottom: 1px solid var(--border-soft); color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; border-right: 1px solid var(--border-soft); }
+  .sys-table tbody td { padding: 12px 8px; border-bottom: 1px solid var(--border-soft); color: var(--text); font-weight: 600; border-right: 1px solid var(--border-soft); }
   .sys-table td.val-0 { color: var(--muted); opacity: 0.3; }
   .sys-table td.val-active { color: var(--text); }
   .sys-table td:last-child { border-right: none; }
-
   .sys-table td.data-green { background: var(--green-bg); color: var(--green); }
   .sys-table td.data-blue { background: var(--blue-bg); color: var(--blue); }
   .sys-table td.data-yellow { background: var(--yellow-bg); color: var(--yellow); }
   .sys-table td.data-red { background: var(--red-bg); color: var(--red); }
-  .sys-table tbody tr.selected td { background: rgba(232,193,90,0.15) !important; border-bottom-color: var(--gold); border-top: 1px solid var(--gold); }
+  .sys-table tbody tr.selected td { background-color: rgba(232,193,90,0.15) !important; color: var(--yellow) !important; border-bottom-color: var(--yellow) !important; font-weight: 800; }
+  .sys-table tbody tr.selected td.sticky-col { background-color: #2b271a !important; color: var(--yellow) !important; }
 
   /* LIVE OCH CHATT */
   .live-layout { display: grid; grid-template-columns: 1fr 340px; gap: 16px; width: 100%; height: 100%; overflow: hidden; }
@@ -309,7 +298,21 @@
     .top-single-row { flex-wrap: wrap; gap: 12px; padding: 12px; }
     .top-single-row h1 { width: 100%; margin-bottom: 8px; }
     .group-left, .group-right { flex-wrap: wrap; width: 100%; gap: 12px; border: none; padding: 0; }
-    .match-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    
+    #matchGrid { grid-template-columns: 1fr !important; }
+    .notes-card { grid-column: 1 / -1 !important; width: 100% !important; margin-top: 10px; }
+    
+    /* GÖR ALLA TABELLER SCROLLBARA I SIDLED PÅ MOBILEN */
+    .table-wrapper, .table-wrap, .sys-table-wrap { 
+        width: 100% !important; 
+        overflow-x: auto !important; 
+        -webkit-overflow-scrolling: touch; 
+
+    }
+    .admin-table { 
+        min-width: 500px !important; 
+    }
+    
     .rss-bar { display: none !important; }
     .btn-move.btn-lock { padding: 8px 10px; }
   }
@@ -351,7 +354,6 @@
     </div>
   </div>
 
-  <!-- FLIKAR -->
   <div class="tabs-nav">
     <button class="tab-btn active" onclick="switchTab('kupong')">Kupong</button>
     <button class="tab-btn" onclick="switchTab('playerview')">Live & Chat <span class="tab-badge" id="timeAlertBadge" style="display:none; background:var(--red);">!</span></button>
@@ -365,9 +367,7 @@
 
   <main class="main">
     
-    <!-- KUPONG -->
     <div id="tab-kupong" class="tab-content active">
-      <!-- Panelen med korten -->
       <div class="panel">
         <div class="top-single-row">
           <h1>Kupong</h1>
@@ -403,7 +403,6 @@
         </div>
       </div>
 
-      <!-- SYSTEMTABELLEN (UTANFÖR PANELEN, STÄNGD SOM STANDARD) -->
       <div class="accordion-container">
         <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
           <h2>Antalet vinstrader vid olika system</h2>
@@ -439,16 +438,13 @@
                   <th class="bg-yellow">11</th><th class="bg-yellow">10</th>
                 </tr>
               </thead>
-              <tbody id="system-table-body">
-                <!-- Renderas via JS -->
-              </tbody>
+              <tbody id="system-table-body"></tbody>
             </table>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- LIVE & CHAT -->
     <div id="tab-playerview" class="tab-content">
       <div class="live-layout">
         <div class="live-panel">
@@ -466,7 +462,6 @@
       </div>
     </div>
 
-    <!-- FREEMARKET -->
     <div id="tab-freemarket" class="tab-content">
       <div class="panel">
         <div class="panel-head" style="padding: 16px 22px; border-bottom: 1px solid var(--border-soft);">
@@ -502,7 +497,6 @@
       </div>
     </div>
 
-    <!-- MINA MATCHER -->
     <div id="tab-mina-matcher" class="tab-content">
       <div class="panel">
         <div class="panel-head" style="padding: 16px 22px; border-bottom: 1px solid var(--border-soft); display:flex; justify-content:space-between; align-items:center;">
@@ -515,7 +509,6 @@
       </div>
     </div>
 
-    <!-- HANTERA MATCHER -->
     <div id="tab-hantera-matcher" class="tab-content">
       <div class="panel">
         <div class="panel-head" style="padding: 16px 22px; border-bottom: 1px solid var(--border-soft); display:flex; justify-content:space-between; align-items:center;">
@@ -533,7 +526,6 @@
       </div>
     </div>
 
-    <!-- HIGHSCORE -->
     <div id="tab-highscore" class="tab-content">
       <div class="panel">
         <div class="panel-head"><h2>Highscore</h2></div>
@@ -546,7 +538,6 @@
       </div>
     </div>
 
-    <!-- HISTORIK -->
     <div id="tab-historik" class="tab-content">
       <div class="panel">
         <div class="panel-head"><h2>Min historik</h2></div>
@@ -559,22 +550,22 @@
       </div>
     </div>
 
-    <!-- INSTÄLLNINGAR -->
     <div id="tab-installningar" class="tab-content">
       <div class="accordions">
         <div class="accordion open" id="acc-users">
           <div class="accordion-header" onclick="document.getElementById('acc-users').classList.toggle('open')"><h2>Hantera Användare</h2><div class="arrow">▼</div></div>
-          <div class="acc-content">
+                    <div class="acc-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
               <p style="font-size:13px; color:var(--muted);">Hantera spelare och deras behörigheter.</p>
               <button class="btn-add" onclick="showCreateUser()">+ Skapa användare</button>
             </div>
-            <table class="admin-table">
-              <thead><tr><th>Visningsnamn</th><th>E-postadress</th><th>Lösenord</th><th style="text-align:center">Kupong</th><th style="text-align:center">Freemarket</th><th style="text-align:right;">Åtgärder</th></tr></thead>
-              <tbody id="usersTableBody"></tbody>
-            </table>
+            <div class="table-wrapper">
+              <table class="admin-table">
+                <thead><tr><th>Visningsnamn</th><th>E-postadress</th><th>Lösenord</th><th style="text-align:center">Kupong</th><th style="text-align:center">Freemarket</th><th style="text-align:right;">Åtgärder</th></tr></thead>
+                <tbody id="usersTableBody"></tbody>
+              </table>
+            </div>
           </div>
-        </div>
         <div class="accordion" id="acc-rss">
           <div class="accordion-header" onclick="document.getElementById('acc-rss').classList.toggle('open')"><h2>Hantera RSS-flöden</h2><div class="arrow">▼</div></div>
           <div class="acc-content">
@@ -592,7 +583,6 @@
   </main>
 </div>
 
-<!-- MODALER -->
 <div id="createUserModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
   <div class="login-card" style="position:relative;">
     <h1>SKAPA SPELARE</h1>
@@ -651,8 +641,8 @@
   let PRICE_PER_ROW = 1;
   let MATCHES = 13;
   let pendingMatch = null;
-  let openDetails = new Set(); // NY: Sparar vilka "Visa alla tips" som är öppna
-  let matchVotesCache = {}; // Sparar siffrorna så de inte blinkar
+  let openDetails = new Set();
+  let matchVotesCache = {};
   
   let isDragging = false, startIdx = null, endIdx = null;
 
@@ -814,7 +804,6 @@
     location.reload();
   }
 
-  // LADDA RUNDA & MATCHER
   async function loadRound() {
     const { data: rounds } = await supabaseClient.from('rounds').select('*').order('created_at', { ascending: false }).limit(1);
     if (rounds && rounds.length > 0) {
@@ -855,8 +844,7 @@
     updateAdminLiveStatusText();
   }
 
-  // RENDERA KUPONG
-   function renderMatches() {
+  function renderMatches() {
     const $grid = document.getElementById('matchGrid');
     $grid.innerHTML = '';
     $grid.classList.toggle('placed', isPublished);
@@ -916,6 +904,7 @@
     updateLiveStats();
     updateAdminBars();
   }
+
   function fitNotes() {
     const grid = document.getElementById('matchGrid');
     const note = document.getElementById('notesCard');
@@ -945,7 +934,6 @@
     renderMatches();
   };
 
-  // BERÄKNA KOMBINATIONER
   const allValidCombos = [];
   for (let h = 0; h <= MATCHES; h++){
     for (let v = 0; v <= MATCHES - h; v++){
@@ -1071,9 +1059,8 @@
       } 
   });
 
-async function publishPicks() {
+  async function publishPicks() {
     if (!currentRoundId) { alert('Kupongen är inte sparad i databasen än.'); return; }
-    
     const newPublishedState = !isPublished; 
     const picks = state.matches.map(m => Array.isArray(m.signs) ? m.signs : []);
     const locked = {};
@@ -1083,10 +1070,7 @@ async function publishPicks() {
     btn.disabled = true;
     
     const { error } = await supabaseClient.rpc('admin_publish_picks', {
-        p_round_id: currentRoundId, 
-        p_live_started: newPublishedState, 
-        p_admin_picks: picks, 
-        p_admin_locked: locked
+        p_round_id: currentRoundId, p_live_started: newPublishedState, p_admin_picks: picks, p_admin_locked: locked
     });
     
     btn.disabled = false;
@@ -1095,9 +1079,8 @@ async function publishPicks() {
     isPublished = newPublishedState;
     renderMatches(); 
     updateAdminLiveStatusText();
-}
+  }
 
-  // LIVE STATISTIK
   async function updateAdminBars() {
     try {
       if(!currentRoundId) return;
@@ -1121,9 +1104,10 @@ async function publishPicks() {
           }
         });
         if (matchVotes > 0) details.classList.add('has-tips'); else details.classList.remove('has-tips');
-                matchVotesCache[i] = matchVotes; // Spara siffran i minnet
+        matchVotesCache[i] = matchVotes;
         const summaryEl = details.querySelector('summary');
         if (summaryEl) summaryEl.textContent = `Visa alla tips (${matchVotes} inlämnade)`;
+        
         container.innerHTML = combos.map(c => {
           const count = matchCounts[c]; const pct = matchVotes > 0 ? Math.round((count / matchVotes) * 100) : 0; const isActive = count > 0 ? 'active' : '';
           return `<div class="stat-bar-row"><span class="stat-label ${isActive}">${c}</span><div class="stat-track"><div class="stat-fill" style="width:${pct}%"></div></div><span class="stat-count ${isActive}">${count}</span></div>`;
@@ -1132,7 +1116,6 @@ async function publishPicks() {
     } catch (error) { console.error(error); }
   }
 
-  // LIVE & CHATT
   function updateAdminLiveStatusText() {
     const el = document.getElementById('adminLiveStatusText');
     if (!el) return;
@@ -1244,7 +1227,6 @@ async function publishPicks() {
     renderChat();
   }
 
-  // TABELLER & INSTÄLLNINGAR
   window.switchTab = function(tabId) {
     try {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1304,7 +1286,6 @@ async function publishPicks() {
     }).join('');
   }
 
-  // 100-MINUTERSBUBBLA
   async function checkTimeAlerts() {
     const { data: live } = await supabaseClient.from('live_scores').select('*');
     if (!live) return;
@@ -1360,7 +1341,6 @@ async function publishPicks() {
     loadUsers();
   };
 
-  // FREEMARKET
   function selectOutcome(v) {
     document.getElementById('fm-outcome').value = v;
     const by = document.getElementById('fm-btn-yes');
@@ -1579,7 +1559,6 @@ async function publishPicks() {
     loadMyActiveMatches();
   };
 
-  // RSS & ANVÄNDARE
   window.showCreateUser = function() { document.getElementById('createUserModal').style.display = 'flex'; };
   window.closeCreateUser = function(e) { if (e) e.preventDefault(); document.getElementById('createUserModal').style.display = 'none'; };
 
@@ -1628,7 +1607,7 @@ async function publishPicks() {
     loadRssFeeds(); fetchRSS();
   };
 
-       async function fetchRSS() {
+  async function fetchRSS() {
     if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return;
     try {
       const { data: feeds } = await supabaseClient.from('rss_feeds').select('*');
@@ -1651,7 +1630,12 @@ async function publishPicks() {
     } catch (e) {}
   }
 
-  // SYSTEMTABELL
+  document.getElementById('rssPauseBtn').addEventListener('click', function () {
+    const t = document.getElementById('rssFeed');
+    const paused = t.classList.toggle('paused');
+    this.textContent = paused ? 'Fortsätt' : 'Pausa';
+  });
+
   function renderSystemTable() {
     const $sysBody = document.getElementById('system-table-body');
     if(!$sysBody) return;
@@ -1701,7 +1685,6 @@ async function publishPicks() {
     };
   }
 
-  // NEDRÄKNING
   function startClock() {
     if (timerInterval) clearInterval(timerInterval);
     const cd = document.getElementById('countdown');
