@@ -43,7 +43,7 @@
   .btn-logout:hover { color: var(--text); border-color: rgba(232,193,90,0.35); }
 
   .rss-bar {background: #0b1118;border-bottom: 1px solid var(--border);padding: 8px 20px;display: flex;align-items: center;gap: 15px;overflow: hidden;flex-shrink:0;}
-  .rss-badge {background: var(--red);color: #fff;font-size: 10px;font-weight: 800;padding: 2px 6px;border-radius: 4px;white-space: nowrap; letter-spacing: 0.5px; flex-shrink: 0;}
+  .rss-badge {background: var(--red);color: #fff;font-size: 10px;font-weight: 800;padding: 2px 6px;border-radius: 4px;white-space: nowrap;letter-spacing: 0.5px;flex-shrink: 0;}
   .rss-marquee {overflow: hidden;width: 100%;display: flex;}
   .rss-ticker {display: flex;white-space: nowrap;animation: marquee 120s linear infinite; will-change: transform;}
   .rss-ticker:hover {animation-play-state: paused;}
@@ -68,7 +68,6 @@
   
   .panel{background:linear-gradient(180deg,rgba(19,26,38,0.92),rgba(15,20,29,0.96));border:1px solid var(--border);border-radius:14px;overflow: hidden; display: flex; flex-direction: column; flex: 1 0 auto; margin-bottom: 16px;}
   
-  /* KUPONG LAYOUT */
   #tab-kupong { gap: 0; height: 100%; }
   
   .top-single-row { display: flex; align-items: center; padding: 16px 22px; gap: 24px; border-bottom: 1px solid var(--border-soft); min-height: 80px; flex-wrap: wrap; flex-shrink: 0;}
@@ -99,7 +98,6 @@
   .match.halv { border-color: rgba(143,199,255,0.45); box-shadow: 0 0 0 1px rgba(143,199,255,0.12); }
   .match.hel { border-color: rgba(196,160,255,0.5); box-shadow: 0 0 0 1px rgba(196,160,255,0.14); }
   
-  /* MARKERINGSFUNKTIONEN */
   .match.marked { background: #3d3420; border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
   .match.drag-highlight { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; background: #1b2332; }
   .match.locked-highlight { background: linear-gradient(rgba(51,224,138,0.10), rgba(51,224,138,0.10)), var(--panel2); border-color: var(--green); box-shadow: 0 0 0 1px var(--green) inset, 0 0 14px rgba(51,224,138,0.25); }
@@ -115,7 +113,7 @@
   .match-grid.placed .signs, .match-grid.placed .teams { opacity: 0.7; }
   .match-grid.placed .team-input { pointer-events: none; }
   
-  .match-no{font-size:10px;font-weight:700;color:var(--gold)}
+  .match-no{font-size:10px;font-weight:700;color:var(--muted);}
   .match-actions{display:flex;gap:2px}
   .btn-move{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:10px;padding:1px 3px;}
   .match-tag{font-size:8px;font-weight:700;padding:1px 4px;border-radius:999px;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.05);}
@@ -143,7 +141,6 @@
   .notes-card { background: var(--panel2); border: 1px dashed var(--border); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 6px; min-height: 150px; }
   .notes-card textarea { flex: 1; width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 8px; resize: none; outline: none; font-family: inherit; font-size: 12px; }
 
-  /* SYSTEMTABELL DESIGN */
   .accordion-container { width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; flex-shrink: 0; }
   .accordion-header { padding: 16px 22px; background: var(--panel2); border-bottom: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;}
   .accordion-header h2 { font-size: 15px; font-weight: 700; margin: 0;}
@@ -184,7 +181,6 @@
   .sys-table tbody tr.selected td { background-color: rgba(232,193,90,0.15) !important; color: var(--yellow) !important; border-bottom-color: var(--yellow) !important; font-weight: 800; }
   .sys-table tbody tr.selected td.sticky-col { background-color: #2b271a !important; color: var(--yellow) !important; }
 
-  /* LIVE OCH CHATT */
   .live-layout { display: grid; grid-template-columns: 1fr 340px; gap: 16px; width: 100%; height: 100%; overflow: hidden; }
   .live-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; overflow: hidden; }
   .live-header { display:flex; justify-content:space-between; margin-bottom:12px; border-bottom: 1px solid var(--border-soft); padding-bottom: 8px;}
@@ -229,7 +225,6 @@
   .chat-input input { flex: 1; padding: 10px 12px; border-radius: 6px; background: var(--panel); border: 1px solid var(--border); color: var(--text); font-size: 12px; outline: none; }
   .chat-input button { padding: 10px 16px; border-radius: 6px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #1a1206; font-weight: 800; font-size: 12px; cursor: pointer; }
 
-  /* FREEMARKET */
   .fm-layout { display: grid; grid-template-columns: 340px 1fr; gap: 16px; padding: 16px; align-items: start; }
   .fm-form { background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; height: fit-content; }
   .fm-form h3 { font-size: 14px; color: var(--gold); margin-bottom: 12px; }
@@ -257,7 +252,6 @@
   .fm-match-btn:hover { background:rgba(232,193,90,0.25); }
   .fm-empty { color:var(--muted); font-size:13px; text-align:center; padding:24px; grid-column:1/-1; }
 
-  /* ACCORDIONS (INSTÄLLNINGAR) */
   .accordion{background:linear-gradient(180deg,rgba(19,26,38,0.92),rgba(15,20,29,0.96));border:1px solid var(--border);border-radius:14px;overflow: hidden;}
   .acc-content{display:none;padding:22px;}
   .accordion.open .acc-content{display:block;}
@@ -285,6 +279,14 @@
   .custom-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--panel); border: 1px solid var(--gold); color: var(--text); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5); opacity: 0; transition: all 0.3s; z-index: 99999; pointer-events: none; }
   .custom-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  .game-tab {
+    background: transparent; border: 1px solid transparent; color: var(--muted);
+    font-family: inherit; font-size: 12px; font-weight: 700; padding: 6px 12px;
+    border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.2s;
+  }
+  .game-tab:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .game-tab.active { color: var(--gold); background: rgba(232,193,90,0.1); border-color: rgba(232,193,90,0.3); }
+
   @media (max-width: 768px) {
     body { height: auto; overflow-y: auto; }
     #app { height: auto; min-height: 100vh; overflow: visible; }
@@ -298,21 +300,10 @@
     .top-single-row { flex-wrap: wrap; gap: 12px; padding: 12px; }
     .top-single-row h1 { width: 100%; margin-bottom: 8px; }
     .group-left, .group-right { flex-wrap: wrap; width: 100%; gap: 12px; border: none; padding: 0; }
-    
     #matchGrid { grid-template-columns: 1fr !important; }
     .notes-card { grid-column: 1 / -1 !important; width: 100% !important; margin-top: 10px; }
-    
-    /* GÖR ALLA TABELLER SCROLLBARA I SIDLED PÅ MOBILEN */
-    .table-wrapper, .table-wrap, .sys-table-wrap { 
-        width: 100% !important; 
-        overflow-x: auto !important; 
-        -webkit-overflow-scrolling: touch; 
-
-    }
-    .admin-table { 
-        min-width: 500px !important; 
-    }
-    
+    .table-wrapper, .table-wrap, .sys-table-wrap { width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+    .admin-table { min-width: 500px !important; }
     .rss-bar { display: none !important; }
     .btn-move.btn-lock { padding: 8px 10px; }
   }
@@ -368,6 +359,12 @@
   <main class="main">
     
     <div id="tab-kupong" class="tab-content active">
+      <div style="display: flex; gap: 8px; margin-bottom: 12px; width: 100%;">
+        <button type="button" class="game-tab active" id="admin-tab-europatipset" data-game="europatipset" onclick="switchAdminGameType('europatipset')">EUROPATIPSET</button>
+        <button type="button" class="game-tab" id="admin-tab-stryktipset" data-game="stryktipset" onclick="switchAdminGameType('stryktipset')">STRYKTIPSET</button>
+        <button type="button" class="game-tab" id="admin-tab-topptipset" data-game="topptipset" onclick="switchAdminGameType('topptipset')">TOPPTIPSET</button>
+      </div>
+
       <div class="panel">
         <div class="top-single-row">
           <h1>Kupong</h1>
@@ -391,8 +388,8 @@
               <span class="data-label">Din Kombination</span>
               <span id="liveCombo" class="data-value">–</span>
             </div>
-            <button class="btn-primary" id="placeBtn" type="button" onclick="publishPicks()">Placera spel</button>
-            <button class="btn-clear" id="clearBtn" type="button">Rensa</button>
+            <button class="btn-primary" id="placeBtn" type="button" onclick="publishPicks()" style="width: 132px;">Placera spel</button>
+            <button class="btn-clear" id="clearBtn" type="button" style="width: 90px;">Rensa</button>
           </div>
         </div>
         <div class="match-grid" id="matchGrid">
@@ -446,6 +443,12 @@
     </div>
 
     <div id="tab-playerview" class="tab-content">
+      <div style="display: flex; gap: 8px; margin-bottom: 12px; width: 100%;">
+        <button type="button" class="game-tab active" id="live-tab-europatipset" onclick="switchLiveGameType('europatipset')">EUROPATIPSET</button>
+        <button type="button" class="game-tab" id="live-tab-stryktipset" onclick="switchLiveGameType('stryktipset')">STRYKTIPSET</button>
+        <button type="button" class="game-tab" id="live-tab-topptipset" onclick="switchLiveGameType('topptipset')">TOPPTIPSET</button>
+      </div>
+
       <div class="live-layout">
         <div class="live-panel">
           <div class="live-header"><h2>Livevy - Lees Spel</h2><span id="adminLiveStatusText">ÖPPEN</span></div>
@@ -623,7 +626,6 @@
 </div>
 
 <div class="custom-toast" id="custom-toast"></div>
-
 <script>
   let supabaseClient = null;
   let currentUser = null;
@@ -643,6 +645,7 @@
   let pendingMatch = null;
   let openDetails = new Set();
   let matchVotesCache = {};
+  let currentGameType = 'europatipset';
   
   let isDragging = false, startIdx = null, endIdx = null;
 
@@ -804,15 +807,53 @@
     location.reload();
   }
 
+  window.switchAdminGameType = function(type) {
+    currentGameType = type;
+    document.querySelectorAll('#tab-kupong .game-tab').forEach(btn => {
+      if (btn.dataset.game === type) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+    document.querySelectorAll('#tab-playerview .game-tab').forEach(btn => {
+      if (btn.id === 'live-tab-' + type) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+    loadRound().then(() => startClock());
+  };
+
+  window.switchLiveGameType = function(type) {
+    currentGameType = type;
+    document.querySelectorAll('#tab-kupong .game-tab').forEach(btn => {
+      if (btn.dataset.game === type) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+    document.querySelectorAll('#tab-playerview .game-tab').forEach(btn => {
+      if (btn.id === 'live-tab-' + type) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+    loadRound().then(() => {
+      renderAdminLiveView();
+      startClock();
+    });
+  };
+
   async function loadRound() {
-    const { data: rounds } = await supabaseClient.from('rounds').select('*').order('created_at', { ascending: false }).limit(1);
+    const { data: rounds } = await supabaseClient.from('rounds').select('*').eq('game_type', currentGameType).order('created_at', { ascending: false }).limit(1);
     if (rounds && rounds.length > 0) {
       currentRoundId = rounds[0].id;
       currentDeadline = rounds[0].deadline;
       isPublished = !!rounds[0].live_started;
       
       const { data: ms } = await supabaseClient.from('matches').select('*').eq('round_id', currentRoundId).order('match_order');
-      if (ms && ms.length === 13) {
+      const { data: live } = await supabaseClient.from('live_scores').select('*').eq('game_type', currentGameType);
+      
+      liveScores = {};
+      if (live) live.forEach(m => { liveScores[m.match_order - 1] = m; });
+      
+      MATCHES = (ms && ms.length > 0) ? ms.length : 13;
+      state.matches = Array.from({ length: MATCHES }, () => ({ home: '', away: '', signs: [] }));
+      lockedIndices.clear();
+      
+      if (ms && ms.length > 0) {
         ms.forEach((m, i) => {
           state.matches[i].home = m.home;
           state.matches[i].away = m.away;
@@ -823,12 +864,13 @@
         const picks = rounds[0].admin_picks;
         if (Array.isArray(picks)) {
           picks.forEach((s, i) => { 
-            if (state.matches[i]) {
-              state.matches[i].signs = Array.isArray(s) ? s : [];
-            } 
+            if (state.matches[i] && Array.isArray(s)) {
+              state.matches[i].signs = s;
+            }
           });
         }
       }
+      
       if (rounds[0].admin_locked) {
         const locked = rounds[0].admin_locked;
         Object.keys(locked).forEach(k => {
@@ -839,6 +881,14 @@
           }
         });
       }
+    } else {
+      currentRoundId = null;
+      currentDeadline = null;
+      isPublished = false;
+      MATCHES = 13;
+      state.matches = Array.from({ length: 13 }, () => ({ home: '', away: '', signs: [] }));
+      liveScores = {};
+      lockedIndices.clear();
     }
     renderMatches();
     updateAdminLiveStatusText();
@@ -867,12 +917,17 @@
       const n = signs.length; 
       const kind = n === 3 ? 'hel' : n === 2 ? 'halv' : n === 1 ? 'spik' : '';
       const el = document.createElement('div'); 
+      const lv = liveScores[i];
       
       el.className = 'match' + (n === 2 ? ' halv' : n === 3 ? ' hel' : '') + (lockedIndices.has(i) ? ' locked-highlight' : '') + (markedIndices.has(i) ? ' marked' : '');
       el.dataset.idx = i;
       
       el.innerHTML = `
-        <div class="match-header"><span class="match-no">M${i+1}</span><span class="match-tag ${kind}">${kind ? kind.toUpperCase() : ''}</span>
+        <div class="match-header">
+          <span class="match-no" style="color:var(--muted); font-size:10px;">
+            ${(lv && lv.datetime) ? new Date(lv.datetime).toLocaleString('sv-SE', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'M'+(i+1)}
+          </span>
+          <span class="match-tag ${kind}">${kind ? kind.toUpperCase() : ''}</span>
           <div class="match-actions"><button type="button" class="btn-move btn-lock ${lockedIndices.has(i) ? 'on' : ''}" title="${lockedIndices.has(i) ? 'Lås upp match' : 'Lås match'}" onclick="toggleCardLock(event, ${i})">${lockedIndices.has(i) ? LOCK_SVG_CLOSED : LOCK_SVG_OPEN}</button></div>
         </div>
         <div class="teams"><input type="text" class="team-input" placeholder="Hemmalag" value="${esc(m.home)}" oninput="updateTeam(${i}, 'home', this.value)"><input type="text" class="team-input" placeholder="Bortalag" value="${esc(m.away)}" oninput="updateTeam(${i}, 'away', this.value)"></div>
@@ -918,6 +973,30 @@
   window.addEventListener('resize', fitNotes);
 
   window.updateTeam = function(idx, field, val) { state.matches[idx][field] = val; };
+  
+  let saveTimeout = null;
+  async function saveDraft() {
+    if (!currentRoundId) return;
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(async () => {
+        const picks = state.matches.map(m => Array.isArray(m.signs) ? m.signs : []);
+        const locked = {};
+        lockedIndices.forEach(i => { locked[i] = state.matches[i].signs || []; });
+        
+        const { error } = await supabaseClient.rpc('admin_publish_picks', {
+            p_round_id: currentRoundId, 
+            p_live_started: isPublished, 
+            p_admin_picks: picks, 
+            p_admin_locked: locked
+        });
+        
+        if (error) {
+            alert('FEL VID SPARNING: ' + error.message);
+            console.error(error);
+        }
+    }, 1000);
+  }
+
   window.toggleSign = function(event, idx, sign) { 
     if (event) event.stopPropagation(); 
     if (isPublished || lockedIndices.has(idx)) return; 
@@ -926,17 +1005,20 @@
     if (m.signs.includes(sign)) { m.signs = m.signs.filter(s => s !== sign); } 
     else { m.signs.push(sign); m.signs.sort((a, b) => ['1', 'X', '2'].indexOf(a) - ['1', 'X', '2'].indexOf(b)); } 
     renderMatches(); 
+    saveDraft();
   };
+  
   window.toggleCardLock = function(e, idx) {
     if (e) e.stopPropagation();
     if (isPublished) return;
     if (lockedIndices.has(idx)) lockedIndices.delete(idx); else lockedIndices.add(idx);
     renderMatches();
+    saveDraft();
   };
 
   const allValidCombos = [];
-  for (let h = 0; h <= MATCHES; h++){
-    for (let v = 0; v <= MATCHES - h; v++){
+  for (let h = 0; h <= 13; h++){
+    for (let v = 0; v <= 13 - h; v++){
       const rows = Math.pow(3, h) * Math.pow(2, v);
       allValidCombos.push({ hela: h, halva: v, rows, amount: rows * PRICE_PER_ROW });
     }
@@ -1056,6 +1138,7 @@
           document.getElementById('comboSub').innerHTML = ''; 
           document.getElementById('comboSub').classList.remove('active'); 
           renderMatches(); 
+          saveDraft();
       } 
   });
 
@@ -1127,11 +1210,11 @@
     const grid = document.getElementById('adminLiveGrid'); 
     if(!grid) return; grid.innerHTML = '';
     
-    const { data: live } = await supabaseClient.from('live_scores').select('*');
+    const { data: live } = await supabaseClient.from('live_scores').select('*').eq('game_type', currentGameType);
     const scores = {};
     if (live) live.forEach(m => { scores[m.match_order - 1] = m; });
 
-    for (let i = 0; i < 13; i++) {
+    for (let i = 0; i < MATCHES; i++) {
       const m = state.matches[i] || { home: '', away: '', signs: [] };
       const lv = scores[i];
       const p = Array.isArray(m.signs) ? m.signs : [];
@@ -1159,10 +1242,12 @@
 
       let scoreHtml = '';
       if (lv) {
-          let hg = lv.home_goals, ag = lv.away_goals;
           const st = (lv.status || '').toLowerCase();
-          if ((st === 'ns' || st === 'pending') && (hg === null || hg === undefined)) { hg = 0; ag = 0; }
-          scoreHtml = `<div class="live-card-score ${isFinished ? 'green' : 'red'}"><span>${hg ?? '-'}</span><span>${ag ?? '-'}</span></div>`;
+          if (st !== 'ns' && st !== 'pending' && st !== '') {
+              let hg = lv.home_goals ?? '-';
+              let ag = lv.away_goals ?? '-';
+              scoreHtml = `<div class="live-card-score ${isFinished ? 'green' : 'red'}"><span>${hg}</span><span>${ag}</span></div>`;
+          }
       }
 
       let c1 = 'live-card-sign' + (p.includes('1') ? ' on' : '');
@@ -1181,7 +1266,12 @@
       el.className = cardClass;
 
       el.innerHTML = `
-        <div class="live-card-header"><span class="live-card-no">M${i+1}</span>${badgeHtml}</div>
+        <div class="live-card-header">
+          <span class="live-card-no" style="color:var(--muted); font-size:10px;">
+            ${(lv && lv.datetime) ? new Date(lv.datetime).toLocaleString('sv-SE', { month: 'short', day: 'numeric' }) : 'M'+(i+1)}
+          </span>
+          ${badgeHtml}
+        </div>
         <div class="live-card-content">
           <div class="live-card-teams"><span>${esc(m.home)}</span><span>${esc(m.away)}</span></div>
           ${scoreHtml}
@@ -1199,7 +1289,7 @@
         const tpl = getComputedStyle(grid).gridTemplateColumns;
         if (tpl && tpl !== 'none') {
             const cols = tpl.split(' ').filter(Boolean).length || 1;
-            const rem = 13 % cols;
+            const rem = MATCHES % cols;
             noteCard.style.gridColumn = 'span ' + (rem === 0 ? cols : cols - rem);
         }
     }, 10);
@@ -1287,7 +1377,7 @@
   }
 
   async function checkTimeAlerts() {
-    const { data: live } = await supabaseClient.from('live_scores').select('*');
+    const { data: live } = await supabaseClient.from('live_scores').select('*').eq('game_type', currentGameType);
     if (!live) return;
     const now = Date.now();
     const hasAlert = live.some(m => {

@@ -166,6 +166,14 @@
     .match-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
     .table-wrap { margin: 8px; }
   }
+  .game-tabs { display: flex; gap: 8px; }
+  .game-tab {
+    background: transparent; border: 1px solid transparent; color: var(--muted);
+    font-family: inherit; font-size: 12px; font-weight: 700; padding: 6px 12px;
+    border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.2s;
+  }
+  .game-tab:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .game-tab.active { color: var(--gold); background: rgba(232,193,90,0.1); border-color: rgba(232,193,90,0.3); }
 </style>
 </head>
 <body>
@@ -232,7 +240,17 @@
     <div class="left-content">
       
       <section class="panel" id="tipView" style="display:none;">
-        <div class="panel-head"><h2>Dina tips</h2><button class="btn-clear" onclick="clearMyCoupon()">Rensa</button></div>
+        <div class="panel-head">
+  <div style="display:flex; align-items:center; gap:16px;">
+    <h2>Dina tips</h2>
+    <div class="game-tabs" id="gameTabs">
+      <button type="button" class="game-tab active" data-game="europatipset" onclick="switchGameType('europatipset')">EUROPATIPSET</button>
+      <button type="button" class="game-tab" data-game="stryktipset" onclick="switchGameType('stryktipset')">STRYKTIPSET</button>
+      <button type="button" class="game-tab" data-game="topptipset" onclick="switchGameType('topptipset')">TOPPTIPSET</button>
+    </div>
+  </div>
+  <button class="btn-clear" onclick="clearMyCoupon()">Rensa</button>
+</div>
         <div class="match-grid" id="matchGrid"></div>
         <div class="submit-bar">
           <div class="submit-info" id="submitInfo">Ifyllda: <strong>0</strong> / 13</div>
@@ -400,9 +418,9 @@
     }
   };
 
-  async function fetchLiveScores() {
+    async function fetchLiveScores() {
       try {
-          const { data, error } = await supabaseClient.from('live_scores').select('*');
+          const { data, error } = await supabaseClient.from('live_scores').select('*').eq('game_type', window.currentGameType);
           if (!error && data) {
               liveScores = {};
               data.forEach(m => { liveScores[m.match_order - 1] = m; });
@@ -411,11 +429,12 @@
       } catch (e) { console.warn('Fel vid hämtning:', e); }
   }
 
-  async function refreshLee() {
+    async function refreshLee() {
     try {
-      const { data } = await supabaseClient.from('rounds').select('*').order('created_at', { ascending: false }).limit(1);
+      const { data } = await supabaseClient.from('rounds').select('*').eq('game_type', window.currentGameType).order('created_at', { ascending: false }).limit(1);
       if (data && data[0]) {
-        const before = JSON.stringify(getLee()); applyRound(data[0]);
+        const before = JSON.stringify(getLee()); 
+        applyRound(data[0]);
         if (JSON.stringify(getLee()) !== before) renderMatches();
       }
     } catch (e) {}
@@ -461,6 +480,22 @@
     setInterval(fetchLiveScores, 300000);
     updateBalanceUI();
   }
+  // --- SPELTYP (EUROPATIPSET / STRYKTIPSET / TOPPTIPSET) ---
+  window.currentGameType = 'europatipset';
+
+    window.switchGameType = function(type) {
+    window.currentGameType = type;
+    liveScores = {}; // Rensa gamla resultat direkt!
+    
+    // Byt färg på knapparna
+    document.querySelectorAll('.game-tab').forEach(btn => {
+      if (btn.dataset.game === type) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+
+    // Vänta med att hämta resultat tills matcherna är laddade
+    loadState().then(() => fetchLiveScores());
+  };
 
   async function login() {
     const email = document.getElementById('loginUser').value.trim();
@@ -521,27 +556,55 @@
       if (data && el) el.textContent = data.balance + ' kr';
   }
 
-  async function loadState() {
+   async function loadState() {
     try {
-      const { data: rounds } = await supabaseClient.from('rounds').select('*').order('created_at', { ascending: false }).limit(1);
+      const { data: rounds } = await supabaseClient.from('rounds').select('*').eq('game_type', window.currentGameType).order('created_at', { ascending: false }).limit(1);
+      
       if (rounds && rounds.length > 0) {
-        currentRoundId = rounds[0].id; applyRound(rounds[0]);
-        if (rounds[0].deadline) deadline = new Date(rounds[0].deadline).getTime();
+        currentRoundId = rounds[0].id; 
+        applyRound(rounds[0]);
         
+        if (rounds[0].deadline) deadline = new Date(rounds[0].deadline).getTime();
+        else deadline = 0;
+
         const { data: matches } = await supabaseClient.from('matches').select('*').eq('round_id', currentRoundId).order('match_order');
-        if (matches && matches.length === 13) MATCHES = matches.map(m => ({ home: m.home, away: m.away }));
+        
+        if (matches && matches.length > 0) {
+            MATCHES = matches.map(m => ({ home: m.home, away: m.away }));
+        } else {
+            MATCHES = [...FALLBACK_MATCHES];
+        }
+        
+        const expectedLength = MATCHES.length;
+        
+        // Skapa en helt tom picks-array för det här spelet
+        picks = Array(expectedLength).fill(null).map(() => []);
+        isSubmitted = false;
 
         const { data: suggestion } = await supabaseClient.from('suggestions').select('*').eq('player_id', currentUserId).eq('round_id', currentRoundId).maybeSingle();
-        if (suggestion) { picks = suggestion.picks || Array(13).fill(null).map(() => []); isSubmitted = suggestion.submitted || false; }
+        
+        // Om det finns sparade tips, fyll på dem i arrayen
+        if (suggestion && suggestion.picks) { 
+            for (let i = 0; i < Math.min(suggestion.picks.length, expectedLength); i++) {
+                picks[i] = suggestion.picks[i] || [];
+            }
+            isSubmitted = suggestion.submitted || false; 
+        }
+      } else {
+        currentRoundId = null;
+        MATCHES = [...FALLBACK_MATCHES];
+        picks = Array(MATCHES.length).fill(null).map(() => []);
+        isSubmitted = false;
       }
+      
       renderMatches();
+      startCountdown();
     } catch (e) { console.error(e); }
   }
 
-  function renderMatches() {
+      function renderMatches() {
     const grid = document.getElementById('matchGrid');
     
-    // Spara var markören är om man skriver i anteckningsrutan
     const activeEl = document.activeElement;
     const isNotesFocused = activeEl && activeEl.id === 'notesArea';
     const selStart = isNotesFocused ? activeEl.selectionStart : 0;
@@ -555,11 +618,16 @@
       const p = picks[i] || [];
       let currentWin = null, isFinished = false;
 
-      if (live && live.home_goals != null && live.away_goals != null) {
-          if (live.home_goals > live.away_goals) currentWin = '1';
-          else if (live.home_goals < live.away_goals) currentWin = '2';
-          else currentWin = 'X';
+      if (live) {
           const st = (live.status || '').toLowerCase();
+          const isNotStarted = (st === 'ns' || st === 'pending' || !st);
+          
+          // Räkna bara ut vinnare om matchen har startat
+          if (!isNotStarted && live.home_goals != null && live.away_goals != null) {
+              if (live.home_goals > live.away_goals) currentWin = '1';
+              else if (live.home_goals < live.away_goals) currentWin = '2';
+              else currentWin = 'X';
+          }
           isFinished = (st === 'ft' || st === 'settled' || st === 'ended');
       }
 
@@ -603,12 +671,19 @@
       if (live) {
           let hg = live.home_goals, ag = live.away_goals;
           const st = (live.status || '').toLowerCase();
-          if ((st === 'ns' || st === 'pending') && (hg === null || hg === undefined)) { hg = 0; ag = 0; }
-          scoreHtml = `<div class="score-col ${isFinished ? 'green' : 'red'}"><span>${hg ?? '-'}</span><span>${ag ?? '-'}</span></div>`;
+          const isNotStarted = (st === 'ns' || st === 'pending' || !st);
+          
+          // Visa bara resultat om matchen har startat
+          if (!isNotStarted && hg != null && ag != null) {
+              scoreHtml = `<div class="score-col ${isFinished ? 'green' : 'red'}"><span>${hg}</span><span>${ag}</span></div>`;
+          }
       }
 
       el.innerHTML = `
-        <div class="match-header"><span class="match-no">M${i+1}</span>${badgeHtml}</div>
+        <div class="match-header">
+          <span class="match-no" style="color:var(--muted); font-size:10px;">${(live && live.datetime) ? new Date(live.datetime).toLocaleString('sv-SE', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'M'+(i+1)}</span>
+          ${badgeHtml}
+        </div>
         <div class="match-content">
           <div class="teams"><span>${esc(m.home)}</span><span>${esc(m.away)}</span></div>
           ${scoreHtml}
@@ -627,7 +702,6 @@
     grid.appendChild(noteCard);
     document.getElementById('notesArea').addEventListener('input', (e) => localStorage.setItem('lee_player_notes', e.target.value));
 
-    // Sätt tillbaka markören om man skrev
     if (isNotesFocused) {
       const newNotes = document.getElementById('notesArea');
       if (newNotes) {
@@ -639,7 +713,6 @@
     fitNotes();
     updateSubmitInfo();
   }
-
   function fitNotes() {
     const grid = document.getElementById('matchGrid');
     const note = grid && grid.querySelector('.notes-card');
@@ -659,19 +732,27 @@
     renderMatches();
   }
 
-  function toggleSign(idx, sign) {
+   function toggleSign(idx, sign) {
     if (isSubmitted) return;
     let p = picks[idx] || [];
-    if (p.includes(sign)) { if (p.length > 1) p = p.filter(s => s !== sign); }
-    else { p.push(sign); p.sort((a,b) => ['1','X','2'].indexOf(a) - ['1','X','2'].indexOf(b)); }
-    picks[idx] = p; renderMatches(); saveState();
+    if (p.includes(sign)) { 
+        // Tar bort tecknet helt, även om det är det sista
+        p = p.filter(s => s !== sign); 
+    } else { 
+        p.push(sign); 
+        p.sort((a,b) => ['1','X','2'].indexOf(a) - ['1','X','2'].indexOf(b)); 
+    }
+    picks[idx] = p; 
+    renderMatches(); 
+    saveState();
   }
 
-  function updateSubmitInfo() {
+    function updateSubmitInfo() {
     const filled = picks.filter(p => p && p.length > 0).length;
-    document.getElementById('submitInfo').innerHTML = isSubmitted ? '<strong style="color:var(--green)">Inlämnat!</strong>' : `Ifyllda: <strong>${filled}</strong> / 13`;
+    document.getElementById('submitInfo').innerHTML = isSubmitted ? '<strong style="color:var(--green)">Inlämnat!</strong>' : `Ifyllda: <strong>${filled}</strong> / ${MATCHES.length}`;
     document.getElementById('submitBtn').style.display = isSubmitted ? 'none' : 'block';
     document.getElementById('submitBtn').disabled = filled === 0 || (deadline > 0 && Date.now() > deadline);
+
   }
 
   async function saveState() {
