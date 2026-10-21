@@ -1628,7 +1628,7 @@ async function publishPicks() {
     loadRssFeeds(); fetchRSS();
   };
 
-  async function fetchRSS() {
+       async function fetchRSS() {
     if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return;
     try {
       const { data: feeds } = await supabaseClient.from('rss_feeds').select('*');
@@ -1647,18 +1647,9 @@ async function publishPicks() {
       if (allHtml) {
         document.getElementById('rssGroup1').innerHTML = allHtml;
         document.getElementById('rssGroup2').innerHTML = allHtml;
-      } else {
-        document.getElementById('rssGroup1').innerHTML = '<span class="rss-item-link">Inga nyheter         	tillgängliga just nu.</span>';
-        document.getElementById('rssGroup2').innerHTML = '';
       }
     } catch (e) {}
   }
-
-  document.getElementById('rssPauseBtn').addEventListener('click', function () {
-    const t = document.getElementById('rssFeed');
-    const paused = t.classList.toggle('paused');
-    this.textContent = paused ? 'Fortsätt' : 'Pausa';
-  });
 
   // SYSTEMTABELL
   function renderSystemTable() {
