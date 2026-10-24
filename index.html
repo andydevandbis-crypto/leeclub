@@ -364,16 +364,9 @@
         <div class="panel-head"><h2>Highscore</h2></div>
         <div style="padding: 24px; overflow-y: auto;">
           <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th style="text-align: left;">Rank</th>
-                  <th style="text-align: left;">Spelare</th>
-                  <th style="text-align: right;">Vinst (7 dagar)</th>
-                  <th style="text-align: right;">Antal spel</th>
-                </tr>
-              </thead>
-              <tbody id="highscoreBody"><tr><td colspan="4" style="text-align:center; color:var(--muted);">Laddar...</td></tr></tbody>
+            <table class="admin-table" style="width:100%;">
+              <thead><tr><th>Rank</th><th>Spelare</th><th style="text-align:right">Saldo</th><th style="text-align:right">Vinst (kr)</th><th style="text-align:right">Insats (kr)</th><th style="text-align:right">Antal Spel</th></tr></thead>
+              <tbody id="highscoreBody"><tr><td colspan="6" style="text-align:center; color:var(--muted);">Laddar...</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -1116,34 +1109,58 @@ async function loadMyMatches() {
   }
 
       async function loadHighscore() {
-      const body = document.getElementById('highscoreBody');
-      body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--muted);">Laddar...</td></tr>';
-      
-      const { data, error } = await supabaseClient.rpc('get_weekly_profit', { p_limit: 10 });
-      
-      if (error) { 
-          body.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--red);">Kunde inte hämta highscore.</td></tr>`; 
-          return; 
-      }
-      if (!data || !data.length) { 
-          body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--muted);">Inga spelare ännu.</td></tr>'; 
-          return; 
-      }
-      
-      body.innerHTML = data.map((p, i) => {
-          const profit = Number(p.profit) || 0;
-          const profitClass = profit > 0 ? 'var(--green)' : (profit < 0 ? 'var(--red)' : 'var(--muted)');
-          const profitSign = profit > 0 ? '+' : '';
-          return `
-          <tr style="border-bottom: 1px solid var(--border-soft);">
-            <td style="padding: 16px 12px; font-weight: 800; color: ${i === 0 ? 'var(--gold)' : 'var(--text)'};">#${i+1}</td>
-            <td style="padding: 16px 12px;">${esc(p.display_name || p.username || 'Okänd')}</td>
-            <td style="padding: 16px 12px; color: ${profitClass}; font-weight: 800; text-align: right;">${profitSign}${profit.toFixed(2)} kr</td>
-            <td style="padding: 16px 12px; color: var(--muted); font-weight: 600; text-align: right;">${p.total_trades}</td>
-          </tr>`;
-      }).join('');
-  }
-  async function loadHistory() {
+    const body = document.getElementById('highscoreBody');
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Laddar...</td></tr>';
+    
+    const { data: profiles } = await supabaseClient.from('profiles').select('id, display_name, username, balance').limit(20);
+    if (!profiles) return;
+    
+    const { data: markets } = await supabaseClient.from('freemarket_markets').select('id, status').neq('status', 'open');
+    const { data: trades } = await supabaseClient.from('freemarket_trades').select('*');
+
+    const calculatedData = profiles.map(p => {
+        const pTrades = trades ? trades.filter(t => t.buyer_id === p.id || t.seller_id === p.id) : [];
+        let totalInvested = 0, totalReturned = 0;
+        
+        pTrades.forEach(t => {
+            const market = markets ? markets.find(m => m.id === t.market_id) : null;
+            if (market && market.status.startsWith('resolved')) {
+                const winOutcome = market.status === 'resolved_yes' ? 'yes' : 'no';
+                const sellerWon = t.seller_outcome === winOutcome;
+                const buyerWon = !sellerWon;
+                const won = (t.buyer_id === p.id) ? buyerWon : sellerWon;
+                
+                if (won) { totalReturned += (Number(t.amount) * Number(t.odds)); }
+                totalInvested += Number(t.amount);
+            }
+        });
+
+        const total = pTrades.length;
+        const netProfit = totalReturned - totalInvested;
+        
+        return { ...p, total, netProfit, totalInvested };
+    });
+
+    calculatedData.sort((a, b) => b.netProfit - a.netProfit);
+
+    body.innerHTML = calculatedData.map((p, i) => {
+        const roundedProfit = Math.round(p.netProfit);
+        const profitStr = roundedProfit > 0 ? '+' + roundedProfit + ' kr' : roundedProfit + ' kr';
+        const profitColor = roundedProfit > 0 ? 'var(--green)' : roundedProfit < 0 ? 'var(--red)' : 'var(--muted)';
+
+        return `
+        <tr>
+            <td style="color:${i === 0 ? 'var(--gold)' : 'inherit'};font-weight:800">#${i + 1}</td>
+            <td>${esc(p.display_name || p.username || 'Okänd')}</td>
+            <td style="text-align:right;color:var(--green);font-weight:800">${p.balance} kr</td>
+            <td style="text-align:right;color:${profitColor};font-weight:800">${profitStr}</td>
+            <td style="text-align:right">${p.totalInvested} kr</td>
+            <td style="text-align:right">${p.total}</td>
+        </tr>`;
+    }).join('');
+}
+
+async function loadHistory() {
       const body = document.getElementById('historikBody');
       body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--muted);">Laddar...</td></tr>';
       const { data, error } = await supabaseClient.rpc('get_my_history');
