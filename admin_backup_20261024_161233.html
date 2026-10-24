@@ -43,7 +43,7 @@
   .btn-logout:hover { color: var(--text); border-color: rgba(232,193,90,0.35); }
 
   .rss-bar {background: #0b1118;border-bottom: 1px solid var(--border);padding: 8px 20px;display: flex;align-items: center;gap: 15px;overflow: hidden;flex-shrink:0;}
-  .rss-badge {background: var(--red);color: #fff;font-size: 10px;font-weight: 800;padding: 2px 6px;border-radius: 4px;white-space: nowrap; letter-spacing: 0.5px; flex-shrink: 0;}
+  .rss-badge {background: var(--red);color: #fff;font-size: 10px;font-weight: 800;padding: 2px 6px;border-radius: 4px;white-space: nowrap;letter-spacing: 0.5px;flex-shrink: 0;}
   .rss-marquee {overflow: hidden;width: 100%;display: flex;}
   .rss-ticker {display: flex;white-space: nowrap;animation: marquee 120s linear infinite; will-change: transform;}
   .rss-ticker:hover {animation-play-state: paused;}
@@ -390,7 +390,6 @@
             </div>
             <button class="btn-primary" id="placeBtn" type="button" onclick="publishPicks()" style="width: 132px;">Placera spel</button>
             <button class="btn-clear" id="clearBtn" type="button" style="width: 90px;">Rensa</button>
-            <span id="saveStatus" style="font-size: 12px; font-weight: bold; margin-left: 10px; min-width: 60px;"></span>
           </div>
         </div>
         <div class="match-grid" id="matchGrid">
@@ -793,6 +792,7 @@
       renderChat();
       if (chatInterval) clearInterval(chatInterval);
       chatInterval = setInterval(() => { if (!document.hidden) renderChat(); }, 4000);
+      setInterval(() => { if (!document.hidden) updateAdminBars(); }, 10000);
 
       if (alertInterval) clearInterval(alertInterval);
       checkTimeAlerts();
@@ -865,10 +865,13 @@
         const picks = rounds[0].admin_picks;
         if (Array.isArray(picks)) {
           picks.forEach((s, i) => { 
-            if (state.matches[i]) state.matches[i].signs = Array.isArray(s) ? s : [];
+            if (state.matches[i] && Array.isArray(s)) {
+              state.matches[i].signs = s;
+            }
           });
         }
       }
+      
       if (rounds[0].admin_locked) {
         const locked = rounds[0].admin_locked;
         Object.keys(locked).forEach(k => {
@@ -972,17 +975,27 @@
 
   window.updateTeam = function(idx, field, val) { state.matches[idx][field] = val; };
   
+  let saveTimeout = null;
   async function saveDraft() {
     if (!currentRoundId) return;
-    const picks = state.matches.map(m => Array.isArray(m.signs) ? m.signs : []);
-    const locked = {};
-    lockedIndices.forEach(i => { locked[i] = state.matches[i].signs || []; });
-    await supabaseClient.rpc('admin_publish_picks', {
-        p_round_id: currentRoundId, 
-        p_live_started: isPublished, 
-        p_admin_picks: picks, 
-        p_admin_locked: locked
-    });
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(async () => {
+        const picks = state.matches.map(m => Array.isArray(m.signs) ? m.signs : []);
+        const locked = {};
+        lockedIndices.forEach(i => { locked[i] = state.matches[i].signs || []; });
+        
+        const { error } = await supabaseClient.rpc('admin_publish_picks', {
+            p_round_id: currentRoundId, 
+            p_live_started: isPublished, 
+            p_admin_picks: picks, 
+            p_admin_locked: locked
+        });
+        
+        if (error) {
+            alert('FEL VID SPARNING: ' + error.message);
+            console.error(error);
+        }
+    }, 1000);
   }
 
   window.toggleSign = function(event, idx, sign) { 
@@ -1685,34 +1698,45 @@
     loadRssFeeds(); fetchRSS();
   };
 
-  async function fetchRSS() {
+    async function fetchRSS() {
     if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return;
     try {
       const { data: feeds } = await supabaseClient.from('rss_feeds').select('*');
       if (!feeds || feeds.length === 0) return;
+      
       const parts = await Promise.all(feeds.map(async f => {
         try {
-          const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(f.url));
-          const data = await res.json();
-          if (data.status === 'ok' && data.items) {
-            return data.items.slice(0, 3).map(item => `<a href="${esc(item.link)}" target="_blank" rel="noopener" class="rss-item-link">${esc(item.title)}</a>`).join('');
+          // Använder en proxy för att kringgå CORS
+          const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(f.url);
+          const res = await fetch(proxyUrl);
+          const text = await res.text();
+          
+          // Tolkar XML-datan
+          const parser = new DOMParser();
+          const xml = parser.parseFromString(text, "text/xml");
+          const items = xml.querySelectorAll("item");
+          
+          let html = '';
+          for (let i = 0; i < Math.min(items.length, 3); i++) {
+            const title = items[i].querySelector("title")?.textContent || '';
+            const link = items[i].querySelector("link")?.textContent || '#';
+            html += `<a href="${esc(link)}" target="_blank" rel="noopener" class="rss-item-link">${esc(title)}</a>`;
           }
-        } catch (e) {}
-        return '';
+          return html;
+        } catch (e) { 
+          return ''; 
+        }
       }));
+      
       const allHtml = parts.join('');
       if (allHtml) {
         document.getElementById('rssGroup1').innerHTML = allHtml;
         document.getElementById('rssGroup2').innerHTML = allHtml;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error("RSS-fel:", e);
+    }
   }
-
-  document.getElementById('rssPauseBtn').addEventListener('click', function () {
-    const t = document.getElementById('rssFeed');
-    const paused = t.classList.toggle('paused');
-    this.textContent = paused ? 'Fortsätt' : 'Pausa';
-  });
 
   function renderSystemTable() {
     const $sysBody = document.getElementById('system-table-body');

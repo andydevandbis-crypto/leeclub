@@ -307,6 +307,41 @@
     .rss-bar { display: none !important; }
     .btn-move.btn-lock { padding: 8px 10px; }
   }
+  @media (max-width: 768px) {
+    .fm-info {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+    .fm-info > div:last-child {
+        width: 100%;
+        margin-top: 12px;
+    }
+    .fm-match-btn {
+        width: 100%;
+        text-align: center;
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+    .fm-info > div:first-child {
+        width: 100%;
+    }
+    .fm-layout {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    .fm-form {
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+    .fm-list {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    .fm-card {
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+  }
 </style>
 </head>
 <body>
