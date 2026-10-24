@@ -569,7 +569,7 @@
         <div class="panel-head"><h2>Highscore</h2></div>
         <div class="table-wrapper" style="padding: 16px;">
           <table class="admin-table" style="width:100%;">
-            <thead><tr><th>Rank</th><th>Spelare</th><th style="text-align:right">Saldo</th><th style="text-align:right">ROI</th><th style="text-align:right">Vinstprocent</th><th style="text-align:right">Antal Spel</th></tr></thead>
+            <thead><tr><th>Rank</th><th>Spelare</th><th style="text-align:right">Saldo</th><th style="text-align:right">Vinst (kr)</th><th style="text-align:right">Insats (kr)</th><th style="text-align:right">Antal Spel</th></tr></thead>
             <tbody id="highscoreBody"></tbody>
           </table>
         </div>
@@ -1376,22 +1376,17 @@
     const body = document.getElementById('highscoreBody');
     body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Laddar...</td></tr>';
     
-    // Hämta spelare
-    const { data: profiles, error: pErr } = await supabaseClient.from('profiles').select('id, display_name, username, balance').order('balance', { ascending: false }).limit(20);
-    if (pErr || !profiles) { body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red)">Kunde inte hämta</td></tr>'; return; }
+    // 1. Hämta alla spelare
+    const { data: profiles } = await supabaseClient.from('profiles').select('id, display_name, username, balance').limit(20);
+    if (!profiles) return;
     
-    // Hämta avslutade matcher och trades för att räkna ut ROI
+    // 2. Hämta alla avslutade matcher och trades för att räkna ut vinsten i kr
     const { data: markets } = await supabaseClient.from('freemarket_markets').select('id, status').neq('status', 'open');
     const { data: trades } = await supabaseClient.from('freemarket_trades').select('*');
 
-    if (!profiles.length) { 
-        body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Inga spelare ännu.</td></tr>'; 
-        return; 
-    }
-
-    body.innerHTML = profiles.map((p, i) => {
+    const calculatedData = profiles.map(p => {
         const pTrades = trades ? trades.filter(t => t.buyer_id === p.id || t.seller_id === p.id) : [];
-        let wins = 0, totalInvested = 0, totalReturned = 0;
+        let totalInvested = 0, totalReturned = 0;
         
         pTrades.forEach(t => {
             const market = markets ? markets.find(m => m.id === t.market_id) : null;
@@ -1400,26 +1395,35 @@
                 const sellerWon = t.seller_outcome === winOutcome;
                 const buyerWon = !sellerWon;
                 const won = (t.buyer_id === p.id) ? buyerWon : sellerWon;
-                if (won) { wins++; totalReturned += (Number(t.amount) * Number(t.odds)); }
+                
+                // Om man vann får man tillbaka insats * odds
+                if (won) { totalReturned += (Number(t.amount) * Number(t.odds)); }
+                // Insatsen dras alltid
                 totalInvested += Number(t.amount);
             }
         });
 
         const total = pTrades.length;
-        const winRate = total > 0 ? Math.round((wins / total) * 100) + '%' : '0%';
-        let roi = 0;
-        if (totalInvested > 0) roi = Math.round(((totalReturned - totalInvested) / totalInvested) * 100);
-        const roiStr = roi > 0 ? '+' + roi + '%' : roi + '%';
-        const roiColor = roi > 0 ? 'var(--green)' : roi < 0 ? 'var(--red)' : 'var(--muted)';
+        const netProfit = totalReturned - totalInvested; // Vinst i kronor
+        
+        return { ...p, total, netProfit, totalInvested };
+    });
+
+    // 3. Sortera på Netto vinst i kronor (högst först)
+    calculatedData.sort((a, b) => b.netProfit - a.netProfit);
+
+    body.innerHTML = calculatedData.map((p, i) => {
+        const profitStr = p.netProfit > 0 ? '+' + p.netProfit + ' kr' : p.netProfit + ' kr';
+        const profitColor = p.netProfit > 0 ? 'var(--green)' : p.netProfit < 0 ? 'var(--red)' : 'var(--muted)';
 
         return `
         <tr>
             <td style="color:${i === 0 ? 'var(--gold)' : 'inherit'};font-weight:800">#${i + 1}</td>
             <td>${esc(p.display_name || p.username || 'Okänd')}</td>
             <td style="text-align:right;color:var(--green);font-weight:800">${p.balance} kr</td>
-            <td style="text-align:right;color:${roiColor};font-weight:800">${roiStr}</td>
-            <td style="text-align:right">${winRate}</td>
-            <td style="text-align:right">${total}</td>
+            <td style="text-align:right;color:${profitColor};font-weight:800">${profitStr}</td>
+            <td style="text-align:right">${p.totalInvested} kr</td>
+            <td style="text-align:right">${p.total}</td>
         </tr>`;
     }).join('');
 }
