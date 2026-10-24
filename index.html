@@ -213,6 +213,34 @@
       border-color: var(--red) !important;
       opacity: 0.8;
   }
+  @media (max-width: 768px) {
+    .fm-layout, 
+    .fm-layout > div, 
+    .fm-form, 
+    .fm-list, 
+    .fm-card, 
+    .fm-info {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .fm-layout { 
+        display: flex !important; 
+        flex-direction: column !important; 
+        padding: 12px !important;
+    }
+    .fm-list { 
+        display: flex !important; 
+        flex-direction: column !important; 
+        gap: 12px !important; 
+    }
+    .fm-info { 
+        display: flex !important; 
+        flex-direction: row !important; 
+        justify-content: space-between !important; 
+    }
+  }
 </style>
 </head>
 <body>
