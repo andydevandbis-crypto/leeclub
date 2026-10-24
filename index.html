@@ -369,7 +369,7 @@
         <div style="padding: 24px; overflow-y: auto;">
           <div class="table-wrap">
             <table class="admin-table" style="width:100%;">
-              <thead><tr><th>Rank</th><th>Spelare</th><th style="text-align:right">Saldo</th><th style="text-align:right">Vinst (kr)</th><th style="text-align:right">Insats (kr)</th><th style="text-align:right">Antal Spel</th></tr></thead>
+              <thead><tr><th>Rank</th><th>Spelare</th><th style="text-align:right">Vinst (kr)</th><th style="text-align:right">Saldo</th><th style="text-align:right">Insats (kr)</th><th style="text-align:right">Antal Spel</th></tr></thead>
               <tbody id="highscoreBody"><tr><td colspan="6" style="text-align:center; color:var(--muted);">Laddar...</td></tr></tbody>
             </table>
           </div>
@@ -1161,8 +1161,8 @@ async function loadMyMatches() {
         <tr>
             <td style="color:${i === 0 ? 'var(--gold)' : 'inherit'};font-weight:800">#${i + 1}</td>
             <td>${typeof esc === 'function' ? esc(p.display_name || p.username || 'Okänd') : (p.display_name || p.username)}</td>
-            <td style="text-align:right;color:var(--green);font-weight:800">${p.balance} kr</td>
             <td style="text-align:right;color:${profitColor};font-weight:800">${profitStr}</td>
+            <td style="text-align:right;color:var(--green);font-weight:800">${p.balance} kr</td>
             <td style="text-align:right">${p.totalInvested} kr</td>
             <td style="text-align:right">${p.total}</td>
         </tr>`;
