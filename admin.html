@@ -342,6 +342,15 @@
         box-sizing: border-box;
     }
   }
+
+  @media (max-width: 768px) {
+    .admin-table th, .admin-table td {
+        padding: 8px 4px !important;
+        font-size: 11px !important;
+        white-space: nowrap !important;
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -1413,7 +1422,7 @@
     calculatedData.sort((a, b) => b.netProfit - a.netProfit);
 
     body.innerHTML = calculatedData.map((p, i) => {
-        const profitStr = p.netProfit > 0 ? '+' + p.netProfit + ' kr' : p.netProfit + ' kr';
+        const roundedProfit = Math.round(p.netProfit); const profitStr = roundedProfit > 0 ? '+' + roundedProfit + ' kr' : roundedProfit + ' kr';
         const profitColor = p.netProfit > 0 ? 'var(--green)' : p.netProfit < 0 ? 'var(--red)' : 'var(--muted)';
 
         return `
