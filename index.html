@@ -209,6 +209,10 @@
         box-sizing: border-box;
     }
   }
+  .fm-card.locked-card {
+      border-color: var(--red) !important;
+      opacity: 0.8;
+  }
 </style>
 </head>
 <body>
@@ -931,8 +935,8 @@
         let btn = isLocked ? '<span style="color:var(--red); font-size:11px; font-weight:800; background:rgba(224,90,90,0.1); padding:6px 12px; border-radius:6px; border:1px solid rgba(224,90,90,0.3);">LÅST</span>' 
                 : `<button onclick="doMatch('${order.id}', '${m.id}', '${order.user_id}', ${order.odds}, ${order.amount}, '${order.outcome}')" class="fm-match-btn">Matcha (${bP})</button>`;
 
-        return `<div class="fm-card">
-          <div class="fm-card-top"><span class="fm-time">${timeStr}</span>${isLocked ? '<span class="fm-lock">LÅST</span>' : ''}</div>
+        return `<div class="fm-card ${isLocked ? 'locked-card' : ''}">
+          <div class="fm-card-top"><span class="fm-time">${timeStr}</span></div>
           <div class="fm-q">${esc(m.question)}</div>
           
           <div class="fm-info" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
