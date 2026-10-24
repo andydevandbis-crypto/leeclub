@@ -1114,39 +1114,44 @@ async function loadMyMatches() {
 
       async function loadHighscore() {
     const body = document.getElementById('highscoreBody');
+    if (!body) return;
     body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Laddar...</td></tr>';
     
-    const { data: profiles } = await supabaseClient.from('profiles').select('id, display_name, username, balance').limit(20);
-    if (!profiles) return;
-    
+    // 1. Hämta alla spelare (UTAN att sortera på saldo)
+    const { data: profiles } = await supabaseClient.from('profiles').select('id, display_name, username, balance');
     const { data: markets } = await supabaseClient.from('freemarket_markets').select('id, status').neq('status', 'open');
     const { data: trades } = await supabaseClient.from('freemarket_trades').select('*');
 
+    if (!profiles) return;
+
+    // 2. Räkna ut vinst i kronor för varje spelare
     const calculatedData = profiles.map(p => {
         const pTrades = trades ? trades.filter(t => t.buyer_id === p.id || t.seller_id === p.id) : [];
-        let totalInvested = 0, totalReturned = 0;
+        let totalInvested = 0;
+        let totalReturned = 0;
         
         pTrades.forEach(t => {
             const market = markets ? markets.find(m => m.id === t.market_id) : null;
-            if (market && market.status.startsWith('resolved')) {
+            // Kolla bara avslutade matcher
+            if (market && (market.status === 'resolved_yes' || market.status === 'resolved_no')) {
                 const winOutcome = market.status === 'resolved_yes' ? 'yes' : 'no';
                 const sellerWon = t.seller_outcome === winOutcome;
                 const buyerWon = !sellerWon;
                 const won = (t.buyer_id === p.id) ? buyerWon : sellerWon;
                 
-                if (won) { totalReturned += (Number(t.amount) * Number(t.odds)); }
                 totalInvested += Number(t.amount);
+                if (won) totalReturned += (Number(t.amount) * Number(t.odds));
             }
         });
 
-        const total = pTrades.length;
         const netProfit = totalReturned - totalInvested;
-        
-        return { ...p, total, netProfit, totalInvested };
+        return { ...p, total: pTrades.length, netProfit, totalInvested };
     });
 
+    // 3. SORTERA PÅ NETTOVINST (Högst vinst först)
     calculatedData.sort((a, b) => b.netProfit - a.netProfit);
 
+    // 4. Rita ut tabellen
     body.innerHTML = calculatedData.map((p, i) => {
         const roundedProfit = Math.round(p.netProfit);
         const profitStr = roundedProfit > 0 ? '+' + roundedProfit + ' kr' : roundedProfit + ' kr';
@@ -1155,7 +1160,7 @@ async function loadMyMatches() {
         return `
         <tr>
             <td style="color:${i === 0 ? 'var(--gold)' : 'inherit'};font-weight:800">#${i + 1}</td>
-            <td>${esc(p.display_name || p.username || 'Okänd')}</td>
+            <td>${typeof esc === 'function' ? esc(p.display_name || p.username || 'Okänd') : (p.display_name || p.username)}</td>
             <td style="text-align:right;color:var(--green);font-weight:800">${p.balance} kr</td>
             <td style="text-align:right;color:${profitColor};font-weight:800">${profitStr}</td>
             <td style="text-align:right">${p.totalInvested} kr</td>
@@ -1163,6 +1168,7 @@ async function loadMyMatches() {
         </tr>`;
     }).join('');
 }
+
 
 async function loadHistory() {
       const body = document.getElementById('historikBody');
